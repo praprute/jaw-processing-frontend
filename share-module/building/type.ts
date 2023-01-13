@@ -7,7 +7,7 @@ export interface IAllBuildingDto {
   date_create: string
 }
 
-export interface IAllBuildingAllBuildingDto {
+export interface IAllBuildingAndPuddleDto {
   idbuilding: number
   name: string
   limit_pool: string

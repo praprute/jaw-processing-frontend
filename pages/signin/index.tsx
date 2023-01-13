@@ -72,18 +72,18 @@ const SiginPage = () => {
             </StyleTitle>
             <br />
             <Form form={form} onFinish={handleSubmit} layout={'vertical'} name="basic" autoComplete="off">
-              <Form.Item label="PHONE" name="phone" rules={[{ required: true, message: 'Please input your phone number!' }]}>
+              <StyledFormItem label="PHONE" name="phone" rules={[{ required: true, message: 'Please input your phone number!' }]}>
                 <StyledInput placeholder="Your Phone number" />
-              </Form.Item>
-              <Form.Item label="PASSWORD" name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
+              </StyledFormItem>
+              <StyledFormItem label="PASSWORD" name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
                 <StyledInputPassword placeholder="Your Password" />
-              </Form.Item>
+              </StyledFormItem>
               <br />
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Submit
+              <StyledFormItem>
+                <Button type="primary" size="large" htmlType="submit">
+                  SIGNIN
                 </Button>
-              </Form.Item>
+              </StyledFormItem>
             </Form>
           </StyledBoxSignin>
         </StyledContent>
@@ -94,19 +94,25 @@ const SiginPage = () => {
 }
 
 export default SiginPage
-
+const StyledFormItem = styled(Form.Item)`
+  .ant-form-item-required {
+    color: white !important;
+  }
+`
 const StyledInput = styled(Input)`
   width: 100%;
-  border-color: #f0b90b;
+  // border-color: #f0b90b;
   background: rgba(255, 255, 255, 0.05);
+  color: white !important;
 `
 
 const StyledInputPassword = styled(Input.Password)`
   width: 100%;
-  border-color: #f0b90b;
+  // border-color: #f0b90b;
   background: rgba(255, 255, 255, 0.05);
   &&.ant-input-affix-wrapper > .ant-input:not(textarea) {
     background: transparent;
+    color: white !important;
   }
 `
 const StyleTitle = styled.div`

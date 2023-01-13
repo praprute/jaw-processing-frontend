@@ -3,34 +3,19 @@ import { Breadcrumb, Button, Col, Row } from 'antd'
 import Head from 'next/head'
 import styled from 'styled-components'
 import AppLayout from '../components/Layouts'
-import { getAllBuildingTask, getAllBuildingTasks, getAllPuddleByIdBuilding } from '../share-module/building/task'
-import { IAllBuildingAllBuildingDto, IResAllBuilding } from '../share-module/building/type'
+import { getAllBuildingTask } from '../share-module/building/task'
+import { IAllBuildingAndPuddleDto } from '../share-module/building/type'
 import { NextPageWithLayout } from './_app'
 import Link from 'next/link'
 
 const Home: NextPageWithLayout = () => {
-  const [building, setBuilding] = useState<IAllBuildingAllBuildingDto[]>([])
-  const getAllBuildings = getAllBuildingTasks.useTask()
+  const [building, setBuilding] = useState<IAllBuildingAndPuddleDto[]>([])
+  const getAllBuildings = getAllBuildingTask.useTask()
 
   useEffect(() => {
     ;(async () => {
-      // TODO : Test Saga-toolkit
       const result = await getAllBuildings.onRequest()
-      console.log('result : ', result)
-    })()
-  }, [])
-  useEffect(() => {
-    ;(async () => {
-      const result = await getAllBuildingTask()
-      if (result.success === 'success') {
-        const allBuilding: IResAllBuilding = result
-        if (allBuilding?.message && allBuilding?.message?.length > 0) {
-          for await (const data of allBuilding?.message) {
-            const res = await getAllPuddleByIdBuilding(data.idbuilding)
-            setBuilding((prevData) => [...prevData, { ...data, allPuddle: res?.puddle }])
-          }
-        }
-      }
+      setBuilding(result)
     })()
   }, [])
 
@@ -44,8 +29,7 @@ const Home: NextPageWithLayout = () => {
       </Head>
       <Breadcrumb style={{ margin: '16px 0', fontSize: '12px' }}>
         <Breadcrumb.Item>Process Menagement</Breadcrumb.Item>
-        <Breadcrumb.Item>Building</Breadcrumb.Item>
-        <Breadcrumb.Item>List</Breadcrumb.Item>
+        <Breadcrumb.Item>อาคารทั้งหมด</Breadcrumb.Item>
       </Breadcrumb>
       <StyledBoxHeader>
         <span>อาคารทั้งหมด</span>
@@ -107,7 +91,7 @@ const StyledTitleBetween = styled.div`
   font-size: 14px;
 `
 const StyledGlassBox = styled.div`
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 1);
   border-radius: 8px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(5.3px);

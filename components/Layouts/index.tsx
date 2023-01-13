@@ -1,10 +1,10 @@
-import { DeploymentUnitOutlined, MenuOutlined } from '@ant-design/icons'
-import { Divider, DrawerProps } from 'antd'
+import { DeploymentUnitOutlined, MenuOutlined, SearchOutlined } from '@ant-design/icons'
+import { Button, Divider, DrawerProps, Layout, Menu, Drawer, Avatar, Input } from 'antd'
 
-import { Layout, Menu, Drawer, Avatar } from 'antd'
+import { AudioOutlined } from '@ant-design/icons'
 
 import { MenuProps } from 'antd/lib/menu'
-import React, { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import { IUserInfo } from '../../share-module/auth/type'
@@ -14,8 +14,16 @@ export interface ILayout {
   children: ReactNode
 }
 
+const { Search } = Input
 const { Header, Content, Sider, Footer } = Layout
-
+const suffix = (
+  <AudioOutlined
+    style={{
+      fontSize: 16,
+      color: '#1890ff'
+    }}
+  />
+)
 const AppLayout = (props: ILayout) => {
   const { children } = props
   const router = useRouter()
@@ -26,12 +34,43 @@ const AppLayout = (props: ILayout) => {
 
   const menuItems = [
     { key: '/', name: 'Dashboard' },
-    { key: '/signin', name: 'Signin' }
+    { key: '/a', name: 'All Orders' },
+    { key: '/b', name: 'Production Doc' },
+    { key: '/c', name: 'Accounting Doc' },
+    { key: '/d', name: 'user info' }
   ]
+  const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
+  const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
+  const menuItems_STOCK = [{ key: '/menuItems_STOCK', name: 'Coming soon' }]
+  const menuItems_USER = [{ key: '/menuItems_USER', name: 'Coming soon' }]
 
   const itemsMenu: MenuProps['items'] = menuItems.map((text, index) => {
     const key = String(index + 1)
+    return {
+      key: `${text.key}`,
+      label: `${text.name}`
+    }
+  })
 
+  const itemsMenu_ACCOUNT: MenuProps['items'] = menuItems_ACCOUNT.map((text, index) => {
+    return {
+      key: `${text.key}`,
+      label: `${text.name}`
+    }
+  })
+  const itemsMenu_PRODUCT: MenuProps['items'] = menuItems_PRODUCT.map((text, index) => {
+    return {
+      key: `${text.key}`,
+      label: `${text.name}`
+    }
+  })
+  const itemsMenu_STOCK: MenuProps['items'] = menuItems_STOCK.map((text, index) => {
+    return {
+      key: `${text.key}`,
+      label: `${text.name}`
+    }
+  })
+  const itemsMenu_USER: MenuProps['items'] = menuItems_USER.map((text, index) => {
     return {
       key: `${text.key}`,
       label: `${text.name}`
@@ -50,7 +89,6 @@ const AppLayout = (props: ILayout) => {
     ;(async () => {
       const getToken = await myToken()
       const result = await userInfo(getToken as string)
-      console.log(result)
       if (result.success === 'success') {
         setMyInfo(result.message[0])
         setDefaultKey('/')
@@ -103,12 +141,16 @@ const AppLayout = (props: ILayout) => {
     )
   }
 
-  const MenuPath = () => {
+  const MenuPath = (props: { hideUserInfo?: boolean }) => {
+    const { hideUserInfo = false } = props
     return (
       <>
-        <WrapMenuCardInfo>
-          <CardInfo />
-        </WrapMenuCardInfo>
+        {!hideUserInfo && (
+          <WrapMenuCardInfo>
+            <CardInfo />
+          </WrapMenuCardInfo>
+        )}
+
         <StyledTitleMenu>PROCESS MENAGEMENT</StyledTitleMenu>
         <StyledMenu
           theme="dark"
@@ -119,6 +161,50 @@ const AppLayout = (props: ILayout) => {
           }}
           style={{ height: '100%', borderRight: 0 }}
           items={itemsMenu}
+        />
+        <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
+        <StyledMenu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={[defaultKey]}
+          onSelect={(values) => {
+            router.push(values.key)
+          }}
+          style={{ height: '100%', borderRight: 0 }}
+          items={itemsMenu_ACCOUNT}
+        />
+        <StyledTitleMenu>PRODUCT MENAGEMENT</StyledTitleMenu>
+        <StyledMenu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={[defaultKey]}
+          onSelect={(values) => {
+            router.push(values.key)
+          }}
+          style={{ height: '100%', borderRight: 0 }}
+          items={itemsMenu_PRODUCT}
+        />
+        <StyledTitleMenu>STOCK MENAGEMENT</StyledTitleMenu>
+        <StyledMenu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={[defaultKey]}
+          onSelect={(values) => {
+            router.push(values.key)
+          }}
+          style={{ height: '100%', borderRight: 0 }}
+          items={itemsMenu_STOCK}
+        />
+        <StyledTitleMenu>USER MENAGEMENT</StyledTitleMenu>
+        <StyledMenu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={[defaultKey]}
+          onSelect={(values) => {
+            router.push(values.key)
+          }}
+          style={{ height: '100%', borderRight: 0 }}
+          items={itemsMenu_USER}
         />
       </>
     )
@@ -131,7 +217,7 @@ const AppLayout = (props: ILayout) => {
           <DeploymentUnitOutlined style={{ fontWeight: '700', fontSize: '18px', color: '#f0b90b', marginRight: '8px' }} />
           <div className="logo">{process.env.NEXT_PUBLIC_NAME_PLATFORM}</div>
         </HeaderLogo>
-        <span>SIGNOUT</span>
+        <StyledSearch placeholder="ค้นหาเอกสารที่ต้องการ" suffix={<SearchOutlined />} />
         <StyledMenuIcon onClick={showDrawer} className="menu-icon" style={{ fontSize: '16px', color: '#FFFFFF', cursor: 'pointer' }} />
       </WrapHeader>
       <WrapperDrawer
@@ -151,7 +237,9 @@ const AppLayout = (props: ILayout) => {
       <Layout>
         <WrapSider style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }} width={260}>
           <MenuPath />
-        </WrapSider>{' '}
+          <br />
+          <StyledLogOut size="large">SIGNOUT</StyledLogOut>
+        </WrapSider>
         <StyledContent
           style={{
             padding: 24,
@@ -166,7 +254,22 @@ const AppLayout = (props: ILayout) => {
 }
 
 export default AppLayout
-
+const StyledSearch = styled(Input)`
+  width: 400px;
+`
+const StyledLogOut = styled(Button)`
+  width: 100%;
+  border-radius: 2px;
+  color: white;
+  background: #f5222d;
+  border-color: transparent;
+  &:hover {
+    color: white;
+    border-color: #f53841;
+    background: #f53841;
+    box-shadow: 0 1px 10px #f5222d;
+  }
+`
 const StyledMenuIcon = styled(MenuOutlined)`
   cursor: pointer;
   @media only screen and (min-width: 769px) {
@@ -216,8 +319,8 @@ const StyledLayOut = styled(Layout)`
 `
 const StyledContent = styled(Content)`
   width: 100%;
-  height: 100%;
-  background: #ffffff;
+  height: auto;
+  background: #f7f8f9;
   min-height: 100vh;
   color: black;
 `
@@ -274,8 +377,12 @@ const WrapCardInfo = styled.div`
 
 const WrapSider = styled(Sider)`
   height: 100%;
+  width: 260px;
   min-height: 100vh;
-
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   @media only screen and (max-width: 769px) {
     display: none;
   }
