@@ -10,74 +10,78 @@ import Router from 'next/router'
 import * as modules from './root-module'
 
 const bindMiddleware = (middleware: any) => {
-  if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { composeWithDevTools } = require('redux-devtools-extension')
-    return composeWithDevTools(applyMiddleware(...middleware))
-  }
+    if (process.env.NODE_ENV !== 'production') {
+        const { composeWithDevTools } = require('redux-devtools-extension')
+        return composeWithDevTools(applyMiddleware(...middleware))
+    }
+    return applyMiddleware(...middleware)
 }
 
-export const initStore = (preloadedState: any = {}) => {
-  const { asPath } = Router.router || {}
-  if (asPath) {
-    preloadedState.router = initialRouterState(asPath)
-  }
-  const routerMiddleware = createRouterMiddleware()
-  const sagaMiddleware = createSagaMiddleware()
+const initStore = (preloadedState: any = {}) => {
+    const { asPath } = Router.router || {}
+    if (asPath) {
+        preloadedState.router = initialRouterState(asPath)
+    }
+    const routerMiddleware = createRouterMiddleware()
+    const sagaMiddleware = createSagaMiddleware()
 
-  const reducers = {
-    ...loadReducers(getModules(), preloadedState),
-    router: routerReducer
-  }
+    const reducers = {
+        ...loadReducers(getModules(), preloadedState),
+        router: routerReducer,
+    }
 
-  const rootReducer = combineReducers(reducers)
-  const store = createStore(rootReducer, preloadedState, bindMiddleware([sagaMiddleware, createReduxWaitForMiddleware(), routerMiddleware]))
+    const rootReducer = combineReducers(reducers)
+    const store = createStore(
+        rootReducer,
+        preloadedState,
+        bindMiddleware([sagaMiddleware, createReduxWaitForMiddleware(), routerMiddleware]),
+    )
 
-  const tasks = loadSagaTasks(getModules())
-  function* rootSaga() {
-    yield all([...tasks])
-  }
-  sagaMiddleware.run(rootSaga)
-  return store
+    const tasks = loadSagaTasks(getModules())
+    function* rootSaga() {
+        yield all([...tasks])
+    }
+    sagaMiddleware.run(rootSaga)
+    return store
 }
 
 let store: any
 
-export const initializeStore = (preloadedState: any) => {
-  let _store = store ?? initStore(preloadedState)
+const initializeStore = (preloadedState: any) => {
+    let _store = store ?? initStore(preloadedState)
 
-  if (preloadedState && store) {
-    _store = initStore({
-      ...store.getState(),
-      ...preloadedState
-    })
+    if (preloadedState && store) {
+        _store = initStore({
+            ...store.getState(),
+            ...preloadedState,
+        })
 
-    store = undefined
-  }
+        store = undefined
+    }
 
-  if (typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
+        return _store
+    }
+
+    if (!store) {
+        store = _store
+    }
+
     return _store
-  }
-
-  if (!store) {
-    store = _store
-  }
-
-  return _store
 }
 
 const getModules = () => {
-  const initialize_modules = process.env.NEXT_PUBLIC_MODULES || undefined
+    const initialize_modules = process.env.NEXT_PUBLIC_MODULES || undefined
 
-  switch (initialize_modules) {
-    case 'JAW_MANAGEMENT':
-      return modules
-    default:
-      return null
-  }
+    switch (initialize_modules) {
+        case 'JAW_MANAGEMENT':
+            return modules
+        default:
+            return null
+    }
 }
 
 export function useStore(initialState: any) {
-  const store = useMemo(() => initializeStore(initialState), [initialState])
-  return store
+    const store = useMemo(() => initializeStore(initialState), [initialState])
+    return store
 }

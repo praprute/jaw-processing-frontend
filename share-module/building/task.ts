@@ -1,10 +1,9 @@
-/* eslint-disable prefer-const */
 import { createReduxAsyncTask } from '@moonshot-team/saga-toolkit'
 import { put } from 'redux-saga/effects'
 import axios from 'axios'
 
 import { myToken } from '../auth'
-import { IAllBuildingAndPuddleDto, IAllPuddleDto, ICountingPuddle, IResAllBuilding, IResAllPuddleDto, MODULE_NAME } from './type'
+import { IAllBuildingAndPuddleDto, IAllPuddleDto, IDetailPuddle, IResAllPuddleDto, MODULE_NAME } from './type'
 import { configAPI } from '../configApi'
 
 export const getAllBuildingTask = createReduxAsyncTask({
@@ -12,7 +11,7 @@ export const getAllBuildingTask = createReduxAsyncTask({
     name: 'getAllBuilding',
     defaultData: {} as IAllBuildingAndPuddleDto[],
     saga: ({ actions }) =>
-        function* (action) {
+        function* () {
             try {
                 const config = yield configAPI()
                 const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getAllBuilding`, config)
@@ -48,6 +47,27 @@ export const getPuddleByIdBuildingTask = createReduxAsyncTask({
                 const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getAllPuddle/${building_id}`, config)
                 if (data.success === 'success') {
                     yield put(actions.success(data.message as IAllPuddleDto[]))
+                }
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const getPuddleDetailByIdTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getPuddleDetailById',
+    defaultData: {} as IDetailPuddle,
+    defaultPayload: {} as { puddle_id: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { puddle_id } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getDetailPuddleById/${puddle_id}`, config)
+                if (data.success === 'success') {
+                    yield put(actions.success(data.message[0] as IDetailPuddle))
                 }
             } catch (error: any) {
                 const errorResponse = yield error.json()

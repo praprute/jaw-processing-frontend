@@ -1,27 +1,27 @@
-export interface IAuthDetail {
-  idusers: number
-  uuid: string
-  phone: string
-  role: number
-  token: string
+interface IAuthDetail {
+    idusers: number
+    uuid: string
+    phone: string
+    role: number
+    token: string
 }
 
 export interface IUserInfo {
-  idusers: number
-  uuid: string
-  role: number
-  phone: string
-  name: string
-  password: string
-  date_create: string
+    idusers: number
+    uuid: string
+    role: number
+    phone: string
+    name: string
+    password: string
+    date_create: string
 }
 
 export interface IResAuth {
-  success: string
-  message: IAuthDetail
+    success: string
+    message: IAuthDetail
 }
 
 export interface IResUserInfo {
-  success: string
-  message: IUserInfo
+    success: string
+    message: IUserInfo
 }
