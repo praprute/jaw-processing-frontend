@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 
 import { IUserInfo } from '../../share-module/auth/type'
 import { myToken, userInfo } from '../../share-module/auth'
+import { useNavigation } from '../../utils/use-navigation'
 
 interface ILayout {
     children: ReactNode
@@ -19,6 +20,7 @@ const { Header, Content, Sider, Footer } = Layout
 const AppLayout = (props: ILayout) => {
     const { children, hideSidebar = false, isFullscreen = false } = props
     const router = useRouter()
+    const navigation = useNavigation()
     const [defaultKey, setDefaultKey] = useState('/')
     const [myInfo, setMyInfo] = useState<IUserInfo>()
     const [visible, setVisible] = useState(false)
@@ -204,7 +206,11 @@ const AppLayout = (props: ILayout) => {
     return (
         <StyledLayOut>
             <WrapHeader>
-                <HeaderLogo>
+                <HeaderLogo
+                    onClick={() => {
+                        navigation.navigateTo.home()
+                    }}
+                >
                     <DeploymentUnitOutlined
                         style={{ fontWeight: '700', fontSize: '18px', color: '#f0b90b', marginRight: '8px' }}
                     />
@@ -236,7 +242,12 @@ const AppLayout = (props: ILayout) => {
 
             <Layout>
                 {!hideSidebar && (
-                    <WrapSider style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }} width={260}>
+                    <WrapSider
+                        breakpoint='lg'
+                        collapsedWidth='0'
+                        style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }}
+                        width={260}
+                    >
                         <MenuPath />
                         <br />
                         <StyledLogOut size='large'>SIGNOUT</StyledLogOut>
@@ -304,6 +315,7 @@ const HeaderLogo = styled.span`
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 `
 const StyledTitleMenu = styled.p`
     font-size: 12px;

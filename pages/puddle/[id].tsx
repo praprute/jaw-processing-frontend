@@ -3,7 +3,6 @@ import { Breadcrumb, Button, Col, Drawer, Form, Row, Space, Spin } from 'antd'
 import Head from 'next/head'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import dayjs from 'dayjs'
 
 import { NextPageWithLayout } from '../_app'
@@ -74,11 +73,15 @@ const PuddlePage: NextPageWithLayout = () => {
                 <link href='/favicon.ico' rel='icon' />
             </Head>
             <Breadcrumb style={{ margin: '16px 0', fontSize: '12px' }}>
-                <Breadcrumb.Item>Process Menagement</Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <Link href='/'>อาคารทั้งหมด</Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>รหัสอาคาร {id}</Breadcrumb.Item>
+                <StyledBreadcrumbItem>Process Menagement</StyledBreadcrumbItem>
+                <StyledBreadcrumbItem
+                    onClick={() => {
+                        navigation.navigateTo.home()
+                    }}
+                >
+                    อาคารทั้งหมด
+                </StyledBreadcrumbItem>
+                <StyledBreadcrumbItem>รหัสอาคาร {id}</StyledBreadcrumbItem>
             </Breadcrumb>
             <StyledBoxHeader>
                 <span>รหัสอาคาร {id}</span>
@@ -106,7 +109,6 @@ const PuddlePage: NextPageWithLayout = () => {
                                         <span>{data.idpuddle}</span>
                                         <span>
                                             {dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
-                                            {data.status === 1 && <span>ลงปลา</span>}
                                             {data.status === 0 && <span>ว่าง</span>}
                                             {data.status === 1 && <span>ลงปลา</span>}
                                             {data.status === 2 && <span>เติมน้ำปลา</span>}
@@ -155,6 +157,9 @@ PuddlePage.getLayout = function getLayout(page: ReactElement) {
 
 export default PuddlePage
 
+const StyledBreadcrumbItem = styled(Breadcrumb.Item)`
+    cursor: pointer;
+`
 const StyledLoadingContent = styled.div`
     text-align: center;
     display: flex;
@@ -194,7 +199,7 @@ const StyledGlassBox = styled.div<{ isStatus: number }>`
             return `background:#FC0F0f;`
         }
         if (p.isStatus === 0) {
-            return `background:#66C4E2;`
+            return `background:#2db7f5;`
         }
     }}
     border-radius: 0px;

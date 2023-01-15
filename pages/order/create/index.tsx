@@ -18,8 +18,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const router = useRouter()
     const navigation = useNavigation()
     const [form] = Form.useForm()
-    const { puddle_address } = router.query
-
+    const { puddle_address, id } = router.query
     const [statusPuddleOrder, setStatusPuddleOrder] = useState(1)
     const [valuePrice, setValuePrice] = useState({
         fish_price: 0,
@@ -68,6 +67,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
             let payload = {
                 order_name: '-',
                 uuid_puddle: puddle_address as string,
+                puddle_id: Number(id),
                 status_puddle_order: statusPuddleOrder,
                 fish: parseFloat2Decimals(form.getFieldValue('fish')),
                 salt: parseFloat2Decimals(form.getFieldValue('salt')),
@@ -103,7 +103,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
 
     return (
         <MainLayout>
-            <StyledBackPage>
+            <StyledBackPage
+                onClick={() => {
+                    navigation.navigateTo.toBack()
+                }}
+            >
                 <LeftOutlined style={{ fontSize: 14, marginRight: 8 }} />
                 ย้อนกลับ
             </StyledBackPage>

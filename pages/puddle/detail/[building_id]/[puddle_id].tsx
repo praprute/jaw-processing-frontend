@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react'
 import Head from 'next/head'
-import { Breadcrumb, Button, Tag } from 'antd'
+import { Breadcrumb, Button, Divider } from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 
@@ -8,6 +8,9 @@ import AppLayout from '../../../../components/Layouts'
 import { NextPageWithLayout } from '../../../_app'
 import { useNavigation } from '../../../../utils/use-navigation'
 import { getPuddleDetailByIdTask } from '../../../../share-module/building/task'
+import BadgeStatus from '../../../../components/BadgeStatus'
+import { getAllOrdersFromPuddleIdTask } from '../../../../share-module/order/task'
+import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 
 const DetailPuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
@@ -15,10 +18,14 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const { building_id, puddle_id } = router.query
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
+    const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
 
     useEffect(() => {
         ;(async () => {
-            puddle_id ? await getPuddleDetailById.onRequest({ puddle_id: Number(puddle_id) }) : null
+            if (puddle_id) {
+                await getPuddleDetailById.onRequest({ puddle_id: Number(puddle_id) })
+                await getAllOrdersFromPuddleId.onRequest({ puddle_id: Number(puddle_id) })
+            }
         })()
     }, [puddle_id])
 
@@ -48,24 +55,31 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </StyledBreadcrumbItem>
                 <StyledBreadcrumbItem>รหัสบ่อ {puddle_id}</StyledBreadcrumbItem>
             </Breadcrumb>
-
             <StyledBoxHeader>
                 <StyledTitleBoxHeader>
                     <span>
                         บ่อหมายเลข {puddle_id} : {getPuddleDetailById.data?.uuid_puddle}
                     </span>
-                    <StyledTag color='#2db7f5'>สถานะว่าง</StyledTag>
+                    <BadgeStatus status={getPuddleDetailById.data?.status} />
                 </StyledTitleBoxHeader>
 
                 <StyledButton
                     onClick={() => {
-                        navigation.navigateTo.createOrder(getPuddleDetailById.data?.uuid_puddle as string)
+                        navigation.navigateTo.createOrder(getPuddleDetailById.data?.uuid_puddle as string, puddle_id as string)
                     }}
                     type='primary'
                 >
                     ลงทะเบียน order
                 </StyledButton>
             </StyledBoxHeader>
+            <br />
+            <span>รายการล่าสุด</span>
+            <Divider />
+            <StyledBoxContent>
+                <span>การทำรายการทั้งหมดทั้งหมด</span>
+                <br />
+                <TableHistoryOrders data={getAllOrdersFromPuddleId.data} loading={getAllOrdersFromPuddleId.loading} />
+            </StyledBoxContent>
         </>
     )
 }
@@ -80,10 +94,19 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 
 export default DetailPuddlePage
 
-const StyledTag = styled(Tag)<{ isStatus?: number }>`
-    border-radius: 12px;
-    font-size: 12px;
-    padding: 0px 15px;
+const StyledBoxContent = styled.div`
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5.3px);
+    -webkit-backdrop-filter: blur(5.3px);
+    padding: 20px 20px 10px 20px;
 `
 
 const StyledTitleBoxHeader = styled.div`
