@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { ReactElement, useEffect } from 'react'
 import Head from 'next/head'
 import { Breadcrumb, Button, Tag } from 'antd'
 import styled from 'styled-components'
@@ -7,15 +7,25 @@ import { useRouter } from 'next/router'
 import AppLayout from '../../../../components/Layouts'
 import { NextPageWithLayout } from '../../../_app'
 import { useNavigation } from '../../../../utils/use-navigation'
+import { getPuddleDetailByIdTask } from '../../../../share-module/building/task'
 
 const DetailPuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
     const navigation = useNavigation()
     const { building_id, puddle_id } = router.query
+
+    const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            puddle_id ? await getPuddleDetailById.onRequest({ puddle_id: Number(puddle_id) }) : null
+        })()
+    }, [puddle_id])
+
     return (
         <>
             <Head>
-                <title>Puddle | Jaw Management</title>
+                <title>Puddle Detail | Jaw Management</title>
                 <meta content='Jaw Management' name='description' />
                 <meta content='width=device-width, initial-scale=1' name='viewport' />
                 <link href='/favicon.ico' rel='icon' />
@@ -41,11 +51,20 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
             <StyledBoxHeader>
                 <StyledTitleBoxHeader>
-                    <span>บ่อหมายเลข {puddle_id}</span>
+                    <span>
+                        บ่อหมายเลข {puddle_id} : {getPuddleDetailById.data?.uuid_puddle}
+                    </span>
                     <StyledTag color='#2db7f5'>สถานะว่าง</StyledTag>
                 </StyledTitleBoxHeader>
 
-                <StyledButton type='primary'>ลงทะเบียนบ่อ</StyledButton>
+                <StyledButton
+                    onClick={() => {
+                        navigation.navigateTo.createOrder(getPuddleDetailById.data?.uuid_puddle as string)
+                    }}
+                    type='primary'
+                >
+                    ลงทะเบียน order
+                </StyledButton>
             </StyledBoxHeader>
         </>
     )

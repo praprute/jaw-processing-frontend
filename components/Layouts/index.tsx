@@ -2,7 +2,7 @@ import { DeploymentUnitOutlined, MenuOutlined, SearchOutlined } from '@ant-desig
 import { Button, Divider, Layout, Menu, Drawer, Avatar, Input } from 'antd'
 import { MenuProps } from 'antd/lib/menu'
 import { ReactNode, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { useRouter } from 'next/router'
 
 import { IUserInfo } from '../../share-module/auth/type'
@@ -10,12 +10,14 @@ import { myToken, userInfo } from '../../share-module/auth'
 
 interface ILayout {
     children: ReactNode
+    hideSidebar?: boolean
+    isFullscreen?: boolean
 }
 
 const { Header, Content, Sider, Footer } = Layout
 
 const AppLayout = (props: ILayout) => {
-    const { children } = props
+    const { children, hideSidebar = false, isFullscreen = false } = props
     const router = useRouter()
     const [defaultKey, setDefaultKey] = useState('/')
     const [myInfo, setMyInfo] = useState<IUserInfo>()
@@ -233,12 +235,16 @@ const AppLayout = (props: ILayout) => {
             </WrapperDrawer>
 
             <Layout>
-                <WrapSider style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }} width={260}>
-                    <MenuPath />
-                    <br />
-                    <StyledLogOut size='large'>SIGNOUT</StyledLogOut>
-                </WrapSider>
+                {!hideSidebar && (
+                    <WrapSider style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }} width={260}>
+                        <MenuPath />
+                        <br />
+                        <StyledLogOut size='large'>SIGNOUT</StyledLogOut>
+                    </WrapSider>
+                )}
+
                 <StyledContent
+                    isFullscreen={isFullscreen}
                     style={{
                         padding: 24,
                         margin: 0,
@@ -316,8 +322,16 @@ const StyledLayOut = styled(Layout)`
     min-height: 100vh;
     overflow: hidden;
 `
-const StyledContent = styled(Content)`
+const StyledContent = styled(Content)<{ isFullscreen?: boolean }>`
     width: 100%;
+    ${({ isFullscreen }) =>
+        isFullscreen &&
+        css`
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        `}
     height: auto;
     background: #f7f8f9;
     min-height: 100vh;

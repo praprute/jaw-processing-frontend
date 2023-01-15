@@ -21,7 +21,6 @@ const SiginPage = () => {
                 password: form.getFieldValue(['password']),
             }
             const result: IResAuth = await loginTask(payload)
-            console.log('result : ', result)
             if (result.success === 'success') {
                 toast.success(`signin success please wait...`, {
                     position: 'top-right',

@@ -17,7 +17,6 @@ type AppPropsWithLayout = AppProps & {
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     const store = useStore(pageProps.initialReduxState)
-    // const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
     const getLayout = Component.getLayout ?? ((page) => page)
 
     return getLayout(

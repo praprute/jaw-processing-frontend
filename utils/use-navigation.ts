@@ -5,6 +5,9 @@ export const useNavigation = () => {
 
     return {
         navigateTo: {
+            toBack: async () => {
+                history.back()
+            },
             home: async () => {
                 await history.push('/')
             },
@@ -13,6 +16,9 @@ export const useNavigation = () => {
             },
             detailPuddle: async (building_id: string, puddle_id: string) => {
                 await history.push(`/puddle/detail/${building_id}/${puddle_id}`)
+            },
+            createOrder: async (uuid_puddle: string) => {
+                await history.push(`/order/create?puddle_address=${uuid_puddle}`)
             },
         },
     }
