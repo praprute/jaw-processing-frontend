@@ -3,7 +3,7 @@ import { put } from 'redux-saga/effects'
 import axios from 'axios'
 
 import { configAPI } from '../configApi'
-import { IOrderDto, MODULE_NAME } from './type'
+import { IOrderDetailDto, IOrderDto, IPayloadTransferFishSauce, MODULE_NAME } from './type'
 
 export const createOrderTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
@@ -49,6 +49,45 @@ export const getAllOrdersFromPuddleIdTask = createReduxAsyncTask({
                 const config = yield configAPI()
                 const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getAllOrdersFromPuddleId/${puddle_id}`, config)
                 yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const getOrdersDetailFromIdTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getOrdersDetailFromId',
+    defaultData: {} as IOrderDetailDto[],
+    defaultPayload: {} as { order_id: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { order_id } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getOrderDetails/${order_id}`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const submitTransferTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'submitTransfer',
+    defaultData: {} as string,
+    defaultPayload: {} as IPayloadTransferFishSauce,
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/exportFishSauce/`, action.payload, config)
+                if (data.success === 'success') {
+                    yield put(actions.success(data.success))
+                } else {
+                    yield put(actions.failure(data))
+                }
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))
             }

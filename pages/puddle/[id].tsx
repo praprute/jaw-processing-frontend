@@ -11,6 +11,7 @@ import { createPuddleTask, getPuddleByIdBuildingTask } from '../../share-module/
 import FormInsertPuddle from '../../components/FormInsertPuddle'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 import { useNavigation } from '../../utils/use-navigation'
+import { TypeOrderPuddle } from '../../utils/type_puddle'
 
 const PuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
@@ -110,9 +111,9 @@ const PuddlePage: NextPageWithLayout = () => {
                                         <span>
                                             {dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
                                             {data.status === 0 && <span>ว่าง</span>}
-                                            {data.status === 1 && <span>ลงปลา</span>}
-                                            {data.status === 2 && <span>เติมน้ำปลา</span>}
-                                            {data.status === 3 && <span>ถ่ายน้ำปลาออก</span>}
+                                            {data.status === 1 && <span>หมักปลา</span>}
+                                            {data.status === 2 && <span>บ่อเวียน</span>}
+                                            {data.status === 3 && <span>บ่อผสม</span>}
                                         </span>
                                         <span>{data.description}</span>
                                     </StyledTitleBetween>
@@ -195,11 +196,13 @@ const StyledTitleBetween = styled.div`
 `
 const StyledGlassBox = styled.div<{ isStatus: number }>`
     ${(p) => {
-        if (p.isStatus === 1) {
-            return `background:#FC0F0f;`
-        }
-        if (p.isStatus === 0) {
-            return `background:#2db7f5;`
+        switch (p.isStatus) {
+            case TypeOrderPuddle.FREE:
+                return `background:#2db7f5;`
+            case TypeOrderPuddle.FERMENT:
+                return `background:#FC0F0f;`
+            case TypeOrderPuddle.CIRCULAR:
+                return `background:#FDD298;`
         }
     }}
     border-radius: 0px;

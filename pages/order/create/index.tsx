@@ -9,6 +9,7 @@ import ModalLoading from '../../../components/Modal/ModalLoading'
 import { createOrderTask } from '../../../share-module/order/task'
 import { NoticeError, NoticeSuccess } from '../../../utils/noticeStatus'
 import { parseFloat2Decimals } from '../../../utils/parseFloat'
+import { TypeOrderPuddle } from '../../../utils/type_puddle'
 import { useNavigation } from '../../../utils/use-navigation'
 import { NextPageWithLayout } from '../../_app'
 
@@ -33,11 +34,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
 
     const TYPE_ORDER = [
         {
-            value: 1,
+            value: TypeOrderPuddle.FERMENT,
             label: 'บ่อหมัก',
         },
         {
-            value: 2,
+            value: TypeOrderPuddle.CIRCULAR,
             label: 'บ่อเวียน',
         },
     ]
@@ -61,6 +62,22 @@ const CreateOrderPage: NextPageWithLayout = () => {
         }
     }, [summaryPricePerUnit])
 
+    useEffect(() => {
+        if (statusPuddleOrder === TypeOrderPuddle.CIRCULAR) {
+            form.setFieldsValue({
+                fish: 0,
+                fish_price: 0,
+                salt: 0,
+                salt_price: 0,
+                laber: 0,
+                laber_price: 0,
+                volume: 0,
+                price_per_unit: 0,
+                description: 'บ่อเวียน',
+            })
+        }
+    }, [statusPuddleOrder])
+
     const handleSubmit = async () => {
         try {
             setVisible(true)
@@ -77,7 +94,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 fish_price: parseFloat2Decimals(form.getFieldValue('fish_price')),
                 salt_price: parseFloat2Decimals(form.getFieldValue('salt_price')),
                 laber_price: parseFloat2Decimals(form.getFieldValue('laber_price')),
-                amount_items: MAX_ITEMS_PERCENTAGE,
+                amount_items: statusPuddleOrder === TypeOrderPuddle.FERMENT ? MAX_ITEMS_PERCENTAGE : 0,
             }
             const result = await createOrder.onRequest(payload)
 
