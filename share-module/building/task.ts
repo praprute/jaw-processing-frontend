@@ -2,9 +2,9 @@ import { createReduxAsyncTask } from '@moonshot-team/saga-toolkit'
 import { put } from 'redux-saga/effects'
 import axios from 'axios'
 
-import { myToken } from '../auth'
 import { IAllBuildingAndPuddleDto, IAllPuddleDto, IDetailPuddle, IResAllPuddleDto, MODULE_NAME } from './type'
 import { configAPI } from '../configApi'
+import { myToken } from '../auth/task'
 
 export const getAllBuildingTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
@@ -80,13 +80,13 @@ export const createPuddleTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'createPuddle',
     defaultData: {} as any,
-    defaultPayload: {} as { building_id: number },
+    defaultPayload: {} as { building_id: number; serial: string },
     saga: ({ actions }) =>
         function* (action) {
             try {
-                const { building_id } = action.payload
+                const { building_id, serial } = action.payload
                 const config = yield configAPI()
-                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createPuddle`, { building_id }, config)
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createPuddle`, { building_id, serial }, config)
                 yield put(actions.success(data))
             } catch (error: any) {
                 const errorResponse = yield error.json()

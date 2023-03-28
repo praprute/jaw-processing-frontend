@@ -1,3 +1,5 @@
+export const MODULE_NAME = '@AuthModules'
+
 interface IAuthDetail {
     idusers: number
     uuid: string
@@ -14,6 +16,7 @@ export interface IUserInfo {
     name: string
     password: string
     date_create: string
+    accessToken: string
 }
 
 export interface IResAuth {

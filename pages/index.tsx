@@ -8,18 +8,23 @@ import { getAllBuildingTask } from '../share-module/building/task'
 import { IAllBuildingAndPuddleDto } from '../share-module/building/type'
 import { NextPageWithLayout } from './_app'
 import { useNavigation } from '../utils/use-navigation'
+import { loginTask, userInfoTask } from '../share-module/auth/task'
 
 const Home: NextPageWithLayout = () => {
     const navigation = useNavigation()
     const [building, setBuilding] = useState<IAllBuildingAndPuddleDto[]>([])
     const getAllBuildings = getAllBuildingTask.useTask()
+    const { data: loginToken } = loginTask.useTask()
+    const { data: userInfoData } = userInfoTask.useTask()
 
     useEffect(() => {
         ;(async () => {
-            const result = await getAllBuildings.onRequest()
-            setBuilding(result)
+            if (loginToken?.message?.token || userInfoData?.message?.accessToken) {
+                const result = await getAllBuildings.onRequest()
+                setBuilding(result)
+            }
         })()
-    }, [])
+    }, [loginToken, userInfoData])
 
     return (
         <>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactElement } from 'react'
 import Head from 'next/head'
 import { Layout, Button, Divider, Form, Input } from 'antd'
 import styled from 'styled-components'
@@ -6,21 +6,25 @@ import { DeploymentUnitOutlined } from '@ant-design/icons'
 import { ToastContainer, toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 
-import { loginTask } from '../../share-module/auth'
 import { IResAuth } from '../../share-module/auth/type'
+import { loginTask, userInfoTask } from '../../share-module/auth/task'
 
 const { Header, Content, Footer } = Layout
 
 const SiginPage = () => {
     const [form] = Form.useForm()
     const router = useRouter()
+    const { onRequest: loginRequest } = loginTask.useTask()
+    const { onRequest: userInfoRequest } = userInfoTask.useTask()
+
     const handleSubmit = async () => {
         try {
             const payload = {
-                phone: form.getFieldValue(['phone']),
+                userName: form.getFieldValue(['userName']),
                 password: form.getFieldValue(['password']),
             }
-            const result: IResAuth = await loginTask(payload)
+            const result: IResAuth = await loginRequest(payload)
+            await userInfoRequest()
             if (result.success === 'success') {
                 toast.success(`signin success please wait...`, {
                     position: 'top-right',
@@ -47,6 +51,16 @@ const SiginPage = () => {
             }
         } catch (e: any) {
             console.log(e)
+            toast.error(`${e[0].message}`, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'dark',
+            })
         }
     }
 
@@ -76,14 +90,14 @@ const SiginPage = () => {
                         <br />
                         <Form autoComplete='off' form={form} layout={'vertical'} name='basic' onFinish={handleSubmit}>
                             <StyledFormItem
-                                label='PHONE'
-                                name='phone'
-                                rules={[{ required: true, message: 'Please input your phone number!' }]}
+                                label='Phone | Email'
+                                name='userName'
+                                rules={[{ required: true, message: 'Please input your phone number or email!' }]}
                             >
-                                <StyledInput placeholder='Your Phone number' />
+                                <StyledInput placeholder='Your phone number or email' />
                             </StyledFormItem>
                             <StyledFormItem
-                                label='PASSWORD'
+                                label='Password'
                                 name='password'
                                 rules={[{ required: true, message: 'Please input your password!' }]}
                             >
@@ -93,6 +107,9 @@ const SiginPage = () => {
                             <StyledFormItem>
                                 <Button htmlType='submit' size='large' type='primary'>
                                     SIGNIN
+                                </Button>
+                                <Button className='register_button' size='large' type='text'>
+                                    <p>register</p>
                                 </Button>
                             </StyledFormItem>
                         </Form>
@@ -104,22 +121,34 @@ const SiginPage = () => {
     )
 }
 
+SiginPage.getLayout = function getLayout(page: ReactElement) {
+    return <>{page}</>
+}
+
 export default SiginPage
 const StyledFormItem = styled(Form.Item)`
     .ant-form-item-required {
         color: white !important;
     }
+    .register_button {
+        margin-left: 8px;
+        color: #3498db;
+    }
+    .register_button p {
+        margin-bottom: 0px;
+        text-decoration: underline;
+    }
 `
 const StyledInput = styled(Input)`
     width: 100%;
-    // border-color: #f0b90b;
+
     background: rgba(255, 255, 255, 0.05);
     color: white !important;
 `
 
 const StyledInputPassword = styled(Input.Password)`
     width: 100%;
-    // border-color: #f0b90b;
+
     background: rgba(255, 255, 255, 0.05);
     &&.ant-input-affix-wrapper > .ant-input:not(textarea) {
         background: transparent;
@@ -133,14 +162,15 @@ const StyleTitle = styled.div`
 `
 const StyledBoxSignin = styled.div`
     /* From https://css.glass */
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(26, 28, 33); // rgba(255, 255, 255, 0.05);
     border-radius: 2px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5.3px);
+    // backdrop-filter: blur(5.3px);
     -webkit-backdrop-filter: blur(5.3px);
     width: 60%;
     padding: 20px;
-
+    max-width: 990px;
+    border-radius: 12px;
     @media (max-width: 414px) {
         width: 90%;
     }
@@ -154,7 +184,7 @@ const StyledLayOut = styled(Layout)`
 const StyledContent = styled(Content)`
     width: 100%;
     height: 100%;
-    background: rgb(26, 28, 33);
+    background: #f7f8f9; //rgb(26, 28, 33);
     display: flex;
     justify-content: center;
     align-items: center;

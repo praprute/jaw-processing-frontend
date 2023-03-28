@@ -1,8 +1,10 @@
 import { Form, Input, Select } from 'antd'
+import { LabeledValue } from 'antd/lib/select'
 import styled from 'styled-components'
 
-import { IAllPuddleDto } from '../../share-module/building/type'
+import { IAllBuildingAndPuddleDto, IAllPuddleDto } from '../../share-module/building/type'
 import { IOrderDetailDto } from '../../share-module/order/type'
+import { ITypeProcess } from '../../share-module/puddle/type'
 
 const { Option } = Select
 
@@ -10,41 +12,82 @@ interface ITransferFishsauce {
     puddleOption?: IAllPuddleDto[]
     lastedOrder?: IOrderDetailDto
     onChangeAmountItems?: (e: React.ChangeEvent<HTMLInputElement>) => void
-    amountItemsKG?: number
+    amountItemsL?: number
+    buildingOption?: IAllBuildingAndPuddleDto[]
+    onChangeBuilding?: (value: number) => void
+    onSelectAction?: (labelValue: LabeledValue) => void
+    typeProcess?: ITypeProcess[]
+    throwOutProcess?: boolean
 }
 
 const TransferFishsauce = (props: ITransferFishsauce) => {
-    const { puddleOption, onChangeAmountItems, amountItemsKG } = props
+    const {
+        puddleOption,
+        onChangeAmountItems,
+        amountItemsL,
+        buildingOption,
+        onChangeBuilding,
+        onSelectAction,
+        typeProcess,
+        throwOutProcess = false,
+    } = props
+    console.log('throwOutProcess: ', throwOutProcess)
     return (
         <>
-            <StyledFormItems
-                label='เลือกบ่อปลายทาง'
-                name='id_puddle'
-                rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}
-            >
-                <Select placeholder='เลือกบ่อปลายทาง' style={{ width: '100%' }}>
-                    {puddleOption &&
-                        puddleOption.map((data, index) => (
-                            <Option key={index} value={data.idpuddle}>
-                                <span>{data.idpuddle}</span>
+            <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>
+                <Select onChange={onChangeBuilding} placeholder='เลือกอาคาร' style={{ width: '100%' }}>
+                    {buildingOption &&
+                        buildingOption.map((data, index) => (
+                            <Option key={index} value={data.idbuilding}>
+                                <span>{data.name}</span>
                             </Option>
                         ))}
                 </Select>
             </StyledFormItems>
             <StyledFormItems
-                label='ปริมาตรตั้งต้น'
+                label='เลือกบ่อปลายทาง'
+                name='id_puddle'
+                rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}
+            >
+                <Select onSelect={onSelectAction} placeholder='เลือกบ่อปลายทาง' style={{ width: '100%' }}>
+                    {puddleOption &&
+                        puddleOption.map((data, index) => (
+                            <Option key={index} value={data.idpuddle}>
+                                <span>{data?.serial}</span>
+                            </Option>
+                        ))}
+                </Select>
+            </StyledFormItems>
+            <StyledFormItems label='confirmation action puddle serial' name='action_puddle'>
+                <Input disabled placeholder='confirmation action puddle serial' size='large' style={{ color: 'black' }} />
+            </StyledFormItems>
+            {/* <StyledFormItems
+                label='ปริมาตรก่อนหน้า'
                 name='volume_start'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
-            </StyledFormItems>
+                <Input disabled placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
+            </StyledFormItems> */}
             <StyledFormItems
-                extra={`~ ${amountItemsKG} kg.`}
+                extra={`~ ${amountItemsL} L.`}
                 label='จำนวนที่ปล่อยออก'
                 name='volume'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
                 <Input onChange={onChangeAmountItems} placeholder='จำนวนที่ปล่อยออก' size='large' style={{ color: 'black' }} />
+            </StyledFormItems>
+            <StyledFormItems
+                label='ปริมาตรที่เหลือ (kg.)'
+                name='remaining_volume'
+                rules={[
+                    {
+                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                        required: true,
+                        message: 'กรุณากรอก ปริมาตรที่เหลือ (L.)',
+                    },
+                ]}
+            >
+                <Input placeholder='ปริมาตรที่เหลือ (L.)' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='ร้อยละที่ปล่อยออก'
@@ -88,6 +131,25 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
             >
                 <Input placeholder='มูลค่า คงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
+            <StyledFormItems label='เลือกรายการการทำงาน' name='process' rules={[{ required: false }]}>
+                <Select placeholder='เลือกรายการการทำงาน' style={{ width: '100%' }}>
+                    {typeProcess &&
+                        typeProcess.map((data, index) => (
+                            <Option key={index} value={data.idtype_process}>
+                                <span>{data?.process_name}</span>
+                            </Option>
+                        ))}
+                </Select>
+            </StyledFormItems>
+            {/* {throwOutProcess && (
+                <StyledFormItems label='ยืนยันการถ่ายกากไปบ่ออื่น' name='throwOut' rules={[{ required: false }]}>
+                    <Select onSelect={onSelectAction} placeholder='ยืนยันการถ่ายกากไปบ่ออื่น' style={{ width: '100%' }}>
+                        <Checkbox checked={throwOutProcess} disabled={true}>
+                            ยืนยันการถ่ายกากไปบ่ออื่น
+                        </Checkbox>
+                    </Select>
+                </StyledFormItems>
+            )} */}
         </>
     )
 }

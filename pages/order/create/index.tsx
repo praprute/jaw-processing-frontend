@@ -22,6 +22,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const { puddle_address, id } = router.query
     const [statusPuddleOrder, setStatusPuddleOrder] = useState(1)
     const [valuePrice, setValuePrice] = useState({
+        fish: 0,
         fish_price: 0,
         salt_price: 0,
         laber_price: 0,
@@ -41,12 +42,28 @@ const CreateOrderPage: NextPageWithLayout = () => {
             value: TypeOrderPuddle.CIRCULAR,
             label: 'บ่อเวียน',
         },
+        {
+            value: TypeOrderPuddle.BREAK,
+            label: 'บ่อพักใส',
+        },
+        {
+            value: TypeOrderPuddle.MIXING,
+            label: 'บ่อผสม',
+        },
+        {
+            value: TypeOrderPuddle.FILTER,
+            label: 'บ่อกรอง',
+        },
+        {
+            value: TypeOrderPuddle.STOCK,
+            label: 'บ่อพัก',
+        },
     ]
 
     const summaryPricePerUnit = useMemo(() => {
-        const valueForm = form.getFieldsValue(['fish_price', 'salt_price', 'laber_price'])
+        const valueForm = form.getFieldsValue(['fish', 'fish_price', 'salt_price', 'laber_price'])
         return (
-            (Number(valueForm.fish_price) + Number(valueForm.salt_price) + Number(valueForm.laber_price)) / MAX_ITEMS_PERCENTAGE
+            (Number(valueForm.fish_price) + Number(valueForm.salt_price) + Number(valueForm.laber_price)) / Number(valueForm.fish)
         )
     }, [valuePrice])
 
@@ -63,7 +80,13 @@ const CreateOrderPage: NextPageWithLayout = () => {
     }, [summaryPricePerUnit])
 
     useEffect(() => {
-        if (statusPuddleOrder === TypeOrderPuddle.CIRCULAR) {
+        if (
+            statusPuddleOrder === TypeOrderPuddle.CIRCULAR ||
+            statusPuddleOrder === TypeOrderPuddle.FILTER ||
+            statusPuddleOrder === TypeOrderPuddle.BREAK ||
+            statusPuddleOrder === TypeOrderPuddle.MIXING ||
+            statusPuddleOrder === TypeOrderPuddle.STOCK
+        ) {
             form.setFieldsValue({
                 fish: 0,
                 fish_price: 0,
@@ -71,12 +94,23 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 salt_price: 0,
                 laber: 0,
                 laber_price: 0,
-                volume: 0,
                 price_per_unit: 0,
-                description: 'บ่อเวียน',
+                description: handleDescriptionSetField(statusPuddleOrder),
+            })
+        } else {
+            form.setFieldsValue({
+                description: '',
             })
         }
     }, [statusPuddleOrder])
+
+    const handleDescriptionSetField = (typePuddle: number) => {
+        if (typePuddle === TypeOrderPuddle.CIRCULAR) return 'บ่อเวียน'
+        if (typePuddle === TypeOrderPuddle.FILTER) return 'บ่อกรอง'
+        if (typePuddle === TypeOrderPuddle.BREAK) return 'บ่อพักใส'
+        if (typePuddle === TypeOrderPuddle.MIXING) return 'บ่อผสม'
+        if (typePuddle === TypeOrderPuddle.STOCK) return 'บ่อพัก'
+    }
 
     const handleSubmit = async () => {
         try {
@@ -89,13 +123,14 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 fish: parseFloat2Decimals(form.getFieldValue('fish')),
                 salt: parseFloat2Decimals(form.getFieldValue('salt')),
                 laber: parseFloat2Decimals(form.getFieldValue('laber')),
-                description: form.getFieldValue('description'),
+                description: form.getFieldValue('description') ? form.getFieldValue('description') : '',
                 volume: parseFloat2Decimals(form.getFieldValue('volume')),
                 fish_price: parseFloat2Decimals(form.getFieldValue('fish_price')),
                 salt_price: parseFloat2Decimals(form.getFieldValue('salt_price')),
                 laber_price: parseFloat2Decimals(form.getFieldValue('laber_price')),
                 amount_items: statusPuddleOrder === TypeOrderPuddle.FERMENT ? MAX_ITEMS_PERCENTAGE : 0,
             }
+
             const result = await createOrder.onRequest(payload)
 
             if (result === 'success') {
@@ -226,13 +261,28 @@ const CreateOrderPage: NextPageWithLayout = () => {
                         </Row>
                         <Row gutter={16}>
                             <Col span={12} xs={24}>
-                                <StyledFormItems
-                                    label='ปริมาตรตั้งต้น'
-                                    name='volume'
-                                    rules={[{ required: true, message: 'กรุณากรอกปริมาตรตั้งต้น' }]}
-                                >
-                                    <Input placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
-                                </StyledFormItems>
+                                {statusPuddleOrder === TypeOrderPuddle.FERMENT && (
+                                    <StyledFormItems
+                                        label='ปริมาตรตั้งต้น'
+                                        name='volume'
+                                        rules={[{ required: true, message: 'กรุณากรอกปริมาตรตั้งต้น' }]}
+                                    >
+                                        <Input placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
+                                    </StyledFormItems>
+                                )}
+                                {(statusPuddleOrder === TypeOrderPuddle.CIRCULAR ||
+                                    statusPuddleOrder === TypeOrderPuddle.FILTER ||
+                                    statusPuddleOrder === TypeOrderPuddle.BREAK ||
+                                    statusPuddleOrder === TypeOrderPuddle.MIXING ||
+                                    statusPuddleOrder === TypeOrderPuddle.STOCK) && (
+                                    <StyledFormItems
+                                        label='ความจุของบ่อนี้'
+                                        name='volume'
+                                        rules={[{ required: true, message: 'กรุณากรอกความจุของบ่อนี้' }]}
+                                    >
+                                        <Input placeholder='ความจุของบ่อนี้' size='large' style={{ color: 'black' }} />
+                                    </StyledFormItems>
+                                )}
                             </Col>
                         </Row>
                         <Row gutter={16}>

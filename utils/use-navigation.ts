@@ -8,6 +8,9 @@ export const useNavigation = () => {
             toBack: async () => {
                 history.back()
             },
+            signin: async () => {
+                await history.push('/signin')
+            },
             home: async () => {
                 await history.push('/')
             },

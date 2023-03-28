@@ -1,5 +1,57 @@
 export const MODULE_NAME = '@OrderModules'
 
+export interface IDeleteGetInPayload {
+    id_sub_order: number
+    idtarget_puddle: number
+}
+
+export interface ISubmitGetIn {
+    order_id: number
+    type_process: number
+    amount_items: number
+    amount_price: number
+    remaining_items: number
+    remaining_price: number
+    idtarget_puddle: number
+    lasted_subId: number
+    volume: number
+    remaining_volume: number
+    action_puddle: number
+    action_serial_puddle: number
+}
+
+export interface INoticeTargetPendingDto {
+    idtarget_puddle: number
+    id_puddle: number
+    id_sub_order: number
+    status: number
+    date_create: string
+    idsub_orders: number
+    idOrders: number
+    type: number
+    fish: number
+    salt: number
+    laber: number
+    other: number
+    fish_sauce: number
+    fish_price: number
+    salt_price: number
+    laber_price: number
+    amount_items: number
+    amount_unit_per_price: number
+    amount_price: number
+    remaining_items: number
+    remaining_unit_per_price: number
+    remaining_price: number
+    description?: any
+    user_create_sub: number
+    approved: number
+    volume: number
+    remaining_volume: number
+    source_puddle?: number
+    source_serial_puddle?: number
+}
+
 export interface IPayloadTransferFishSauce {
     order_id: number
     type_process: number
@@ -12,6 +64,10 @@ export interface IPayloadTransferFishSauce {
     approved: number
     volume: number
     id_puddle: number
+    remaining_volume: number
+    action_puddle: number
+    serial_puddle: number
+    process?: number
 }
 
 export interface IOrderDto {
@@ -58,4 +114,10 @@ export interface IOrderDetailDto {
     user_create_sub: number
     approved: number
     volume: number
+    remaining_volume: number
+    action_puddle?: number
+    action_serial_puddle?: number
+    type_process?: number
+    idtype_process?: number
+    process_name?: string
 }

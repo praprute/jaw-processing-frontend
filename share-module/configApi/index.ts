@@ -1,4 +1,4 @@
-import { myToken } from '../auth'
+import { myToken } from '../auth/task'
 
 export const configAPI = async () => {
     const getToken = await myToken()

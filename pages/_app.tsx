@@ -7,6 +7,7 @@ import { ReactElement, ReactNode } from 'react'
 import { Provider as ReduxProvider } from 'react-redux'
 
 import { useStore } from '../share-module/store'
+import RootHoc from '../components/RootHoc'
 
 export type NextPageWithLayout = NextPage & {
     getLayout?: (page: ReactElement) => ReactNode
@@ -19,10 +20,12 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     const store = useStore(pageProps.initialReduxState)
     const getLayout = Component.getLayout ?? ((page) => page)
 
-    return getLayout(
-        <ReduxProvider store={store}>
-            <Component {...pageProps} />
-        </ReduxProvider>,
+    return (
+        <>
+            <ReduxProvider store={store}>
+                <RootHoc>{getLayout(<Component {...pageProps} />)}</RootHoc>
+            </ReduxProvider>
+        </>
     )
 }
 

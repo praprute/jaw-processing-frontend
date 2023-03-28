@@ -4,10 +4,11 @@ import { MenuProps } from 'antd/lib/menu'
 import { ReactNode, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useRouter } from 'next/router'
+import Cookies from 'js-cookie'
 
 import { IUserInfo } from '../../share-module/auth/type'
-import { myToken, userInfo } from '../../share-module/auth'
 import { useNavigation } from '../../utils/use-navigation'
+import { userInfoTask } from '../../share-module/auth/task'
 
 interface ILayout {
     children: ReactNode
@@ -19,6 +20,7 @@ const { Header, Content, Sider, Footer } = Layout
 
 const AppLayout = (props: ILayout) => {
     const { children, hideSidebar = false, isFullscreen = false } = props
+    const { data: userInfoData, onRequest: userInfoRequest } = userInfoTask.useTask()
     const router = useRouter()
     const navigation = useNavigation()
     const [defaultKey, setDefaultKey] = useState('/')
@@ -27,11 +29,11 @@ const AppLayout = (props: ILayout) => {
     const placement = 'left'
 
     const menuItems = [
-        { key: '/', name: 'Dashboard' },
-        { key: '/a', name: 'All Orders' },
-        { key: '/b', name: 'Production Doc' },
+        { key: '/', name: 'Process Menagement' },
+        { key: '/fish-bill', name: 'Fish Weighing Sheet' },
+        { key: '/b', name: 'Stock' },
         { key: '/c', name: 'Accounting Doc' },
-        { key: '/d', name: 'user info' },
+        { key: '/d', name: 'Setting' },
     ]
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
     const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
@@ -80,14 +82,15 @@ const AppLayout = (props: ILayout) => {
 
     useEffect(() => {
         ;(async () => {
-            const getToken = await myToken()
-            const result = await userInfo(getToken as string)
-            if (result.success === 'success') {
-                setMyInfo(result.message[0])
-                setDefaultKey('/')
+            if (userInfoData?.success === 'success') {
+                setMyInfo(userInfoData.message)
+                setDefaultKey(`${router.pathname}`)
+            } else {
+                const res = await userInfoRequest()
+                setMyInfo(res.message)
             }
         })()
-    }, [router.pathname])
+    }, [router.pathname, userInfoData])
 
     const showDrawer = () => {
         setVisible(true)
@@ -95,6 +98,14 @@ const AppLayout = (props: ILayout) => {
 
     const onClose = () => {
         setVisible(false)
+    }
+
+    const handleSignOut = () => {
+        Cookies.remove('accessToken')
+        navigation.navigateTo.signin()
+        // set('accessToken', data.message.token, {
+        //     expires: new Date(Date.now() + 36000 * 1000),
+        // })
     }
 
     //TODO : PERMISSION FEATURE
@@ -250,7 +261,9 @@ const AppLayout = (props: ILayout) => {
                     >
                         <MenuPath />
                         <br />
-                        <StyledLogOut size='large'>SIGNOUT</StyledLogOut>
+                        <StyledLogOut onClick={handleSignOut} size='large'>
+                            SIGNOUT
+                        </StyledLogOut>
                     </WrapSider>
                 )}
 

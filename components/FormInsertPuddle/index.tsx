@@ -15,6 +15,11 @@ const FormInsertPuddle = () => {
                     </Form.Item>
                 </Col>
                 <Col span={12} xs={24}>
+                    <Form.Item label='หมายเลขบ่อ' name='serial'>
+                        <Input placeholder='หมายเลขบ่อ' style={{ color: 'black' }} />
+                    </Form.Item>
+                </Col>
+                <Col span={12} xs={24}>
                     <Form.Item
                         label='วันที่ลงทะเบียน'
                         name='date_create'

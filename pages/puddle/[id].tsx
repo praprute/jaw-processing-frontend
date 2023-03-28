@@ -20,6 +20,7 @@ const PuddlePage: NextPageWithLayout = () => {
     const { id } = router.query
     const [open, setOpen] = useState(false)
     const [tigger, setTigger] = useState(false)
+    const [columnGrid, setColumnGrid] = useState(6)
 
     const getPuddleByIdBuilding = getPuddleByIdBuildingTask.useTask()
     const createPuddleRequest = createPuddleTask.useTask()
@@ -31,9 +32,19 @@ const PuddlePage: NextPageWithLayout = () => {
     }, [id, tigger])
 
     useEffect(() => {
+        id === '1' && setColumnGrid(6)
+        id === '4' && setColumnGrid(12)
+        id === '5' && setColumnGrid(12)
+        id === '6' && setColumnGrid(12)
+        id === '7' && setColumnGrid(8)
+        id === '9' && setColumnGrid(4)
+    }, [id])
+
+    useEffect(() => {
         if (id) {
             form.setFieldsValue({
                 building_id: Number(id),
+                serial: '',
                 date_create: dayjs(new Date()).format('DD/MM/YYYY'),
             })
         }
@@ -43,7 +54,9 @@ const PuddlePage: NextPageWithLayout = () => {
         try {
             let payload = {
                 building_id: form.getFieldValue('building_id'),
+                serial: form.getFieldValue('serial'),
             }
+
             const result = await createPuddleRequest.onRequest(payload)
             if (result.success === 'success') {
                 setTigger(!tigger)
@@ -63,6 +76,29 @@ const PuddlePage: NextPageWithLayout = () => {
 
     const onClose = () => {
         setOpen(false)
+    }
+
+    const mapStatusPuddle = (status: number) => {
+        switch (status) {
+            case TypeOrderPuddle.FREE:
+                return <span>ว่าง</span>
+            case TypeOrderPuddle.FERMENT:
+                return <span>หมักปลา</span>
+            case TypeOrderPuddle.CIRCULAR:
+                return <span>บ่อเวียน</span>
+            case TypeOrderPuddle.MIXING:
+                return <span>บ่อผสม</span>
+            case TypeOrderPuddle.CLARIFIER:
+                return <span>ถ่ายกาก</span>
+            case TypeOrderPuddle.FILTER:
+                return <span>บ่อกรอง</span>
+            case TypeOrderPuddle.BREAK:
+                return <span>บ่อพักใส</span>
+            case TypeOrderPuddle.STOCK:
+                return <span>บ่อพัก</span>
+            default:
+                break
+        }
     }
 
     return (
@@ -91,37 +127,64 @@ const PuddlePage: NextPageWithLayout = () => {
                 </StyledButton>
             </StyledBoxHeader>
             <br />
-            {getPuddleByIdBuilding.loading ? (
-                <StyledLoadingContent>
-                    <Spin size='large' />
-                </StyledLoadingContent>
-            ) : (
-                <Row gutter={[0, 0]}>
-                    {Boolean(getPuddleByIdBuilding?.data?.length) &&
-                        getPuddleByIdBuilding?.data?.map((data, index) => (
-                            <Col key={index} md={6} sm={24} span={12} xs={24}>
-                                <StyledGlassBox
-                                    isStatus={data.status}
-                                    onClick={() => {
-                                        navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
-                                    }}
-                                >
-                                    <StyledTitleBetween>
-                                        <span>{data.idpuddle}</span>
-                                        <span>
-                                            {dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
-                                            {data.status === 0 && <span>ว่าง</span>}
-                                            {data.status === 1 && <span>หมักปลา</span>}
-                                            {data.status === 2 && <span>บ่อเวียน</span>}
-                                            {data.status === 3 && <span>บ่อผสม</span>}
-                                        </span>
-                                        <span>{data.description}</span>
-                                    </StyledTitleBetween>
-                                </StyledGlassBox>
-                            </Col>
-                        ))}
-                </Row>
-            )}
+            <SectionBoxAllPuddled>
+                {getPuddleByIdBuilding.loading ? (
+                    <StyledLoadingContent>
+                        <Spin size='large' />
+                    </StyledLoadingContent>
+                ) : (
+                    <>
+                        {id !== '2' && id !== '3' && id !== '8' && id !== '10' ? (
+                            <Row gutter={[0, 0]}>
+                                {Boolean(getPuddleByIdBuilding?.data?.length) &&
+                                    getPuddleByIdBuilding?.data?.map((data, index) => (
+                                        <Col key={index} md={columnGrid} sm={24} span={12} xs={24}>
+                                            <StyledGlassBox
+                                                isStatus={data.status}
+                                                onClick={() => {
+                                                    data.status !== 999 &&
+                                                        navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
+                                                }}
+                                            >
+                                                <StyledTitleBetween>
+                                                    <span>{data?.serial}</span>
+                                                    <span>
+                                                        {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
+                                                    </span>
+                                                    <span>{mapStatusPuddle(data.status)}</span>
+                                                    {/* <span>{data.description}</span> */}
+                                                </StyledTitleBetween>
+                                            </StyledGlassBox>
+                                        </Col>
+                                    ))}
+                            </Row>
+                        ) : (
+                            <WrapGridCustom>
+                                {Boolean(getPuddleByIdBuilding?.data?.length) &&
+                                    getPuddleByIdBuilding?.data?.map((data, index) => (
+                                        <StyledGlassBox
+                                            isStatus={data.status}
+                                            key={index}
+                                            onClick={() => {
+                                                data.status !== 999 &&
+                                                    navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
+                                            }}
+                                        >
+                                            <StyledTitleBetween>
+                                                <span>{data?.serial}</span>
+                                                <span>
+                                                    {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
+                                                </span>
+                                                <span>{mapStatusPuddle(data.status)}</span>
+                                                {/* <span>{data.description}</span> */}
+                                            </StyledTitleBetween>
+                                        </StyledGlassBox>
+                                    ))}
+                            </WrapGridCustom>
+                        )}
+                    </>
+                )}
+            </SectionBoxAllPuddled>
 
             <StyledDrawe
                 bodyStyle={{ paddingBottom: 80 }}
@@ -157,6 +220,15 @@ PuddlePage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export default PuddlePage
+
+const SectionBoxAllPuddled = styled.div`
+    width: 100%;
+    overflow-x: scroll;
+`
+const WrapGridCustom = styled.div`
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+`
 
 const StyledBreadcrumbItem = styled(Breadcrumb.Item)`
     cursor: pointer;
@@ -203,6 +275,12 @@ const StyledGlassBox = styled.div<{ isStatus: number }>`
                 return `background:#FC0F0f;`
             case TypeOrderPuddle.CIRCULAR:
                 return `background:#FDD298;`
+            case TypeOrderPuddle.MIXING:
+                return `background:#B49ADF;`
+            case TypeOrderPuddle.FILTER:
+                return `background:#94B2D6;`
+            case TypeOrderPuddle.BREAK:
+                return `background:#82AC64;`
         }
     }}
     border-radius: 0px;
