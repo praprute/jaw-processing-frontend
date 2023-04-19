@@ -26,11 +26,11 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'เติมน้ำปลา'
             case TypeProcess.CLEARING:
                 return 'ถ่ายกาก'
-            case TypeProcess.GET_FISH_RESIDUE:
+            case TypeProcess.GETFISHRESIDUE:
                 return 'รับกาก'
-            case TypeProcess.CLEARING_ALL:
+            case TypeProcess.CLEARINGALL:
                 return 'ถ่ายกากทิ้ง'
-            case TypeProcess.ADD_ON_WATER_SALT:
+            case TypeProcess.ADDONWATERSALT:
                 return 'เติมน้ำเกลือ'
             default:
                 break
@@ -102,10 +102,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>
                                             {' '}
                                             <StyledButton
-                                                type='primary'
                                                 onClick={() => {
                                                     onOpenBill(data.idOrders)
                                                 }}
+                                                type='primary'
                                             >
                                                 ดูใบชั่งปลา
                                             </StyledButton>
@@ -141,10 +141,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -180,10 +180,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -220,10 +220,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -232,7 +232,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === TypeProcess.GET_FISH_RESIDUE && (
+                            {data.type === TypeProcess.GETFISHRESIDUE && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -260,10 +260,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -272,7 +272,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === TypeProcess.CLEARING_ALL && (
+                            {data.type === TypeProcess.CLEARINGALL && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -300,10 +300,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -312,7 +312,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === TypeProcess.ADD_ON_WATER_SALT && (
+                            {data.type === TypeProcess.ADDONWATERSALT && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -339,10 +339,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
-                                                    type='primary'
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
+                                                    type='primary'
                                                 >
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
@@ -368,12 +368,12 @@ const StyledRowTransaction = styled.tr<{ isStatus?: number }>`
     ${(p) => {
         switch (p.isStatus) {
             case TypeProcess.TRANSFER:
-            case TypeProcess.ADD_ON_WATER_SALT:
+            case TypeProcess.ADDONWATERSALT:
                 return `background:#DEFCBA;`
             case TypeProcess.IMPORT:
                 return `background:#FDD298;`
             case TypeProcess.CLEARING:
-            case TypeProcess.GET_FISH_RESIDUE:
+            case TypeProcess.GETFISHRESIDUE:
                 return `background:#D68B8B;`
         }
     }}

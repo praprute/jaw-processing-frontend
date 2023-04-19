@@ -3,6 +3,8 @@ import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumbe
 import { useRouter } from 'next/router'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
+import { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
 
 import AppLayout from '../../../components/Layouts'
 import ModalLoading from '../../../components/Modal/ModalLoading'
@@ -13,8 +15,6 @@ import { parseFloat2Decimals } from '../../../utils/parseFloat'
 import { TypeOrderPuddle } from '../../../utils/type_puddle'
 import { useNavigation } from '../../../utils/use-navigation'
 import { NextPageWithLayout } from '../../_app'
-import { ColumnsType } from 'antd/lib/table'
-import moment from 'moment'
 import { numberWithCommas } from '../../../utils/format-number'
 import { getPuddleDetailByIdTask } from '../../../share-module/building/task'
 
@@ -124,7 +124,6 @@ const CreateOrderPage: NextPageWithLayout = () => {
             key: 'idreceipt',
             render: (_: any, data: IFishWeightBill) => (
                 <Button
-                    type='primary'
                     onClick={() => {
                         setVisibleModalAddOn(true)
                         setPreDataAddFish(data)
@@ -133,6 +132,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                             price_per_kg: data.price_per_weigh,
                         })
                     }}
+                    type='primary'
                 >
                     เลือก
                 </Button>
@@ -378,8 +378,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                     rules={[{ required: true, message: 'กรุณาเลือกประเภทบ่อ' }]}
                                 >
                                     <Input
-                                        onChange={handleChangePrice('fish_price')}
                                         disabled
+                                        onChange={handleChangePrice('fish_price')}
                                         placeholder='มูลค่าปลา'
                                         size='large'
                                         style={{ color: 'black' }}
@@ -512,20 +512,20 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 visible={visible}
             />
             <Modal
-                title={`ใบชั่งหมายเลข : ${preDataAddFish?.no} `}
-                open={visibleModalAddOn}
+                centered
                 footer={null}
                 onCancel={() => {
                     setVisibleModalAddOn(false)
                 }}
-                centered
+                open={visibleModalAddOn}
+                title={`ใบชั่งหมายเลข : ${preDataAddFish?.no} `}
             >
                 <StyledForm
-                    name='addON_salt_water'
                     autoComplete='off'
                     form={formAddOn}
                     hideRequiredMark
                     layout='vertical'
+                    name='addON_salt_water'
                     onFinish={handleSubmitPreStock}
                 >
                     <Row gutter={[16, 0]}>
@@ -546,11 +546,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                             >
                                 <StyledInputNumber
-                                    size='large'
-                                    min={0}
                                     defaultValue={0}
                                     max={Number(preDataAddFish?.stock)}
+                                    min={0}
                                     onChange={handleChangeNewStockValue}
+                                    size='large'
                                 />
                                 {/* <Input
                                     onChange={handleChangeNewStockValue}
@@ -576,7 +576,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                             </StyledFormItems>
                         </Col>
                         <Col xs={24}>
-                            <Button type='primary' htmlType='submit'>
+                            <Button htmlType='submit' type='primary'>
                                 ยืนยัน
                             </Button>
                         </Col>

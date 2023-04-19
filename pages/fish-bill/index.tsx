@@ -1,12 +1,13 @@
 import { Button, Divider, Form, Table } from 'antd'
 import { ReactElement, useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
+
 import AppLayout from '../../components/Layouts'
 import FillterBox from '../../components/ReceiveFishWeightBill/FillterBox'
 import { fillterReceiveWeightFishTask, getReceiveFishWeightPaginationTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
-import { ColumnsType } from 'antd/lib/table'
-import moment from 'moment'
 import { numberWithCommas } from '../../utils/format-number'
 import { useNavigation } from '../../utils/use-navigation'
 import { NoticeError } from '../../utils/noticeStatus'
@@ -111,10 +112,10 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
             <StyledNavMenu>
                 <div className='container'>
                     <Button
-                        type='primary'
                         onClick={() => {
                             navigation.navigateTo.createFishWeightReceive()
                         }}
+                        type='primary'
                     >
                         ลงทะเบียนใบชั่ง
                     </Button>

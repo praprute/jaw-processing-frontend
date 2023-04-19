@@ -36,7 +36,7 @@ const FillterSaltBox = () => {
                         </StyledFormItems>
                     </Col>
                     <Col md={24} sm={24} xs={24}>
-                        <StyldeButtonSubmit type='primary' htmlType='submit'>
+                        <StyldeButtonSubmit htmlType='submit' type='primary'>
                             ค้นหา
                         </StyldeButtonSubmit>
                     </Col>

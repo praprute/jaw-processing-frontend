@@ -1,13 +1,12 @@
 import { ReactElement, useEffect, useState } from 'react'
 import { Button, Divider, Form, Table } from 'antd'
 import styled from 'styled-components'
+import { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
 
 import AppLayout from '../../components/Layouts'
 import { useNavigation } from '../../utils/use-navigation'
 import { NextPageWithLayout } from '../_app'
-import { ColumnsType } from 'antd/lib/table'
-
-import moment from 'moment'
 import { numberWithCommas } from '../../utils/format-number'
 import { fillterReceiveSaltTask, getReceiveSaltPaginationTask } from '../../share-module/FishWeightBill/task'
 import { NoticeError } from '../../utils/noticeStatus'
@@ -108,10 +107,10 @@ const SaltReceivePage: NextPageWithLayout = () => {
             <StyledNavMenu>
                 <div className='container'>
                     <Button
-                        type='primary'
                         onClick={() => {
                             navigation.navigateTo.createSaltBillReceive()
                         }}
+                        type='primary'
                     >
                         ลงทะเบียนบิลเกลือ
                     </Button>

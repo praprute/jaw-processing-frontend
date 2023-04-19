@@ -9,7 +9,6 @@ import Cookies from 'js-cookie'
 import { IUserInfo } from '../../share-module/auth/type'
 import { useNavigation } from '../../utils/use-navigation'
 import { userInfoTask } from '../../share-module/auth/task'
-import LeftMenu from './LeftMenu'
 
 interface ILayout {
     children: ReactNode
@@ -168,7 +167,7 @@ const AppLayout = (props: ILayout) => {
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
                 />
-                {/* <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
+                <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
                 <StyledMenu
                     defaultSelectedKeys={[defaultKey]}
                     items={itemsMenu_ACCOUNT}
@@ -211,7 +210,7 @@ const AppLayout = (props: ILayout) => {
                     }}
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
-                /> */}
+                />
             </>
         )
     }

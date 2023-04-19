@@ -1,3 +1,4 @@
+//@typescript-eslint/naming-convention
 export enum TypeOrderPuddle {
     FREE = 0,
     FERMENT = 1,
@@ -19,9 +20,9 @@ export enum TypeProcess {
     // ถ่ายกากรวม
     CLEARING = 3,
     // รับกากเข้า
-    GET_FISH_RESIDUE = 4,
+    GETFISHRESIDUE = 4,
     // ถ่ายกากทิ้ง
-    CLEARING_ALL = 5,
+    CLEARINGALL = 5,
     // เติมน้ำเหลือ
-    ADD_ON_WATER_SALT = 6,
+    ADDONWATERSALT = 6,
 }

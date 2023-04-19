@@ -1,7 +1,8 @@
-import { Layout, Form, Table } from 'antd'
-import { ReactElement, useEffect, useState } from 'react'
+import { Layout, Form } from 'antd'
+import { ReactElement } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
+
 import AppLayout from '../../components/Layouts'
 import { createReceiveSaltTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
@@ -52,11 +53,11 @@ const CreateSaltBillPage: NextPageWithLayout = () => {
             <br />
             <SectionFillter>
                 <StyledForm
-                    name='create_salt_bill'
                     autoComplete='off'
                     form={form}
                     hideRequiredMark
                     layout='vertical'
+                    name='create_salt_bill'
                     onFinish={handleSubmit}
                 >
                     <CreateSaltBillBox />
@@ -89,12 +90,12 @@ const StyledBackPage = styled.span`
     width: fit-content;
 `
 
-const StyledTable = styled(Table)`
-    width: 100%;
-    .ant-table-thead .ant-table-cell {
-        font-weight: 400;
-    }
-`
+// const StyledTable = styled(Table)`
+//     width: 100%;
+//     .ant-table-thead .ant-table-cell {
+//         font-weight: 400;
+//     }
+// `
 
 const StyledForm = styled(Form)`
     width: 100%;
@@ -102,17 +103,17 @@ const StyledForm = styled(Form)`
     justify-content: center;
 `
 
-const Container = styled.div`
-    width: 100%;
-    max-width: 1280px;
-`
+// const Container = styled.div`
+//     width: 100%;
+//     max-width: 1280px;
+// `
 
-const SectionTable = styled.div`
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    overflow-x: scroll;
-`
+// const SectionTable = styled.div`
+//     width: 100%;
+//     display: flex;
+//     justify-content: center;
+//     overflow-x: scroll;
+// `
 const SectionFillter = styled.div`
     width: 100%;
     display: flex;

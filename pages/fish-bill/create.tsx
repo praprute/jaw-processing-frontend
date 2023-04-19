@@ -1,20 +1,12 @@
-import { Layout, Button, Form, Table } from 'antd'
-import { ReactElement, useEffect, useState } from 'react'
+import { Layout, Form } from 'antd'
+import { ReactElement } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
+
 import AppLayout from '../../components/Layouts'
-import FillterBox from '../../components/ReceiveFishWeightBill/FillterBox'
-import {
-    createReceiveWeightFishTask,
-    fillterReceiveWeightFishTask,
-    getReceiveFishWeightPaginationTask,
-} from '../../share-module/FishWeightBill/task'
+import { createReceiveWeightFishTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
-import { ColumnsType } from 'antd/lib/table'
-import moment from 'moment'
-import { numberWithCommas } from '../../utils/format-number'
 import { useNavigation } from '../../utils/use-navigation'
-import { IDtoFishWeight } from '../../share-module/FishWeightBill/type'
 import CreateFishWeightBox from '../../components/ReceiveFishWeightBill/CreateBox'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 
@@ -64,11 +56,11 @@ const CreateFishWeightPage: NextPageWithLayout = () => {
             <br />
             <SectionFillter>
                 <StyledForm
-                    name='create_fishWeight_bill'
                     autoComplete='off'
                     form={form}
                     hideRequiredMark
                     layout='vertical'
+                    name='create_fishWeight_bill'
                     onFinish={handleSubmit}
                 >
                     <CreateFishWeightBox />
@@ -101,12 +93,12 @@ const StyledBackPage = styled.span`
     width: fit-content;
 `
 
-const StyledTable = styled(Table)`
-    width: 100%;
-    .ant-table-thead .ant-table-cell {
-        font-weight: 400;
-    }
-`
+// const StyledTable = styled(Table)`
+//     width: 100%;
+//     .ant-table-thead .ant-table-cell {
+//         font-weight: 400;
+//     }
+// `
 
 const StyledForm = styled(Form)`
     width: 100%;
@@ -114,10 +106,10 @@ const StyledForm = styled(Form)`
     justify-content: center;
 `
 
-const Container = styled.div`
-    width: 100%;
-    max-width: 1280px;
-`
+// const Container = styled.div`
+//     width: 100%;
+//     max-width: 1280px;
+// `
 
 // const ContentFillter = styled.div`
 //     padding: 20px;
@@ -132,12 +124,12 @@ const Container = styled.div`
 //     font-weight: 500;
 // `
 
-const SectionTable = styled.div`
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    overflow-x: scroll;
-`
+// const SectionTable = styled.div`
+//     width: 100%;
+//     display: flex;
+//     justify-content: center;
+//     overflow-x: scroll;
+// `
 const SectionFillter = styled.div`
     width: 100%;
     display: flex;
@@ -151,14 +143,3 @@ const SectionFillter = styled.div`
 //     background: white; //#f7f8f9;
 //     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 // `
-
-// no,
-//       weigh_in,
-//       weigh_out,
-//       weigh_net,
-//       time_in,
-//       time_out,
-//       vehicle_register,
-//       customer_name,
-//       product_name,
-//       store_name,

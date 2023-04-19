@@ -1,9 +1,10 @@
-import { Col, Input, Row, Form, Button, DatePicker } from 'antd'
+import { Col, Input, Row, Form, Button } from 'antd'
 import styled from 'styled-components'
 
-const config = {
-    rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
-}
+// TODO
+// const config = {
+//     rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
+// }
 
 const CreateSaltBillBox = () => {
     return (
@@ -69,7 +70,7 @@ const CreateSaltBillBox = () => {
                     </Col>
 
                     <Col md={24} sm={24} xs={24}>
-                        <StyldeButtonSubmit type='primary' htmlType='submit'>
+                        <StyldeButtonSubmit htmlType='submit' type='primary'>
                             ลงทะเบียน
                         </StyldeButtonSubmit>
                     </Col>
@@ -88,12 +89,12 @@ const StyldeButtonSubmit = styled(Button)`
     font-weight: 500;
 `
 
-const StyledFormItemDatePicker = styled(Form.Item)`
-    .ant-form-item-label > label {
-        font-size: 18px;
-        font-weight: normal;
-    }
-`
+// const StyledFormItemDatePicker = styled(Form.Item)`
+//     .ant-form-item-label > label {
+//         font-size: 18px;
+//         font-weight: normal;
+//     }
+// `
 const StyledFormItems = styled(Form.Item)`
     .ant-form-item-label > label {
         font-size: 18px;

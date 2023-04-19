@@ -21,16 +21,8 @@ interface ITransferFishsauce {
 }
 
 const TransferFishsauce = (props: ITransferFishsauce) => {
-    const {
-        puddleOption,
-        onChangeAmountItems,
-        amountItemsL,
-        buildingOption,
-        onChangeBuilding,
-        onSelectAction,
-        typeProcess,
-        throwOutProcess = false,
-    } = props
+    const { puddleOption, onChangeAmountItems, amountItemsL, buildingOption, onChangeBuilding, onSelectAction, typeProcess } =
+        props
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>

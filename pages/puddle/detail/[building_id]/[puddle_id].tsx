@@ -1,27 +1,12 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
-import {
-    Alert,
-    Breadcrumb,
-    Button,
-    Divider,
-    Drawer,
-    Empty,
-    Form,
-    Input,
-    Modal,
-    Space,
-    Spin,
-    Select,
-    Row,
-    Col,
-    Steps,
-    message,
-} from 'antd'
+import { Alert, Breadcrumb, Button, Divider, Drawer, Empty, Form, Input, Modal, Space, Spin, Select, Row, Col, Steps } from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import { LabeledValue } from 'antd/lib/select'
 import axios from 'axios'
+import Table, { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
 
 import AppLayout from '../../../../components/Layouts'
 import { NextPageWithLayout } from '../../../_app'
@@ -56,8 +41,6 @@ import {
     getReceiveWeightFishByOrderIdTask,
 } from '../../../../share-module/FishWeightBill/task'
 import { numberWithCommas } from '../../../../utils/format-number'
-import Table, { ColumnsType } from 'antd/lib/table'
-import moment from 'moment'
 
 const { Option } = Select
 
@@ -189,11 +172,11 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             key: 'idsalt_receipt',
             render: (_: any, data: ISelectSaltBillDto) => (
                 <Button
-                    type='primary'
                     onClick={() => {
                         setPreDataSaltBill(data)
                         next()
                     }}
+                    type='primary'
                 >
                     เลือก
                 </Button>
@@ -359,7 +342,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const handleSelectOrdersGetIN = async (id_selected: number) => {
         const result = getNoticeTargetPending.data.find((data) => id_selected === data.idtarget_puddle)
         if (result.type === TypeProcess.CLEARING) {
-            setTypeProcessImport(TypeProcess.GET_FISH_RESIDUE)
+            setTypeProcessImport(TypeProcess.GETFISHRESIDUE)
         } else {
             setTypeProcessImport(TypeProcess.IMPORT)
         }
@@ -496,7 +479,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
             const payload = {
                 order_id: getPuddleDetailById?.data?.lasted_order,
-                type_process: TypeProcess.CLEARING_ALL,
+                type_process: TypeProcess.CLEARINGALL,
                 amount_items: remainingItems,
                 amount_unit_per_price: lastedPerUnit,
                 amount_price: lastedPrice,
@@ -532,7 +515,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             let price_net = Number(values.salt) * preDataSaltBill.price_per_weigh
             const payload = {
                 order_id: getPuddleDetailById?.data?.lasted_order,
-                type_process: TypeProcess.ADD_ON_WATER_SALT,
+                type_process: TypeProcess.ADDONWATERSALT,
                 amount_items: amount_item_cal,
                 amount_unit_per_price: price_net / saltWaterKG,
                 amount_price: price_net,
@@ -847,10 +830,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             <StyledEmpty />
                         ) : (
                             <OrderLastedSection
-                                onSelected={handleSelectSubOrder}
                                 data={getOrdersDetailFromId.data}
-                                statusPuddle={getPuddleDetailById.data?.status}
                                 onOpenBill={handleViewFishWeightBill}
+                                onSelected={handleSelectSubOrder}
+                                statusPuddle={getPuddleDetailById.data?.status}
                             />
                         )}
                     </>
@@ -861,18 +844,18 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </StyledButtonAction>
 
                     <StyledButtonAction
-                        type='dashed'
                         onClick={() => {
                             setOpenThrowOtherPuddle(true)
                         }}
+                        type='dashed'
                     >
                         ถ่ายกาก
                     </StyledButtonAction>
                     <StyledButtonAction
-                        type='dashed'
                         onClick={() => {
                             setOpenThrowOut(true)
                         }}
+                        type='dashed'
                     >
                         ถ่ายกากทิ้ง
                     </StyledButtonAction>
@@ -948,8 +931,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onChangeBuilding={handleChangeBuilding}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
-                        typeProcess={getTypeProcess?.data}
                         throwOutProcess
+                        typeProcess={getTypeProcess?.data}
                     />
                     <Button htmlType='submit' type='primary'>
                         Submit
@@ -973,45 +956,45 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 visible={modalLoadingVisivble}
             />
             <Modal
-                title='เพิ่มรายการการทำงาน'
-                open={visibleModalProcess}
-                onOk={() => {
-                    handleSubmitTypeProcessTask()
-                }}
+                centered
                 onCancel={() => {
                     setVisibleModalProcess(false)
                 }}
-                centered
+                onOk={() => {
+                    handleSubmitTypeProcessTask()
+                }}
+                open={visibleModalProcess}
+                title='เพิ่มรายการการทำงาน'
             >
                 <div>
                     <StyledContentModal>
                         <ul>
                             {getTypeProcess?.data?.map((data, index) => (
-                                <li>{data.process_name}</li>
+                                <li key={index}>{data.process_name}</li>
                             ))}
                         </ul>
                     </StyledContentModal>
 
                     <Input
-                        value={valueTypeProcess}
-                        placeholder='เพิ่มรายการการทำงาน'
                         onChange={(e) => {
                             setValueTypeProcess(e.target.value)
                         }}
+                        placeholder='เพิ่มรายการการทำงาน'
+                        value={valueTypeProcess}
                     />
                 </div>
             </Modal>
             {/* modal ถ่ายกากทิ้ง */}
             <Modal
-                title='ยืนยันรการถ่ายกากทิ้ง'
-                open={openThrowOut}
-                onOk={() => {
-                    handleSubmitColseProcess()
-                }}
+                centered
                 onCancel={() => {
                     setOpenThrowOut(false)
                 }}
-                centered
+                onOk={() => {
+                    handleSubmitColseProcess()
+                }}
+                open={openThrowOut}
+                title='ยืนยันรการถ่ายกากทิ้ง'
             >
                 <ModalContent>
                     <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วย'}</p>
@@ -1019,32 +1002,32 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             </Modal>
             {/* modal เลือกการทำงาน */}
             <Modal
-                title={`suborder id : ${idSubOrdersTarget}`}
-                open={visibleModalDescProcess}
-                onOk={handleUpdateDescProcess}
+                centered
                 onCancel={() => {
                     setVisibleModalDescProcess(false)
                     setIdSubOrdersTarget(null)
                     setSelectedIdProcess(null)
                 }}
-                centered
+                onOk={handleUpdateDescProcess}
+                open={visibleModalDescProcess}
+                title={`suborder id : ${idSubOrdersTarget}`}
             >
                 <div>
                     <StyledContentModal>
                         <ul>
                             {getTypeProcess?.data?.map((data, index) => (
-                                <li>{data.process_name}</li>
+                                <li key={index}>{data.process_name}</li>
                             ))}
                         </ul>
                     </StyledContentModal>
                     {idSubOrdersTarget && (
                         <Select
-                            value={selectedIdProcess}
-                            placeholder='เลือกรายการการทำงาน'
                             onChange={(e) => {
                                 setSelectedIdProcess(e)
                             }}
+                            placeholder='เลือกรายการการทำงาน'
                             style={{ width: '100%' }}
+                            value={selectedIdProcess}
                         >
                             {getTypeProcess?.data &&
                                 getTypeProcess?.data.map((data, index) => (
@@ -1057,24 +1040,24 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </div>
             </Modal>
             <Modal
-                title={`เติมน้ำเกลือที่ออเดอร์ : ${getPuddleDetailById?.data?.lasted_order}`}
-                open={visibleModalAddOn}
+                centered
                 footer={null}
                 onCancel={() => {
                     setVisibleModalAddOn(false)
                     setIdSubOrdersTarget(null)
                     setSelectedIdProcess(null)
                 }}
-                centered
+                open={visibleModalAddOn}
+                title={`เติมน้ำเกลือที่ออเดอร์ : ${getPuddleDetailById?.data?.lasted_order}`}
                 width={990}
             >
                 {' '}
                 <StyledForm
-                    name='addON_salt_water'
                     autoComplete='off'
                     form={formAddOn}
                     hideRequiredMark
                     layout='vertical'
+                    name='addON_salt_water'
                     onFinish={handleSubmitAddOn}
                 >
                     <Steps current={currentStepSalt} items={itemsStepsSalt} />
@@ -1087,12 +1070,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             </Button>
                         )} */}
                         {currentStepSalt === stepsSalt.length - 1 && (
-                            <Button type='primary' htmlType='submit'>
+                            <Button htmlType='submit' type='primary'>
                                 ยืนยัน
                             </Button>
                         )}
                         {currentStepSalt > 0 && (
-                            <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
+                            <Button onClick={() => prev()} style={{ margin: '0 8px' }}>
                                 Previous
                             </Button>
                         )}
@@ -1100,14 +1083,14 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </StyledForm>
             </Modal>
             <Modal
-                title={`ใบชั่งที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenWeightBill}`}
-                open={visibleModalBillFerment}
+                centered
                 footer={null}
                 onCancel={() => {
                     setVisibleModalBillFerment(false)
                     setIdOrdersOpenWeightBill(null)
                 }}
-                centered
+                open={visibleModalBillFerment}
+                title={`ใบชั่งที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenWeightBill}`}
                 width={524}
             >
                 {!getReceiveWeightFishByOrderId.data ||
@@ -1141,14 +1124,14 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             </Modal>
 
             <Modal
-                title={`บิลเกลือที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenSaltBill}`}
-                open={visibleModalViewSaltBill}
+                centered
                 footer={null}
                 onCancel={() => {
                     setVisibleModalViewSaltBill(false)
                     setIdOrdersOpenSaltBill(null)
                 }}
-                centered
+                open={visibleModalViewSaltBill}
+                title={`บิลเกลือที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenSaltBill}`}
                 width={524}
             >
                 {!getLogReceiveSaltByOrdersId.data ||
