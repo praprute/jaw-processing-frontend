@@ -10,10 +10,11 @@ interface IOrderLastedSection {
     data: IOrderDetailDto[]
     statusPuddle: number
     onSelected: (id: number) => void
+    onOpenBill: (id: number) => void
 }
 
 const OrderLastedSection = (props: IOrderLastedSection) => {
-    const { data, onSelected } = props
+    const { data, onSelected, onOpenBill } = props
 
     const handleTypeOrder = (type: number) => {
         switch (type) {
@@ -29,6 +30,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'รับกาก'
             case TypeProcess.CLEARING_ALL:
                 return 'ถ่ายกากทิ้ง'
+            case TypeProcess.ADD_ON_WATER_SALT:
+                return 'เติมน้ำเกลือ'
             default:
                 break
         }
@@ -52,7 +55,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 {data &&
                     data.map((data, index) => (
                         <React.Fragment key={index}>
-                            {data.type === 0 && (
+                            {data.type === TypeProcess.FERMENT && (
                                 <>
                                     <StyledRowTransaction>
                                         <td>{data.date_create}</td>
@@ -96,11 +99,21 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.amount_price)}</td>
                                         <td>{numberWithCommas(data.volume)} kg.</td>
                                         <td></td>
-                                        <td></td>
+                                        <td>
+                                            {' '}
+                                            <StyledButton
+                                                type='primary'
+                                                onClick={() => {
+                                                    onOpenBill(data.idOrders)
+                                                }}
+                                            >
+                                                ดูใบชั่งปลา
+                                            </StyledButton>
+                                        </td>
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === 1 && (
+                            {data.type === TypeProcess.TRANSFER && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -140,7 +153,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === 2 && (
+                            {data.type === TypeProcess.IMPORT && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -179,7 +192,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === 3 && (
+                            {data.type === TypeProcess.CLEARING && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -219,7 +232,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === 4 && (
+                            {data.type === TypeProcess.GET_FISH_RESIDUE && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -259,7 +272,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
-                            {data.type === 5 && (
+                            {data.type === TypeProcess.CLEARING_ALL && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td>{data.date_create}</td>
@@ -299,6 +312,45 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                     </StyledRowTransaction>
                                 </>
                             )}
+                            {data.type === TypeProcess.ADD_ON_WATER_SALT && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{data.date_create}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td> {numberWithCommas(data.amount_items)}</td>
+                                        <td>{numberWithCommas(data.amount_unit_per_price)}</td>
+                                        <td> {numberWithCommas(data.amount_price)}</td>
+                                        <td>{numberWithCommas(data.volume)}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    type='primary'
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
                         </React.Fragment>
                     ))}
             </StyledTable>
@@ -316,6 +368,7 @@ const StyledRowTransaction = styled.tr<{ isStatus?: number }>`
     ${(p) => {
         switch (p.isStatus) {
             case TypeProcess.TRANSFER:
+            case TypeProcess.ADD_ON_WATER_SALT:
                 return `background:#DEFCBA;`
             case TypeProcess.IMPORT:
                 return `background:#FDD298;`

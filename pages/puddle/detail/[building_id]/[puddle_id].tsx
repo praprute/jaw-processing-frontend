@@ -1,6 +1,23 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
-import { Alert, Breadcrumb, Button, Divider, Drawer, Empty, Form, Input, Modal, Space, Spin, Select } from 'antd'
+import {
+    Alert,
+    Breadcrumb,
+    Button,
+    Divider,
+    Drawer,
+    Empty,
+    Form,
+    Input,
+    Modal,
+    Space,
+    Spin,
+    Select,
+    Row,
+    Col,
+    Steps,
+    message,
+} from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import { LabeledValue } from 'antd/lib/select'
@@ -20,6 +37,7 @@ import {
     deleteTransactionGetInTask,
     updateProcessDescritionSubOrderTask,
     submitCloseProcessTask,
+    submitAddOnSaltWaterTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -32,8 +50,28 @@ import GetInFishsauce from '../../../../components/FormTransfer/GetInFishsauce'
 import ModalConfirm from '../../../../components/Modal/ModalConfirm'
 import { configAPI } from '../../../../share-module/configApi'
 import { getTypeProcessTask, submitTypeProcessTask } from '../../../../share-module/puddle/task'
+import {
+    getLogReceiveSaltByOrdersIdTask,
+    getReceiveSaltPaginationTask,
+    getReceiveWeightFishByOrderIdTask,
+} from '../../../../share-module/FishWeightBill/task'
+import { numberWithCommas } from '../../../../utils/format-number'
+import Table, { ColumnsType } from 'antd/lib/table'
+import moment from 'moment'
 
 const { Option } = Select
+
+interface ISelectSaltBillDto {
+    idsalt_receipt: number
+    no: string
+    product_name: string
+    weigh_net: number
+    price_per_weigh: number
+    price_net: number
+    customer: string
+    stock: number
+    date_create: string
+}
 
 const DetailPuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
@@ -41,6 +79,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const { building_id, puddle_id } = router.query
     const [form] = Form.useForm()
     const [formGetIn] = Form.useForm()
+    const [formAddOn] = Form.useForm()
 
     const [open, setOpen] = useState(false)
     const [openGetIN, setOpenGetIn] = useState(false)
@@ -62,6 +101,13 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalDescProcess, setVisibleModalDescProcess] = useState(false)
     const [idSubOrdersTarget, setIdSubOrdersTarget] = useState(null)
     const [selectedIdProcess, setSelectedIdProcess] = useState(null)
+    const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
+    const [saltWaterKG, setSaltWaterKG] = useState(0)
+    const [visibleModalBillFerment, setVisibleModalBillFerment] = useState(false)
+    const [idOrdersOpenWeightBill, setIdOrdersOpenWeightBill] = useState(null)
+    const [preDataSaltBill, setPreDataSaltBill] = useState<ISelectSaltBillDto>(null)
+    const [visibleModalViewSaltBill, setVisibleModalViewSaltBill] = useState(false)
+    const [idOrdersOpenSaltBill, setIdOrdersOpenSaltBill] = useState(null)
 
     // TODO
     // const [actionPuddle, setActionPuddle] = useState(null)
@@ -77,6 +123,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [typeProcessImport, setTypeProcessImport] = useState(TypeProcess.IMPORT)
 
     const [valueTypeProcess, setValueTypeProcess] = useState(null)
+    const [currentStepSalt, setCurrentStepSalt] = useState(0)
+    const [currentPageSalt, setCurrentPageSalt] = useState(1)
+    const [sourceDataSalt, setSourceDataSalt] = useState([])
+    const [totalListSalt, setTotalListSalt] = useState(0)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -91,6 +141,85 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const submitTypeProcess = submitTypeProcessTask.useTask()
     const updateProcessDescritionSubOrder = updateProcessDescritionSubOrderTask.useTask()
     const submitCloseProcess = submitCloseProcessTask.useTask()
+    const submitAddOnSaltWater = submitAddOnSaltWaterTask.useTask()
+    const getReceiveWeightFishByOrderId = getReceiveWeightFishByOrderIdTask.useTask()
+    const getReceiveSaltPagination = getReceiveSaltPaginationTask.useTask()
+    const getLogReceiveSaltByOrdersId = getLogReceiveSaltByOrdersIdTask.useTask()
+
+    const OFFSET_PAGE = 10
+
+    const columnsSalt: ColumnsType<any> = [
+        {
+            title: 'ลำดับที่',
+            dataIndex: 'no',
+            key: 'no',
+        },
+        {
+            title: 'วันที่',
+            dataIndex: 'date_create',
+            key: 'date_create',
+            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+        },
+
+        {
+            title: 'น้ำหนักสุทธิ',
+            dataIndex: 'weigh_net',
+            key: 'weigh_net',
+            render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
+        },
+        {
+            title: 'ชื่อลูกค้า',
+            dataIndex: 'customer',
+            key: 'customer',
+        },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'product_name',
+            key: 'product_name',
+        },
+        {
+            title: 'stock คงเหลือ',
+            dataIndex: 'stock',
+            key: 'stock',
+            render: (stock: number) => <span>{numberWithCommas(stock)}</span>,
+        },
+        {
+            title: '',
+            dataIndex: 'idsalt_receipt',
+            key: 'idsalt_receipt',
+            render: (_: any, data: ISelectSaltBillDto) => (
+                <Button
+                    type='primary'
+                    onClick={() => {
+                        setPreDataSaltBill(data)
+                        next()
+                    }}
+                >
+                    เลือก
+                </Button>
+            ),
+        },
+    ]
+
+    useEffect(() => {
+        ;(async () => {
+            await handleGetListReceive()
+        })()
+    }, [currentPageSalt])
+
+    const handleGetListReceive = async () => {
+        try {
+            const res = await getReceiveSaltPagination.onRequest({ page: currentPageSalt - 1, offset: OFFSET_PAGE })
+            setSourceDataSalt(res.data)
+            setTotalListSalt(res.total)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+
+    const handleChangePagination = (pagination: any) => {
+        setCurrentPageSalt(pagination.current)
+    }
 
     useEffect(() => {
         if (building_id && puddle_id) {
@@ -186,6 +315,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 remainingItems - parseFloat2Decimals(((Number(e.target.value) * remainingItems) / volumn).toFixed(2)),
             remaining_volume: remainingVolumnExport - Number(e.target.value),
         })
+    }
+
+    const handleChangeLitToKGSaltWater = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSaltWaterKG(Number(e.target.value) * 1.2)
     }
 
     const handleSubmitTypeProcessTask = async () => {
@@ -388,6 +521,51 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleSubmitAddOn = async (values: any) => {
+        try {
+            setModalLoadingVisivble(true)
+
+            let amount_item_cal =
+                getOrdersDetailFromId.data.length === 1
+                    ? (saltWaterKG * 100) / volumnPuddle
+                    : (saltWaterKG * remainingItems) / remainingVolumnGetIn
+            let price_net = Number(values.salt) * preDataSaltBill.price_per_weigh
+            const payload = {
+                order_id: getPuddleDetailById?.data?.lasted_order,
+                type_process: TypeProcess.ADD_ON_WATER_SALT,
+                amount_items: amount_item_cal,
+                amount_unit_per_price: price_net / saltWaterKG,
+                amount_price: price_net,
+                remaining_items: remainingItems + amount_item_cal,
+                remaining_unit_per_price:
+                    (lastedPrice + price_net) /
+                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + saltWaterKG),
+                remaining_price: lastedPrice + price_net,
+                volume: saltWaterKG,
+                remaining_volume:
+                    getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + saltWaterKG,
+                process: 7,
+                new_stock: Number(values.salt),
+                idreceipt: preDataSaltBill.idsalt_receipt,
+                id_puddle: Number(puddle_id),
+            }
+
+            const res = await submitAddOnSaltWater.onRequest(payload)
+            if (res.success === 'success') {
+                formAddOn.resetFields()
+                NoticeSuccess(`ทำรายการสำเร็จ`)
+                setTrigger(!trigger)
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        } finally {
+            setModalLoadingVisivble(false)
+            setVisibleModalAddOn(false)
+            await handleGetListReceive()
+            setCurrentStepSalt(0)
+        }
+    }
+
     const handleSubmitTransfer = async () => {
         try {
             setModalLoadingVisivble(true)
@@ -465,6 +643,97 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setIdSubOrdersTarget(null)
         }
     }
+
+    const handleViewFishWeightBill = async (e: number) => {
+        setIdOrdersOpenWeightBill(e)
+        setVisibleModalBillFerment(true)
+        try {
+            await getReceiveWeightFishByOrderId.onRequest({ order_id: e })
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        }
+    }
+
+    const handleViewSaltBill = async (e: number) => {
+        setIdOrdersOpenSaltBill(e)
+        setVisibleModalViewSaltBill(true)
+        try {
+            await getLogReceiveSaltByOrdersId.onRequest({ order_id: e })
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        }
+    }
+
+    const next = () => {
+        setCurrentStepSalt(currentStepSalt + 1)
+    }
+
+    const prev = () => {
+        setCurrentStepSalt(currentStepSalt - 1)
+    }
+
+    const stepsSalt = [
+        {
+            title: 'เลือกบิลเกลือ',
+            content: (
+                <StyledTable
+                    columns={columnsSalt}
+                    dataSource={sourceDataSalt}
+                    loading={getReceiveSaltPagination.loading}
+                    onChange={handleChangePagination}
+                    pagination={{
+                        total: totalListSalt,
+                        current: currentPageSalt,
+                        showSizeChanger: false,
+                    }}
+                />
+            ),
+        },
+        {
+            title: 'กรอกปริมาตรที่ใช้',
+            content: (
+                <>
+                    <Row gutter={[16, 0]} style={{ width: '100%' }}>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                extra={`~ ${saltWaterKG} KG.`}
+                                label='ปริมาตรน้ำเกลือที่เติมเพิ่ม (L.)'
+                                name='volume'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <Input
+                                    onChange={handleChangeLitToKGSaltWater}
+                                    placeholder='ปริมาตรน้ำเกลือที่เติมเพิ่ม'
+                                    size='large'
+                                    style={{ color: 'black' }}
+                                />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='ปริมาตรเกลือที่ใช้ (KG)'
+                                name='salt'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <Input placeholder='ปริมาตรเกลือที่ใช้ (KG)' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col>
+                        {/* <Col xs={24}>
+                            <StyledFormItems
+                                label='ราคา'
+                                name='price'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <Input disabled placeholder='ราคา' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col> */}
+                    </Row>
+                </>
+            ),
+        },
+    ]
+
+    const itemsStepsSalt = stepsSalt.map((item) => ({ key: item.title, title: item.title }))
 
     return (
         <>
@@ -581,6 +850,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 onSelected={handleSelectSubOrder}
                                 data={getOrdersDetailFromId.data}
                                 statusPuddle={getPuddleDetailById.data?.status}
+                                onOpenBill={handleViewFishWeightBill}
                             />
                         )}
                     </>
@@ -605,6 +875,23 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         }}
                     >
                         ถ่ายกากทิ้ง
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setVisibleModalAddOn(true)
+                        }}
+                        type='dashed'
+                    >
+                        เติมน้ำเกลือ
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            handleViewSaltBill(getPuddleDetailById?.data?.lasted_order)
+                            setVisibleModalViewSaltBill(true)
+                        }}
+                        type='link'
+                    >
+                        ดูรายการการเติมเกลือจากบิล
                     </StyledButtonAction>
                 </StyledSectionAction>
             </StyledBoxContent>
@@ -769,9 +1056,129 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     )}
                 </div>
             </Modal>
+            <Modal
+                title={`เติมน้ำเกลือที่ออเดอร์ : ${getPuddleDetailById?.data?.lasted_order}`}
+                open={visibleModalAddOn}
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalAddOn(false)
+                    setIdSubOrdersTarget(null)
+                    setSelectedIdProcess(null)
+                }}
+                centered
+                width={990}
+            >
+                {' '}
+                <StyledForm
+                    name='addON_salt_water'
+                    autoComplete='off'
+                    form={formAddOn}
+                    hideRequiredMark
+                    layout='vertical'
+                    onFinish={handleSubmitAddOn}
+                >
+                    <Steps current={currentStepSalt} items={itemsStepsSalt} />
+                    <StyledContentSteop>{stepsSalt[currentStepSalt].content}</StyledContentSteop>
+                    <div>
+                        {/* TODO */}
+                        {/* {currentStepSalt < stepsSalt.length - 1 && (
+                            <Button type='primary' onClick={() => next()}>
+                                Next
+                            </Button>
+                        )} */}
+                        {currentStepSalt === stepsSalt.length - 1 && (
+                            <Button type='primary' htmlType='submit'>
+                                ยืนยัน
+                            </Button>
+                        )}
+                        {currentStepSalt > 0 && (
+                            <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
+                                Previous
+                            </Button>
+                        )}
+                    </div>{' '}
+                </StyledForm>
+            </Modal>
+            <Modal
+                title={`ใบชั่งที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenWeightBill}`}
+                open={visibleModalBillFerment}
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalBillFerment(false)
+                    setIdOrdersOpenWeightBill(null)
+                }}
+                centered
+                width={524}
+            >
+                {!getReceiveWeightFishByOrderId.data ||
+                    (getReceiveWeightFishByOrderId.data.length < 1 && (
+                        <StyledBoxListFishWeightBill>
+                            <span>ไม่มีรายการที่ผูกไว้</span>
+                        </StyledBoxListFishWeightBill>
+                    ))}
+                {getReceiveWeightFishByOrderId.data &&
+                    getReceiveWeightFishByOrderId.data.map((data, index) => (
+                        <React.Fragment key={index}>
+                            <StyledBoxListFishWeightBill>
+                                <span>บิลหมายเลข</span>
+                                <span>{data.no}</span>
+                            </StyledBoxListFishWeightBill>
+                            <StyledBoxListFishWeightBill>
+                                <span>ปริมาณที่ใช้จากบิลนี้</span>
+                                <span>{numberWithCommas(data.amount)}</span>
+                            </StyledBoxListFishWeightBill>
+                            <StyledBoxListFishWeightBill>
+                                <span>สต็อกคงเหลือ</span>
+                                <span>{numberWithCommas(data.stock)}</span>
+                            </StyledBoxListFishWeightBill>
+                            <StyledBoxListFishWeightBill>
+                                <span>สถานที่จัดเก็บ</span>
+                                <span>{data.store_name}</span>
+                            </StyledBoxListFishWeightBill>
+                            <Divider />
+                        </React.Fragment>
+                    ))}
+            </Modal>
+
+            <Modal
+                title={`บิลเกลือที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenSaltBill}`}
+                open={visibleModalViewSaltBill}
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalViewSaltBill(false)
+                    setIdOrdersOpenSaltBill(null)
+                }}
+                centered
+                width={524}
+            >
+                {!getLogReceiveSaltByOrdersId.data ||
+                    (getLogReceiveSaltByOrdersId.data.length < 1 && (
+                        <StyledBoxListFishWeightBill>
+                            <span>ไม่มีรายการที่ผูกไว้</span>
+                        </StyledBoxListFishWeightBill>
+                    ))}
+                {getLogReceiveSaltByOrdersId.data &&
+                    getLogReceiveSaltByOrdersId.data.map((data, index) => (
+                        <React.Fragment key={index}>
+                            <StyledBoxListFishWeightBill>
+                                <span>บิลหมายเลข</span>
+                                <span>{data.no}</span>
+                            </StyledBoxListFishWeightBill>
+                            <StyledBoxListFishWeightBill>
+                                <span>ปริมาณที่ใช้จากบิลนี้</span>
+                                <span>{numberWithCommas(data.amount)} KG</span>
+                            </StyledBoxListFishWeightBill>
+
+                            <Divider />
+                        </React.Fragment>
+                    ))}
+            </Modal>
         </>
     )
 }
+
+// visibleModalViewSaltBill
+// idOrdersOpenSaltBill
 
 DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
     return (
@@ -782,6 +1189,35 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export default DetailPuddlePage
+
+const StyledTable = styled(Table)`
+    width: 100%;
+    .ant-table-thead .ant-table-cell {
+        font-weight: 400;
+    }
+`
+
+const StyledContentSteop = styled.div`
+    margin: 24px 0px;
+`
+const StyledBoxListFishWeightBill = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+`
+
+const StyledFormItems = styled(Form.Item)`
+    width: 100%;
+    .ant-form-item-label > label {
+        font-size: 18px;
+        font-weight: normal;
+    }
+`
+const StyledForm = styled(Form)`
+    width: 100%;
+`
 
 const ModalContent = styled.div`
     p {

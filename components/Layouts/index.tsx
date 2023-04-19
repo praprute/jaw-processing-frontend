@@ -1,7 +1,7 @@
 import { DeploymentUnitOutlined, MenuOutlined, SearchOutlined } from '@ant-design/icons'
 import { Button, Divider, Layout, Menu, Drawer, Avatar, Input } from 'antd'
 import { MenuProps } from 'antd/lib/menu'
-import { ReactNode, useEffect, useState } from 'react'
+import { Fragment, ReactNode, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
@@ -9,6 +9,7 @@ import Cookies from 'js-cookie'
 import { IUserInfo } from '../../share-module/auth/type'
 import { useNavigation } from '../../utils/use-navigation'
 import { userInfoTask } from '../../share-module/auth/task'
+import LeftMenu from './LeftMenu'
 
 interface ILayout {
     children: ReactNode
@@ -30,10 +31,11 @@ const AppLayout = (props: ILayout) => {
 
     const menuItems = [
         { key: '/', name: 'Process Menagement' },
-        { key: '/fish-bill', name: 'Fish Weighing Sheet' },
-        { key: '/b', name: 'Stock' },
-        { key: '/c', name: 'Accounting Doc' },
-        { key: '/d', name: 'Setting' },
+        { key: '/fish-bill', name: 'Fish Weighting Sheet' },
+        { key: '/salt-bill', name: 'Salt Bill' },
+        { key: '/fishsauce-bill', name: 'Fishsauce Bill' },
+        // { key: '/c', name: 'Accounting Doc' },
+        // { key: '/d', name: 'Setting' },
     ]
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
     const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
@@ -166,7 +168,7 @@ const AppLayout = (props: ILayout) => {
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
                 />
-                <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
+                {/* <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
                 <StyledMenu
                     defaultSelectedKeys={[defaultKey]}
                     items={itemsMenu_ACCOUNT}
@@ -209,7 +211,7 @@ const AppLayout = (props: ILayout) => {
                     }}
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
-                />
+                /> */}
             </>
         )
     }
@@ -248,6 +250,8 @@ const AppLayout = (props: ILayout) => {
                 }
                 visible={visible}
             >
+                {/* <LeftMenu menus={LeftMenuItems} /> */}
+
                 <MenuPath />
             </WrapperDrawer>
 
@@ -257,8 +261,9 @@ const AppLayout = (props: ILayout) => {
                         breakpoint='lg'
                         collapsedWidth='0'
                         style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }}
-                        width={260}
+                        width={320}
                     >
+                        {/* <LeftMenu menus={LeftMenuItems} /> */}
                         <MenuPath />
                         <br />
                         <StyledLogOut onClick={handleSignOut} size='large'>
@@ -283,6 +288,25 @@ const AppLayout = (props: ILayout) => {
 }
 
 export default AppLayout
+
+// TODO:
+// const MenuWrapper = styled.div<{ $active: boolean }>`
+//     height: 48px;
+//     margin: 8px auto;
+//     display: flex;
+//     align-items: center;
+//     border-left: 4px solid white;
+//     cursor: pointer;
+//     ${({ $active }) =>
+//         $active &&
+//         css`
+//             border-left: 4px solid #47d344;
+//             background: #e7f7ef;
+//             margin: 8px -18px;
+//             padding: 18px;
+//         `}
+// `
+
 const StyledSearch = styled(Input)`
     width: 400px;
 `

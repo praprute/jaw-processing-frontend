@@ -23,6 +23,18 @@ export const useNavigation = () => {
             createOrder: async (uuid_puddle: string, puddle_id: string) => {
                 await history.push(`/order/create?puddle_address=${uuid_puddle}&id=${puddle_id}`)
             },
+            fishWeightReceive: async () => {
+                await history.push(`fish-bill`)
+            },
+            createFishWeightReceive: async () => {
+                await history.push(`fish-bill/create`)
+            },
+            SaltBillReceive: async () => {
+                await history.push(`salt-bill`)
+            },
+            createSaltBillReceive: async () => {
+                await history.push(`salt-bill/create`)
+            },
         },
     }
 }

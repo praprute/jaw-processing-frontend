@@ -1,10 +1,10 @@
 import { Col, Input, Row, Form, Button } from 'antd'
 import styled from 'styled-components'
 
-const FillterBox = () => {
+const FillterSaltBox = () => {
     return (
         <BoxFillter>
-            <HeaderFillterBox>เรียกดูใบชั่งปลา</HeaderFillterBox>
+            <HeaderFillterBox>เรียกดูบิลเกลือ</HeaderFillterBox>
             <ContentFillter>
                 <Row gutter={[16, 8]}>
                     <Col md={12} sm={24} xs={24}>
@@ -20,11 +20,6 @@ const FillterBox = () => {
                     </Col>
 
                     <Col md={12} sm={24} xs={24}>
-                        <StyledFormItems label='ทะเบียนรถ' name='vehicle_register'>
-                            <Input placeholder='ทะเบียนรถ' size='large' style={{ color: 'black' }} />
-                        </StyledFormItems>
-                    </Col>
-                    <Col md={12} sm={24} xs={24}>
                         <StyledFormItems label='ชื่อลูกค้า' name='customer_name'>
                             <Input placeholder='ชื่อลูกค้า' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
@@ -34,11 +29,7 @@ const FillterBox = () => {
                             <Input placeholder='ชื่อสินค้า' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
                     </Col>
-                    <Col md={12} sm={24} xs={24}>
-                        <StyledFormItems label='สถานที่จัดเก็บ' name='store_name'>
-                            <Input placeholder='สถานที่จัดเก็บ' size='large' style={{ color: 'black' }} />
-                        </StyledFormItems>
-                    </Col>
+
                     <Col md={24} sm={24} xs={24}>
                         <StyledFormItems label='stock คงเหลือ' name='stock'>
                             <Input placeholder='stock คงเหลือ' size='large' style={{ color: 'black' }} />
@@ -55,7 +46,7 @@ const FillterBox = () => {
     )
 }
 
-export default FillterBox
+export default FillterSaltBox
 
 const StyldeButtonSubmit = styled(Button)`
     width: 100%;

@@ -22,4 +22,6 @@ export enum TypeProcess {
     GET_FISH_RESIDUE = 4,
     // ถ่ายกากทิ้ง
     CLEARING_ALL = 5,
+    // เติมน้ำเหลือ
+    ADD_ON_WATER_SALT = 6,
 }

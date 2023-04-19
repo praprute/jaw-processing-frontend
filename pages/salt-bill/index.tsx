@@ -1,25 +1,27 @@
-import { Button, Divider, Form, Table } from 'antd'
 import { ReactElement, useEffect, useState } from 'react'
+import { Button, Divider, Form, Table } from 'antd'
 import styled from 'styled-components'
+
 import AppLayout from '../../components/Layouts'
-import FillterBox from '../../components/ReceiveFishWeightBill/FillterBox'
-import { fillterReceiveWeightFishTask, getReceiveFishWeightPaginationTask } from '../../share-module/FishWeightBill/task'
+import { useNavigation } from '../../utils/use-navigation'
 import { NextPageWithLayout } from '../_app'
 import { ColumnsType } from 'antd/lib/table'
+
 import moment from 'moment'
 import { numberWithCommas } from '../../utils/format-number'
-import { useNavigation } from '../../utils/use-navigation'
+import { fillterReceiveSaltTask, getReceiveSaltPaginationTask } from '../../share-module/FishWeightBill/task'
 import { NoticeError } from '../../utils/noticeStatus'
+import FillterSaltBox from '../../components/SaltBill/FillterSaltBox'
 
-const FishWeightReceivePage: NextPageWithLayout = () => {
+const SaltReceivePage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const navigation = useNavigation()
-
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
     const [totalList, setTotalList] = useState(0)
-    const getReceiveFishWeight = getReceiveFishWeightPaginationTask.useTask()
-    const fillterReceiveWeight = fillterReceiveWeightFishTask.useTask()
+
+    const getReceiveSaltPagination = getReceiveSaltPaginationTask.useTask()
+    const fillterReceiveSalt = fillterReceiveSaltTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -49,19 +51,14 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
         },
         {
             title: 'จำนวนเงินรวม',
-            dataIndex: 'amount_price',
-            key: 'amount_price',
-            render: (amount_price: number) => <span>{numberWithCommas(amount_price)}</span>,
-        },
-        {
-            title: 'ทะเบียนรถ',
-            dataIndex: 'vehicle_register',
-            key: 'vehicle_register',
+            dataIndex: 'price_net',
+            key: 'price_net',
+            render: (price_net: number) => <span>{numberWithCommas(price_net)}</span>,
         },
         {
             title: 'ชื่อลูกค้า',
-            dataIndex: 'customer_name',
-            key: 'customer_name',
+            dataIndex: 'customer',
+            key: 'customer',
         },
         {
             title: 'ชื่อสินค้า',
@@ -84,19 +81,9 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
 
     const handleGetListReceive = async () => {
         try {
-            const res = await getReceiveFishWeight.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
+            const res = await getReceiveSaltPagination.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
             setSourceData(res.data)
             setTotalList(res.total)
-        } catch (e: any) {
-            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
-        }
-    }
-
-    const handleSubmit = async (values: any) => {
-        try {
-            const res = await fillterReceiveWeight.onRequest(values)
-            setSourceData(res)
-            setTotalList(10)
         } catch (e: any) {
             NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
         }
@@ -106,6 +93,16 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
         setCurrentPage(pagination.current)
     }
 
+    const handleSubmit = async (values: any) => {
+        try {
+            const res = await fillterReceiveSalt.onRequest(values)
+            setSourceData(res)
+            setTotalList(10)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+
     return (
         <>
             <StyledNavMenu>
@@ -113,16 +110,16 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
                     <Button
                         type='primary'
                         onClick={() => {
-                            navigation.navigateTo.createFishWeightReceive()
+                            navigation.navigateTo.createSaltBillReceive()
                         }}
                     >
-                        ลงทะเบียนใบชั่ง
+                        ลงทะเบียนบิลเกลือ
                     </Button>
                 </div>
             </StyledNavMenu>
             <SectionFillter>
                 <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
-                    <FillterBox />
+                    <FillterSaltBox />
                 </StyledForm>
             </SectionFillter>
 
@@ -134,11 +131,11 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
 
             <SectionTable>
                 <Container>
-                    <h3>รายการใบชั่งปลา</h3>
+                    <h3>รายการบิลเกลือ</h3>
                     <StyledTable
                         columns={columns}
                         dataSource={sourceData}
-                        loading={getReceiveFishWeight.loading || fillterReceiveWeight.loading}
+                        loading={getReceiveSaltPagination.loading || fillterReceiveSalt.loading}
                         onChange={handleChangePagination}
                         pagination={{
                             total: totalList,
@@ -152,7 +149,7 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
     )
 }
 
-FishWeightReceivePage.getLayout = function getLayout(page: ReactElement) {
+SaltReceivePage.getLayout = function getLayout(page: ReactElement) {
     return (
         <AppLayout>
             <>{page}</>
@@ -160,7 +157,20 @@ FishWeightReceivePage.getLayout = function getLayout(page: ReactElement) {
     )
 }
 
-export default FishWeightReceivePage
+export default SaltReceivePage
+
+const StyledForm = styled(Form)`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+`
+
+const SectionFillter = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+`
 
 const StyledNavMenu = styled.div`
     width: 100%;
@@ -180,23 +190,6 @@ const StyledNavMenu = styled.div`
         padding: 0px 32px;
     }
 `
-const StyledTable = styled(Table)`
-    width: 100%;
-    .ant-table-thead .ant-table-cell {
-        font-weight: 400;
-    }
-`
-
-const StyledForm = styled(Form)`
-    width: 100%;
-    display: flex;
-    justify-content: center;
-`
-
-const Container = styled.div`
-    width: 100%;
-    max-width: 1280px;
-`
 
 const SectionTable = styled.div`
     width: 100%;
@@ -204,9 +197,13 @@ const SectionTable = styled.div`
     justify-content: center;
     overflow-x: scroll;
 `
-const SectionFillter = styled.div`
+const Container = styled.div`
     width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 24px;
+    max-width: 1280px;
+`
+const StyledTable = styled(Table)`
+    width: 100%;
+    .ant-table-thead .ant-table-cell {
+        font-weight: 400;
+    }
 `

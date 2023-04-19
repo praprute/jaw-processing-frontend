@@ -31,7 +31,6 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
         typeProcess,
         throwOutProcess = false,
     } = props
-    console.log('throwOutProcess: ', throwOutProcess)
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>

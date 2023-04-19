@@ -210,3 +210,36 @@ export const submitCloseProcessTask = createReduxAsyncTask({
             }
         },
 })
+
+export const submitAddOnSaltWaterTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'submitAddOnSaltWater',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        order_id: number
+        type_process: number
+        amount_items: number
+        amount_unit_per_price: number
+        amount_price: number
+        remaining_items: number
+        remaining_unit_per_price: number
+        remaining_price: number
+        volume: number
+        remaining_volume: number
+        process?: number
+        new_stock: number
+        idreceipt: number
+        id_puddle: number
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/addOnSaltWaterTask`, action.payload, config)
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
