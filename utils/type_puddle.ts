@@ -8,6 +8,8 @@ export enum TypeOrderPuddle {
     FILTER = 5,
     BREAK = 6,
     STOCK = 7,
+    REPELLENT = 8,
+    HITMARK = 9,
 }
 
 export enum TypeProcess {
@@ -25,4 +27,10 @@ export enum TypeProcess {
     CLEARINGALL = 5,
     // เติมน้ำเหลือ
     ADDONWATERSALT = 6,
+    // เติมน้ำปลา
+    ADDONFISHSAUCE = 7,
+    // ปล่อยน้ำเกลือ
+    TRANSFERSALTWATER = 8,
+    // ปล่อยน้ำเกลือ
+    IMPORTSALTWATER = 9,
 }

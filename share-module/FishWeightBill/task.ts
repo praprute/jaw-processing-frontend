@@ -146,7 +146,8 @@ export const getReceiveWeightFishByOrderIdTask = createReduxAsyncTask({
         },
 })
 
-// Salt
+// -------------------- Salt --------------------
+
 export const getReceiveSaltPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'getReceiveSaltPagination',
@@ -239,6 +240,115 @@ export const getLogReceiveSaltByOrdersIdTask = createReduxAsyncTask({
                 const config = yield configAPI()
                 const { data } = yield axios.get(
                     `${process.env.NEXT_PUBLIC_HOST}/getLogReceiveSaltByOrdersIdTask/${order_id}`,
+                    config,
+                )
+                const res: ILogSaltBillDto[] = data
+                yield put(actions.success(res))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+// -------------------- Fish Sauce --------------------
+
+export const getReceiveFishSaucePaginationTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveFishSaucePagination',
+    defaultData: {} as any,
+    defaultPayload: {} as { page: number; offset: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFiashSauceBillPaginationTask/${page}/${offset}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const fillterReceiveFishSauceTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'fillterReceiveFishSauce',
+    defaultData: {} as IDtoFishWeight[],
+    defaultPayload: {} as {
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/fillterReceiveFiashSauceTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const createReceiveFishSauceTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createReceiveFishSauce',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        no: string
+        weigh_net: number
+        price_per_weigh: number
+        price_net: number
+        customer: string
+        product_name: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/createFiashSauceBillTask`,
+                    action.payload,
+                    config,
+                )
+
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const getLogReceiveFishSauceByOrdersIdTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getLogReceiveFishSauceByOrdersId',
+    defaultData: {} as ILogSaltBillDto[],
+    defaultPayload: {} as {
+        order_id: number
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { order_id } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getLogReceiveFiashSauceByOrdersIdTask/${order_id}`,
                     config,
                 )
                 const res: ILogSaltBillDto[] = data

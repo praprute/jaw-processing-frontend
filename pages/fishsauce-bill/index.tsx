@@ -8,19 +8,19 @@ import AppLayout from '../../components/Layouts'
 import { useNavigation } from '../../utils/use-navigation'
 import { NextPageWithLayout } from '../_app'
 import { numberWithCommas } from '../../utils/format-number'
-import { fillterReceiveSaltTask, getReceiveSaltPaginationTask } from '../../share-module/FishWeightBill/task'
+import { fillterReceiveFishSauceTask, getReceiveFishSaucePaginationTask } from '../../share-module/FishWeightBill/task'
 import { NoticeError } from '../../utils/noticeStatus'
-import FillterSaltBox from '../../components/SaltBill/FillterSaltBox'
+import FillterFishSauceBox from '../../components/FishSauceOutSide/FillterFishSauceBox'
 
-const SaltReceivePage: NextPageWithLayout = () => {
+const FishSauceReceivePage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const navigation = useNavigation()
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
     const [totalList, setTotalList] = useState(0)
 
-    const getReceiveSaltPagination = getReceiveSaltPaginationTask.useTask()
-    const fillterReceiveSalt = fillterReceiveSaltTask.useTask()
+    const getReceiveFishSaucePagination = getReceiveFishSaucePaginationTask.useTask()
+    const fillterReceiveFishSauce = fillterReceiveFishSauceTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -44,7 +44,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
             render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
         },
         {
-            title: 'ราคา / ลิตร',
+            title: 'ราคา / กก.',
             dataIndex: 'price_per_weigh',
             key: 'price_per_weigh',
         },
@@ -80,7 +80,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
 
     const handleGetListReceive = async () => {
         try {
-            const res = await getReceiveSaltPagination.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
+            const res = await getReceiveFishSaucePagination.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
             setSourceData(res.data)
             setTotalList(res.total)
         } catch (e: any) {
@@ -94,7 +94,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
 
     const handleSubmit = async (values: any) => {
         try {
-            const res = await fillterReceiveSalt.onRequest(values)
+            const res = await fillterReceiveFishSauce.onRequest(values)
             setSourceData(res)
             setTotalList(10)
         } catch (e: any) {
@@ -108,17 +108,17 @@ const SaltReceivePage: NextPageWithLayout = () => {
                 <div className='container'>
                     <Button
                         onClick={() => {
-                            navigation.navigateTo.createSaltBillReceive()
+                            navigation.navigateTo.createFishSauceBillReceive()
                         }}
                         type='primary'
                     >
-                        ลงทะเบียนบิลเกลือ
+                        ลงทะเบียนบิลน้ำปลา
                     </Button>
                 </div>
             </StyledNavMenu>
             <SectionFillter>
                 <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
-                    <FillterSaltBox />
+                    <FillterFishSauceBox />
                 </StyledForm>
             </SectionFillter>
 
@@ -130,11 +130,11 @@ const SaltReceivePage: NextPageWithLayout = () => {
 
             <SectionTable>
                 <Container>
-                    <h3>รายการบิลเกลือ</h3>
+                    <h3>รายการบิลน้ำปลา</h3>
                     <StyledTable
                         columns={columns}
                         dataSource={sourceData}
-                        loading={getReceiveSaltPagination.loading || fillterReceiveSalt.loading}
+                        loading={getReceiveFishSaucePagination.loading || fillterReceiveFishSauce.loading}
                         onChange={handleChangePagination}
                         pagination={{
                             total: totalList,
@@ -148,7 +148,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
     )
 }
 
-SaltReceivePage.getLayout = function getLayout(page: ReactElement) {
+FishSauceReceivePage.getLayout = function getLayout(page: ReactElement) {
     return (
         <AppLayout>
             <>{page}</>
@@ -156,7 +156,7 @@ SaltReceivePage.getLayout = function getLayout(page: ReactElement) {
     )
 }
 
-export default SaltReceivePage
+export default FishSauceReceivePage
 
 const StyledForm = styled(Form)`
     width: 100%;

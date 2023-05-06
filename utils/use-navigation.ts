@@ -20,8 +20,8 @@ export const useNavigation = () => {
             detailPuddle: async (building_id: string, puddle_id: string) => {
                 await history.push(`/puddle/detail/${building_id}/${puddle_id}`)
             },
-            createOrder: async (uuid_puddle: string, puddle_id: string) => {
-                await history.push(`/order/create?puddle_address=${uuid_puddle}&id=${puddle_id}`)
+            createOrder: async (uuid_puddle: string, puddle_id: string, building?: string) => {
+                await history.push(`/order/create?puddle_address=${uuid_puddle}&id=${puddle_id}&building=${building}`)
             },
             fishWeightReceive: async () => {
                 await history.push(`fish-bill`)
@@ -34,6 +34,15 @@ export const useNavigation = () => {
             },
             createSaltBillReceive: async () => {
                 await history.push(`salt-bill/create`)
+            },
+            fishSauceBillReceive: async () => {
+                await history.push(`fishsauce-bill`)
+            },
+            createFishSauceBillReceive: async () => {
+                await history.push(`fishsauce-bill/create`)
+            },
+            processManagementSetting: async () => {
+                await history.push('process-management-setting')
             },
         },
     }

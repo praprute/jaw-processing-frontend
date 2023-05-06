@@ -6,7 +6,7 @@ import styled from 'styled-components'
 //     rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
 // }
 
-const CreateSaltBillBox = () => {
+const CreateFishSauceBillBox = () => {
     return (
         <BoxFillter>
             <HeaderFillterBox>ลงทะเบียนบิลเกลือ</HeaderFillterBox>
@@ -33,7 +33,7 @@ const CreateSaltBillBox = () => {
                     </Col>
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems
-                            label='ราคา / ลิตร'
+                            label='ราคา / กก.'
                             name='price_per_weigh'
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
@@ -80,7 +80,7 @@ const CreateSaltBillBox = () => {
     )
 }
 
-export default CreateSaltBillBox
+export default CreateFishSauceBillBox
 
 const StyldeButtonSubmit = styled(Button)`
     width: 100%;

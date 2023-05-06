@@ -50,6 +50,7 @@ export interface INoticeTargetPendingDto {
     remaining_volume: number
     source_puddle?: number
     source_serial_puddle?: number
+    item_transfer?: number
 }
 
 export interface IPayloadTransferFishSauce {
@@ -68,6 +69,24 @@ export interface IPayloadTransferFishSauce {
     action_puddle: number
     serial_puddle: number
     process?: number
+}
+export interface IPayloadTransferSaltWater {
+    order_id: number
+    type_process: number
+    amount_items: number
+    amount_unit_per_price: number
+    amount_price: number
+    remaining_items: number
+    remaining_unit_per_price: number
+    remaining_price: number
+    approved: number
+    volume: number
+    id_puddle: number
+    remaining_volume: number
+    action_puddle: number
+    serial_puddle: number
+    process?: number
+    item_transfer?: number
 }
 
 export interface IOrderDto {

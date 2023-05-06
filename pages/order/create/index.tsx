@@ -1,15 +1,20 @@
 import { LeftOutlined } from '@ant-design/icons'
-import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber } from 'antd'
+import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox } from 'antd'
 import { useRouter } from 'next/router'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
+import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 
 import AppLayout from '../../../components/Layouts'
 import ModalLoading from '../../../components/Modal/ModalLoading'
 import { getReceiveFishWeightPaginationTask, insertLogBillOpenOrderTask } from '../../../share-module/FishWeightBill/task'
-import { createOrderTask } from '../../../share-module/order/task'
+import {
+    createOrderTask,
+    getAllFeeLaborFermentTask,
+    getFeeLaborPerBuildingByBuildingTask,
+} from '../../../share-module/order/task'
 import { NoticeError, NoticeSuccess } from '../../../utils/noticeStatus'
 import { parseFloat2Decimals } from '../../../utils/parseFloat'
 import { TypeOrderPuddle } from '../../../utils/type_puddle'
@@ -47,7 +52,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const [formAddOn] = Form.useForm()
 
-    const { puddle_address, id } = router.query
+    const { puddle_address, id, building } = router.query
     const [statusPuddleOrder, setStatusPuddleOrder] = useState(1)
     const [valuePrice, setValuePrice] = useState({
         fish: 0,
@@ -59,6 +64,12 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
     const [preDataAddFish, setPreDataAddFish] = useState<IFishWeightBill>(null)
     const [dataAddFish, setDataAddFish] = useState<IDataLogStock[]>([])
+    const [costLaborPerBuilding, setCostLaborPerBuilding] = useState(0)
+    const [costLaborFerment, setCostLaborFerment] = useState(0)
+
+    const [checkedCostLaborBuilding, setCheckedLaborBuilding] = useState(false)
+    const [checkedCostLaborFerment, setCheckedCostLaborFerment] = useState(false)
+    const [checkedCostLaborFree, setCheckedCostLaborFree] = useState(false)
 
     const createOrder = createOrderTask.useTask()
 
@@ -68,6 +79,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const getReceiveFishWeight = getReceiveFishWeightPaginationTask.useTask()
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const insertLogBillOpenOrder = insertLogBillOpenOrderTask.useTask()
+    const getFeeLaborPerBuildingByBuilding = getFeeLaborPerBuildingByBuildingTask.useTask()
+    const getAllFeeLaborFerment = getAllFeeLaborFermentTask.useTask()
 
     const OFFSET_PAGE = 10
     const MAX_ITEMS_PERCENTAGE = 100
@@ -165,6 +178,14 @@ const CreateOrderPage: NextPageWithLayout = () => {
             value: TypeOrderPuddle.STOCK,
             label: 'บ่อพัก',
         },
+        {
+            value: TypeOrderPuddle.REPELLENT,
+            label: 'บ่อไล่น้ำสอง',
+        },
+        {
+            value: TypeOrderPuddle.HITMARK,
+            label: 'บ่อตีกาก',
+        },
     ]
 
     const summaryPricePerUnit = useMemo(() => {
@@ -175,7 +196,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     }, [valuePrice])
 
     useEffect(() => {
-        form.setFieldsValue({ status_puddle_order: statusPuddleOrder })
+        form.setFieldsValue({ status_puddle_order: statusPuddleOrder, laber_price: 0, laber: 1, fish: 0 })
     }, [])
 
     useEffect(() => {
@@ -192,7 +213,9 @@ const CreateOrderPage: NextPageWithLayout = () => {
             statusPuddleOrder === TypeOrderPuddle.FILTER ||
             statusPuddleOrder === TypeOrderPuddle.BREAK ||
             statusPuddleOrder === TypeOrderPuddle.MIXING ||
-            statusPuddleOrder === TypeOrderPuddle.STOCK
+            statusPuddleOrder === TypeOrderPuddle.STOCK ||
+            statusPuddleOrder === TypeOrderPuddle.REPELLENT ||
+            statusPuddleOrder === TypeOrderPuddle.HITMARK
         ) {
             form.setFieldsValue({
                 fish: 0,
@@ -216,6 +239,17 @@ const CreateOrderPage: NextPageWithLayout = () => {
             await handleGetListReceive()
         })()
     }, [currentPage])
+
+    useEffect(() => {
+        if (building) {
+            ;(async () => {
+                const res = await getFeeLaborPerBuildingByBuilding.onRequest({ id_building: Number(building) })
+                const costFerment = await getAllFeeLaborFerment.onRequest()
+                setCostLaborPerBuilding(res.price)
+                setCostLaborFerment(costFerment.price)
+            })()
+        }
+    }, [building])
 
     const handleGetListReceive = async () => {
         try {
@@ -329,6 +363,44 @@ const CreateOrderPage: NextPageWithLayout = () => {
         setDataAddFish((prev) => [...prev, ...payload])
         setVisibleModalAddOn(false)
     }
+    const onChangeCostLaborPerBuilding = (e: CheckboxChangeEvent) => {
+        if (e.target.checked === true) {
+            form.setFieldsValue({
+                laber_price: form.getFieldValue('laber_price') + costLaborPerBuilding,
+            })
+            setCheckedCostLaborFree(false)
+        } else {
+            form.setFieldsValue({
+                laber_price: form.getFieldValue('laber_price') - costLaborPerBuilding,
+            })
+        }
+
+        setCheckedLaborBuilding(e.target.checked)
+    }
+    const onChangeCostLaborFerment = (e: CheckboxChangeEvent) => {
+        if (e.target.checked === true) {
+            form.setFieldsValue({
+                laber_price: form.getFieldValue('laber_price') + costLaborFerment * form.getFieldValue('fish'),
+            })
+            setCheckedCostLaborFree(false)
+        } else {
+            form.setFieldsValue({
+                laber_price: form.getFieldValue('laber_price') - costLaborFerment * form.getFieldValue('fish'),
+            })
+        }
+        setCheckedCostLaborFerment(e.target.checked)
+    }
+
+    const onChangeCostLaborFree = (e: CheckboxChangeEvent) => {
+        if (e.target.checked === true) {
+            form.setFieldsValue({
+                laber_price: 0,
+            })
+            setCheckedLaborBuilding(false)
+            setCheckedCostLaborFerment(false)
+        }
+        setCheckedCostLaborFree(e.target.checked)
+    }
 
     return (
         <MainLayout>
@@ -419,7 +491,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                     name='laber'
                                     rules={[{ required: true, message: 'กรุณาเลือกประเภทบ่อ' }]}
                                 >
-                                    <Input placeholder='คนงาน' size='large' style={{ color: 'black' }} />
+                                    <Input disabled placeholder='คนงาน' size='large' style={{ color: 'black' }} />
                                 </StyledFormItems>
                             </Col>
                             <Col md={12} span={12} xs={24}>
@@ -438,6 +510,30 @@ const CreateOrderPage: NextPageWithLayout = () => {
                             </Col>
                         </Row>
                         <Row gutter={16}>
+                            <Col md={8} span={8} xs={24}>
+                                <StyledFormItems>
+                                    <Checkbox checked={checkedCostLaborBuilding} onChange={onChangeCostLaborPerBuilding}>
+                                        ค่าเเรงคนงานต่ออาคาร {costLaborPerBuilding} บาท
+                                    </Checkbox>
+                                </StyledFormItems>
+                            </Col>
+                            <Col md={8} span={8} xs={24}>
+                                <StyledFormItems>
+                                    <Checkbox checked={checkedCostLaborFerment} onChange={onChangeCostLaborFerment}>
+                                        ค่าเเรงลงปลา {costLaborFerment} บาท ต่อ ปลา 1 กิโล
+                                    </Checkbox>
+                                </StyledFormItems>
+                            </Col>
+                            <Col md={8} span={8} xs={24}>
+                                <StyledFormItems>
+                                    <Checkbox checked={checkedCostLaborFree} onChange={onChangeCostLaborFree}>
+                                        ไม่มีค่าเเรง
+                                    </Checkbox>
+                                </StyledFormItems>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
                             <Col span={12} xs={24}>
                                 {statusPuddleOrder === TypeOrderPuddle.FERMENT && (
                                     <StyledFormItems
@@ -452,6 +548,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                     statusPuddleOrder === TypeOrderPuddle.FILTER ||
                                     statusPuddleOrder === TypeOrderPuddle.BREAK ||
                                     statusPuddleOrder === TypeOrderPuddle.MIXING ||
+                                    statusPuddleOrder === TypeOrderPuddle.REPELLENT ||
+                                    statusPuddleOrder === TypeOrderPuddle.HITMARK ||
                                     statusPuddleOrder === TypeOrderPuddle.STOCK) && (
                                     <StyledFormItems
                                         label='ความจุของบ่อนี้'

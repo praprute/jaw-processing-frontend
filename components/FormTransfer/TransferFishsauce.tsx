@@ -12,7 +12,7 @@ interface ITransferFishsauce {
     puddleOption?: IAllPuddleDto[]
     lastedOrder?: IOrderDetailDto
     onChangeAmountItems?: (e: React.ChangeEvent<HTMLInputElement>) => void
-    amountItemsL?: number
+    amountItemsKG?: number
     buildingOption?: IAllBuildingAndPuddleDto[]
     onChangeBuilding?: (value: number) => void
     onSelectAction?: (labelValue: LabeledValue) => void
@@ -21,7 +21,7 @@ interface ITransferFishsauce {
 }
 
 const TransferFishsauce = (props: ITransferFishsauce) => {
-    const { puddleOption, onChangeAmountItems, amountItemsL, buildingOption, onChangeBuilding, onSelectAction, typeProcess } =
+    const { puddleOption, onChangeAmountItems, amountItemsKG, buildingOption, onChangeBuilding, onSelectAction, typeProcess } =
         props
     return (
         <>
@@ -60,7 +60,7 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                 <Input disabled placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
             </StyledFormItems> */}
             <StyledFormItems
-                extra={`~ ${amountItemsL} L.`}
+                extra={`~ ${amountItemsKG} kg.`}
                 label='จำนวนที่ปล่อยออก'
                 name='volume'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}

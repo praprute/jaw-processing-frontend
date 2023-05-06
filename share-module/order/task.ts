@@ -9,6 +9,7 @@ import {
     IOrderDetailDto,
     IOrderDto,
     IPayloadTransferFishSauce,
+    IPayloadTransferSaltWater,
     ISubmitGetIn,
     MODULE_NAME,
 } from './type'
@@ -75,6 +76,31 @@ export const getOrdersDetailFromIdTask = createReduxAsyncTask({
                 const config = yield configAPI()
                 const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getOrderDetails/${order_id}`, config)
                 yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const submitTransferSaltWaterTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'submitTransferSaltWater',
+    defaultData: {} as string,
+    defaultPayload: {} as IPayloadTransferSaltWater,
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/exportSaltWaterToNewPuddleTask/`,
+                    action.payload,
+                    config,
+                )
+                if (data.success === 'success') {
+                    yield put(actions.success(data.success))
+                } else {
+                    yield put(actions.failure(data))
+                }
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))
             }
@@ -238,6 +264,149 @@ export const submitAddOnSaltWaterTask = createReduxAsyncTask({
                 const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/addOnSaltWaterTask`, action.payload, config)
                 const res: { success: string; message: any } = data
                 yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+export const submitAddOnFishSauceTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'submitAddOnFishSauce',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        order_id: number
+        type_process: number
+        amount_items: number
+        amount_unit_per_price: number
+        amount_price: number
+        remaining_items: number
+        remaining_unit_per_price: number
+        remaining_price: number
+        volume: number
+        remaining_volume: number
+        process?: number
+        new_stock: number
+        idreceipt: number
+        id_puddle: number
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/addOnFishSauceWaterTask`,
+                    action.payload,
+                    config,
+                )
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+// getAllFeeLaborPerBuildingByBuilding
+export const getFeeLaborPerBuildingByBuildingTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getFeeLaborPerBuildingByBuilding',
+    defaultData: {} as {
+        idlabor_price_per_building: number
+        building: number
+        price: number
+        date_create: string
+    },
+    defaultPayload: {} as { id_building: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { id_building } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getFeeLaborPerBuildingByBuilding/${id_building}`,
+                    config,
+                )
+                yield put(actions.success(data.message[0]))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const getAllFeeLaborFermentTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getAllFeeLaborFerment',
+    defaultData: {} as {
+        idlabor_price_ferment: number
+        price: number
+        date_create: string
+    },
+    saga: ({ actions }) =>
+        function* () {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getAllFeeLaborFerment`, config)
+                yield put(actions.success(data.message[0]))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+export const updateFeeLaborFermentTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateFeeLaborFerment',
+    defaultData: {} as any,
+    defaultPayload: {} as { id_price: number; price: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(`${process.env.NEXT_PUBLIC_HOST}/updateFeeLaborFerment`, action.payload, config)
+                yield put(actions.success(data.message[0]))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const getAllFeeLaborPerBuildingTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getAllFeeLaborPerBuilding',
+    defaultData: {} as {
+        idlabor_price_per_building: number
+        building: number
+        price: number
+        date_create: string
+        idbuilding: number
+        name: string
+    }[],
+    saga: ({ actions }) =>
+        function* () {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getAllFeeLaborPerBuilding`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const updateFeeLaborPerBuildingTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateFeeLaborPerBuilding',
+    defaultData: {} as any,
+    defaultPayload: {} as { id_price: number; price: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(
+                    `${process.env.NEXT_PUBLIC_HOST}/updateFeeLaborPerBuilding`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message[0]))
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))
             }

@@ -29,10 +29,11 @@ const AppLayout = (props: ILayout) => {
     const placement = 'left'
 
     const menuItems = [
-        { key: '/', name: 'Process Menagement' },
-        { key: '/fish-bill', name: 'Fish Weighting Sheet' },
-        { key: '/salt-bill', name: 'Salt Bill' },
-        { key: '/fishsauce-bill', name: 'Fishsauce Bill' },
+        { key: '/', name: 'ระบบจัดการ การเดินน้ำปลา' },
+        { key: '/fish-bill', name: 'ระบบบิลปลา' },
+        { key: '/salt-bill', name: 'ระบบบิลเกลือ และ น้ำเกลือ' },
+        { key: '/fishsauce-bill', name: 'ระบบบิลน้ำปลา' },
+        { key: '/process-management-setting', name: 'ตั้งค่า' },
         // { key: '/c', name: 'Accounting Doc' },
         // { key: '/d', name: 'Setting' },
     ]
@@ -260,7 +261,7 @@ const AppLayout = (props: ILayout) => {
                         breakpoint='lg'
                         collapsedWidth='0'
                         style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }}
-                        width={320}
+                        width={245}
                     >
                         {/* <LeftMenu menus={LeftMenuItems} /> */}
                         <MenuPath />

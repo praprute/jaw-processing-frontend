@@ -32,6 +32,12 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'ถ่ายกากทิ้ง'
             case TypeProcess.ADDONWATERSALT:
                 return 'เติมน้ำเกลือ'
+            case TypeProcess.ADDONFISHSAUCE:
+                return 'เติมน้ำปลาพรพิมล'
+            case TypeProcess.TRANSFERSALTWATER:
+                return 'ปล่อยน้ำเกลือ'
+            case TypeProcess.IMPORTSALTWATER:
+                return 'เติมน้ำเกลือเข้าจากภายใน'
             default:
                 break
         }
@@ -97,7 +103,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.amount_price)}</td>
-                                        <td>{numberWithCommas(data.volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td></td>
                                         <td>
                                             {' '}
@@ -122,7 +131,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
                                         <td>{data.amount_unit_per_price}</td>
                                         <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_price)}</td>
-                                        <td>{data.volume}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
 
                                         <td></td>
@@ -134,7 +146,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {data?.process_name ? (
@@ -162,7 +177,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td> {numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td> {numberWithCommas(data.amount_price)}</td>
-                                        <td>{numberWithCommas(data.volume)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} KG |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>บ่อที่มา {data?.action_serial_puddle}</td>
                                         <td></td>
                                     </StyledRowTransaction>
@@ -173,7 +191,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {data?.process_name ? (
@@ -201,7 +222,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td> {numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td> {numberWithCommas(data.amount_price)}</td>
-                                        <td>{numberWithCommas(data.volume)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
                                         <td></td>
                                     </StyledRowTransaction>
@@ -212,7 +236,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
@@ -241,7 +268,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td> {numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td> {numberWithCommas(data.amount_price)}</td>
-                                        <td>{numberWithCommas(data.volume)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>บ่อที่มา {data?.action_serial_puddle}</td>
                                         <td></td>
                                     </StyledRowTransaction>
@@ -252,7 +282,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
@@ -281,7 +314,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>-{numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td>-{numberWithCommas(data.amount_price)}</td>
-                                        <td>-{numberWithCommas(data.volume)}</td>
+                                        <td>
+                                            -{numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td></td>
                                         <td></td>
                                     </StyledRowTransaction>
@@ -292,7 +328,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
@@ -321,7 +360,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td> {numberWithCommas(data.amount_items)}</td>
                                         <td>{numberWithCommas(data.amount_unit_per_price)}</td>
                                         <td> {numberWithCommas(data.amount_price)}</td>
-                                        <td>{numberWithCommas(data.volume)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td></td>
                                         <td></td>
                                     </StyledRowTransaction>
@@ -332,7 +374,147 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
                                         <td>{numberWithCommas(data.remaining_price)}</td>
-                                        <td>{numberWithCommas(data.remaining_volume)} kg.</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+                            {data.type === TypeProcess.ADDONFISHSAUCE && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{data.date_create}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td> {numberWithCommas(data.amount_items)}</td>
+                                        <td>{numberWithCommas(data.amount_unit_per_price)}</td>
+                                        <td> {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+                            {data.type === TypeProcess.TRANSFERSALTWATER && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{data.date_create}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
+                                        <td>{data.amount_unit_per_price}</td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
+
+                                        <td></td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+
+                            {data.type === TypeProcess.IMPORTSALTWATER && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{data.date_create}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td> {numberWithCommas(data.amount_items)}</td>
+                                        <td>{numberWithCommas(data.amount_unit_per_price)}</td>
+                                        <td> {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} KG |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>บ่อที่มา {data?.action_serial_puddle}</td>
+                                        <td></td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {data?.process_name ? (
@@ -368,13 +550,16 @@ const StyledRowTransaction = styled.tr<{ isStatus?: number }>`
     ${(p) => {
         switch (p.isStatus) {
             case TypeProcess.TRANSFER:
-            case TypeProcess.ADDONWATERSALT:
                 return `background:#DEFCBA;`
             case TypeProcess.IMPORT:
                 return `background:#FDD298;`
             case TypeProcess.CLEARING:
             case TypeProcess.GETFISHRESIDUE:
                 return `background:#D68B8B;`
+            case TypeProcess.ADDONFISHSAUCE:
+                return `background:#e5cee6;`
+            case TypeProcess.ADDONWATERSALT:
+                return `background:#dfc5be;`
         }
     }}
 `

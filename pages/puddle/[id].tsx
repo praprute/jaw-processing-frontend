@@ -96,6 +96,10 @@ const PuddlePage: NextPageWithLayout = () => {
                 return <span>บ่อพักใส</span>
             case TypeOrderPuddle.STOCK:
                 return <span>บ่อพัก</span>
+            case TypeOrderPuddle.REPELLENT:
+                return <span>บ่อไล่น้ำสอง</span>
+            case TypeOrderPuddle.HITMARK:
+                return <span>บ่อตีกาก</span>
             default:
                 break
         }
@@ -281,6 +285,10 @@ const StyledGlassBox = styled.div<{ isStatus: number }>`
                 return `background:#94B2D6;`
             case TypeOrderPuddle.BREAK:
                 return `background:#82AC64;`
+            case TypeOrderPuddle.REPELLENT:
+                return `background:#35acc6;`
+            case TypeOrderPuddle.HITMARK:
+                return `background:#c68e62;`
         }
     }}
     border-radius: 0px;
