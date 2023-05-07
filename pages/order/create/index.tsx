@@ -1,5 +1,5 @@
 import { LeftOutlined } from '@ant-design/icons'
-import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox } from 'antd'
+import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox, Tabs } from 'antd'
 import { useRouter } from 'next/router'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -9,7 +9,12 @@ import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 
 import AppLayout from '../../../components/Layouts'
 import ModalLoading from '../../../components/Modal/ModalLoading'
-import { getReceiveFishWeightPaginationTask, insertLogBillOpenOrderTask } from '../../../share-module/FishWeightBill/task'
+import {
+    getReceiveFishWeightPaginationTask,
+    getReceiveSolidSaltPaginationTask,
+    insertLogBillOpenOrderTask,
+    insertLogSolidSaltBillOpenOrderTask,
+} from '../../../share-module/FishWeightBill/task'
 import {
     createOrderTask,
     getAllFeeLaborFermentTask,
@@ -22,6 +27,7 @@ import { useNavigation } from '../../../utils/use-navigation'
 import { NextPageWithLayout } from '../../_app'
 import { numberWithCommas } from '../../../utils/format-number'
 import { getPuddleDetailByIdTask } from '../../../share-module/building/task'
+import { ISolidSaltBillDto } from '../../../share-module/FishWeightBill/type'
 
 const { Content } = Layout
 
@@ -51,6 +57,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const navigation = useNavigation()
     const [form] = Form.useForm()
     const [formAddOn] = Form.useForm()
+    const [formAddOnSolidSalt] = Form.useForm()
 
     const { puddle_address, id, building } = router.query
     const [statusPuddleOrder, setStatusPuddleOrder] = useState(1)
@@ -64,6 +71,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
     const [preDataAddFish, setPreDataAddFish] = useState<IFishWeightBill>(null)
     const [dataAddFish, setDataAddFish] = useState<IDataLogStock[]>([])
+
+    const [visibleModalAddOnSolidSalt, setVisibleModalAddOnSolidSalt] = useState(false)
+    const [preDataAddFishSolidSalt, setPreDataAddFishSolidSalt] = useState<ISolidSaltBillDto>(null)
+    const [dataAddSolidSalt, setDataAddSolidSalt] = useState<IDataLogStock[]>([])
+
     const [costLaborPerBuilding, setCostLaborPerBuilding] = useState(0)
     const [costLaborFerment, setCostLaborFerment] = useState(0)
 
@@ -76,11 +88,18 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
     const [totalList, setTotalList] = useState(0)
+
+    const [currentPageSolidSalt, setCurrentPageSolidSalt] = useState(1)
+    const [sourceDataSolidSalt, setSourceDataSolidSalt] = useState([])
+    const [totalListSolidSalt, setTotalListSolidSalt] = useState(0)
+
     const getReceiveFishWeight = getReceiveFishWeightPaginationTask.useTask()
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const insertLogBillOpenOrder = insertLogBillOpenOrderTask.useTask()
     const getFeeLaborPerBuildingByBuilding = getFeeLaborPerBuildingByBuildingTask.useTask()
     const getAllFeeLaborFerment = getAllFeeLaborFermentTask.useTask()
+    const getReceiveSolidSaltPagination = getReceiveSolidSaltPaginationTask.useTask()
+    const insertLogSolidSaltBillOpenOrder = insertLogSolidSaltBillOpenOrderTask.useTask()
 
     const OFFSET_PAGE = 10
     const MAX_ITEMS_PERCENTAGE = 100
@@ -153,6 +172,74 @@ const CreateOrderPage: NextPageWithLayout = () => {
         },
     ]
 
+    const columnsSolidSalt: ColumnsType<any> = [
+        {
+            title: 'ลำดับที่',
+            dataIndex: 'no',
+            key: 'no',
+        },
+        {
+            title: 'วันที่',
+            dataIndex: 'date_create',
+            key: 'date_create',
+            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+        },
+
+        {
+            title: 'น้ำหนักสุทธิ',
+            dataIndex: 'weigh_net',
+            key: 'weigh_net',
+            render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
+        },
+        {
+            title: 'ราคา / กก.',
+            dataIndex: 'price_per_weigh',
+            key: 'price_per_weigh',
+        },
+        {
+            title: 'จำนวนเงินรวม',
+            dataIndex: 'price_net',
+            key: 'price_net',
+            render: (price_net: number) => <span>{numberWithCommas(price_net)}</span>,
+        },
+        {
+            title: 'ชื่อลูกค้า',
+            dataIndex: 'customer',
+            key: 'customer',
+        },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'product_name',
+            key: 'product_name',
+        },
+        {
+            title: 'stock คงเหลือ',
+            dataIndex: 'stock',
+            key: 'stock',
+            render: (stock: number) => <span>{numberWithCommas(stock)}</span>,
+        },
+        {
+            title: '',
+            dataIndex: 'idsolid_salt_receipt',
+            key: 'idsolid_salt_receipt',
+            render: (_: any, data: ISolidSaltBillDto) => (
+                <Button
+                    onClick={() => {
+                        setVisibleModalAddOnSolidSalt(true)
+                        setPreDataAddFishSolidSalt(data)
+                        formAddOnSolidSalt.setFieldsValue({
+                            stock_old: numberWithCommas(data.stock),
+                            price_per_kg: data.price_per_weigh,
+                        })
+                    }}
+                    type='primary'
+                >
+                    เลือก
+                </Button>
+            ),
+        },
+    ]
+
     const TYPE_ORDER = [
         {
             value: TypeOrderPuddle.FERMENT,
@@ -193,7 +280,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
         return (
             (Number(valueForm.fish_price) + Number(valueForm.salt_price) + Number(valueForm.laber_price)) / Number(valueForm.fish)
         )
-    }, [valuePrice])
+    }, [valuePrice, form.getFieldValue('fish_price'), form.getFieldValue('salt_price'), form.getFieldValue('laber_price')])
 
     useEffect(() => {
         form.setFieldsValue({ status_puddle_order: statusPuddleOrder, laber_price: 0, laber: 1, fish: 0 })
@@ -237,8 +324,9 @@ const CreateOrderPage: NextPageWithLayout = () => {
     useEffect(() => {
         ;(async () => {
             await handleGetListReceive()
+            await handleGetListReceiveSolidSalt()
         })()
-    }, [currentPage])
+    }, [currentPage, currentPageSolidSalt])
 
     useEffect(() => {
         if (building) {
@@ -261,8 +349,22 @@ const CreateOrderPage: NextPageWithLayout = () => {
         }
     }
 
+    const handleGetListReceiveSolidSalt = async () => {
+        try {
+            const res = await getReceiveSolidSaltPagination.onRequest({ page: currentPageSolidSalt - 1, offset: OFFSET_PAGE })
+            setSourceDataSolidSalt(res.data)
+            setTotalListSolidSalt(res.total)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+
     const handleChangePagination = (pagination: any) => {
         setCurrentPage(pagination.current)
+    }
+
+    const handleChangePaginationSolidSalt = (pagination: any) => {
+        setCurrentPageSolidSalt(pagination.current)
     }
 
     const handleDescriptionSetField = (typePuddle: number) => {
@@ -305,6 +407,16 @@ const CreateOrderPage: NextPageWithLayout = () => {
                         id_puddle: Number(id),
                     })
                 }
+
+                for (const data of dataAddSolidSalt) {
+                    await insertLogSolidSaltBillOpenOrder.onRequest({
+                        new_stock: data.new_stock,
+                        idreceipt: data.idreceipt,
+                        order_target: detailPuddle?.lasted_order,
+                        id_puddle: Number(id),
+                    })
+                }
+
                 NoticeSuccess('ทำรายการสำเร็จ')
                 // const resUpdateLog = await Promise.all(
                 //     dataAddFish.map(async (data) => {
@@ -341,6 +453,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
             price_value: value * parseFloat2Decimals(formAddOn.getFieldValue('price_per_kg')),
         })
     }
+    const handleChangeNewStockSolidSaltValue = (value: number) => {
+        formAddOnSolidSalt.setFieldsValue({
+            price_value: value * parseFloat2Decimals(formAddOnSolidSalt.getFieldValue('price_per_kg')),
+        })
+    }
 
     const handleSubmitPreStock = (value: any) => {
         let payload = [
@@ -363,6 +480,29 @@ const CreateOrderPage: NextPageWithLayout = () => {
         setDataAddFish((prev) => [...prev, ...payload])
         setVisibleModalAddOn(false)
     }
+
+    const handleSubmitPreStockSolidSalt = (value: any) => {
+        let payload = [
+            {
+                new_stock: parseFloat2Decimals(value?.new_stock),
+                idreceipt: Number(preDataAddFishSolidSalt?.idsolid_salt_receipt),
+            },
+        ]
+        const defaultFishValue = parseFloat2Decimals(form.getFieldValue('salt'))
+            ? parseFloat2Decimals(form.getFieldValue('salt'))
+            : 0
+        const defaultSolidSaltValue = parseFloat2Decimals(form.getFieldValue('salt_price'))
+            ? parseFloat2Decimals(form.getFieldValue('salt_price'))
+            : 0
+        form.setFieldsValue({
+            salt: defaultFishValue + parseFloat2Decimals(value?.new_stock),
+            salt_price: parseFloat2Decimals(value.price_value) + defaultSolidSaltValue,
+        })
+        formAddOnSolidSalt.resetFields()
+        setDataAddSolidSalt((prev) => [...prev, ...payload])
+        setVisibleModalAddOnSolidSalt(false)
+    }
+
     const onChangeCostLaborPerBuilding = (e: CheckboxChangeEvent) => {
         if (e.target.checked === true) {
             form.setFieldsValue({
@@ -466,7 +606,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                     name='salt'
                                     rules={[{ required: true, message: 'กรุณาเลือกประเภทบ่อ' }]}
                                 >
-                                    <Input placeholder='จำนวนเกลือ' size='large' style={{ color: 'black' }} />
+                                    <Input disabled placeholder='จำนวนเกลือ' size='large' style={{ color: 'black' }} />
                                 </StyledFormItems>
                             </Col>
                             <Col md={12} span={12} xs={24}>
@@ -476,6 +616,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                     rules={[{ required: true, message: 'กรุณาเลือกประเภทบ่อ' }]}
                                 >
                                     <Input
+                                        disabled
                                         onChange={handleChangePrice('salt_price')}
                                         placeholder='มูลค่าเกลือ'
                                         size='large'
@@ -591,17 +732,45 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 </Row>{' '}
             </StyledForm>
             <br />
-            <h3>รายการใบชั่งปลา</h3>
-            <StyledTable
-                columns={columns}
-                dataSource={sourceData}
-                loading={getReceiveFishWeight.loading}
-                onChange={handleChangePagination}
-                pagination={{
-                    total: totalList,
-                    current: currentPage,
-                    showSizeChanger: false,
-                }}
+            <Tabs
+                defaultActiveKey='1'
+                items={[
+                    {
+                        label: 'รายการใบชั่งปลา',
+                        key: '1',
+                        children: (
+                            <StyledTable
+                                columns={columns}
+                                dataSource={sourceData}
+                                loading={getReceiveFishWeight.loading}
+                                onChange={handleChangePagination}
+                                pagination={{
+                                    total: totalList,
+                                    current: currentPage,
+                                    showSizeChanger: false,
+                                }}
+                            />
+                        ),
+                    },
+                    {
+                        label: 'รายการบิลเกลือ',
+                        key: '2',
+                        children: (
+                            <StyledTable
+                                columns={columnsSolidSalt}
+                                dataSource={sourceDataSolidSalt}
+                                loading={getReceiveSolidSaltPagination.loading}
+                                onChange={handleChangePaginationSolidSalt}
+                                pagination={{
+                                    total: totalListSolidSalt,
+                                    current: currentPageSolidSalt,
+                                    showSizeChanger: false,
+                                }}
+                            />
+                        ),
+                    },
+                ]}
+                type='card'
             />
             <ModalLoading
                 onClose={() => {
@@ -614,6 +783,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 footer={null}
                 onCancel={() => {
                     setVisibleModalAddOn(false)
+                    formAddOn.resetFields()
                 }}
                 open={visibleModalAddOn}
                 title={`ใบชั่งหมายเลข : ${preDataAddFish?.no} `}
@@ -663,6 +833,67 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                 /> */}
                             </StyledFormItems>
                             {/* [+-]?([0-9]+([.][0-9]*)?|[.][0-9]+) */}
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='มูลค่าที่นำไปใช้'
+                                name='price_value'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <Input disabled placeholder='มูลค่าที่นำไปใช้' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <Button htmlType='submit' type='primary'>
+                                ยืนยัน
+                            </Button>
+                        </Col>
+                    </Row>
+                </StyledForm>
+            </Modal>
+            <Modal
+                centered
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalAddOnSolidSalt(false)
+                    formAddOnSolidSalt.resetFields()
+                }}
+                open={visibleModalAddOnSolidSalt}
+                title={`ใบชั่งหมายเลข : ${preDataAddFishSolidSalt?.no} `}
+            >
+                <StyledForm
+                    autoComplete='off'
+                    form={formAddOnSolidSalt}
+                    hideRequiredMark
+                    layout='vertical'
+                    name='addON_solid_salt'
+                    onFinish={handleSubmitPreStockSolidSalt}
+                >
+                    <Row gutter={[16, 0]}>
+                        <Col xs={24}>
+                            <StyledFormItems label='stock ทีมีอยู่' name='stock_old'>
+                                <Input disabled placeholder='stock ทีมีอยู่' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems label='ราคา / กก.' name='price_per_kg'>
+                                <Input disabled placeholder='ราคา / กก.' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='จำนวนที่นำไปใช้'
+                                name='new_stock'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <StyledInputNumber
+                                    defaultValue={0}
+                                    max={Number(preDataAddFishSolidSalt?.stock)}
+                                    min={0}
+                                    onChange={handleChangeNewStockSolidSaltValue}
+                                    size='large'
+                                />
+                            </StyledFormItems>
                         </Col>
                         <Col xs={24}>
                             <StyledFormItems

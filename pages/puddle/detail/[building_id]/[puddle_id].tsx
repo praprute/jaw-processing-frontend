@@ -554,7 +554,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const submitImportFishSaurce = async () => {
         try {
             setModalLoadingVisivble(true)
-            console.log('itemsGetIn : ', itemsGetIn)
             const payload = {
                 order_id: getPuddleDetailById?.data?.lasted_order,
                 type_process: itemsGetIn === 0 ? typeProcessImport : TypeProcess.IMPORTSALTWATER,

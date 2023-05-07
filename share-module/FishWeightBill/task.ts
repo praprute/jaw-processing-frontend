@@ -3,7 +3,7 @@ import { put } from 'redux-saga/effects'
 import axios from 'axios'
 
 import { configAPI } from '../configApi'
-import { IDtoFishWeight, IListFishWeight, IListFishWeightLog, ILogSaltBillDto, MODULE_NAME } from './type'
+import { IDtoFishWeight, IListFishWeight, IListFishWeightLog, IListSolidSaltBill, ILogSaltBillDto, MODULE_NAME } from './type'
 
 export const getReceiveFishWeightPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
@@ -145,8 +145,120 @@ export const getReceiveWeightFishByOrderIdTask = createReduxAsyncTask({
             }
         },
 })
+// -------------------- Solid Salt --------------------
 
-// -------------------- Salt --------------------
+export const createReceiveSolidSaltTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createReceiveSolidSalt',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        no: string
+        weigh_net: number
+        price_per_weigh: number
+        price_net: number
+        customer: string
+        product_name: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/createSolidSaltBillTask`,
+                    action.payload,
+                    config,
+                )
+
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const getReceiveSolidSaltPaginationTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveSolidSaltPagination',
+    defaultData: {} as IListSolidSaltBill,
+    defaultPayload: {} as { page: number; offset: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveSolidSaltBillPaginationTask/${page}/${offset}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const fillterReceiveSolidSaltTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'fillterReceiveSolidSalt',
+    defaultData: {} as any[],
+    defaultPayload: {} as {
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/fillterReceiveSolidSaltTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const insertLogSolidSaltBillOpenOrderTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'insertLogSolidSaltBillOpenOrder',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        new_stock: number
+        idreceipt: number
+        order_target: number
+        id_puddle: number
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/updateStockSolidSaltTask`,
+                    action.payload,
+                    config,
+                )
+
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+// -------------------- Salt water--------------------
 
 export const getReceiveSaltPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,

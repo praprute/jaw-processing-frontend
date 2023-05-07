@@ -61,6 +61,8 @@ const SiginPage = () => {
                 progress: undefined,
                 theme: 'dark',
             })
+        } finally {
+            form.resetFields()
         }
     }
 

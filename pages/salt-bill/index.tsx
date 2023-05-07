@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useState } from 'react'
-import { Button, Divider, Form, Table } from 'antd'
+import { Button, Divider, Form, Table, Tabs } from 'antd'
 import styled from 'styled-components'
 import { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
@@ -8,19 +8,31 @@ import AppLayout from '../../components/Layouts'
 import { useNavigation } from '../../utils/use-navigation'
 import { NextPageWithLayout } from '../_app'
 import { numberWithCommas } from '../../utils/format-number'
-import { fillterReceiveSaltTask, getReceiveSaltPaginationTask } from '../../share-module/FishWeightBill/task'
+import {
+    fillterReceiveSaltTask,
+    fillterReceiveSolidSaltTask,
+    getReceiveSaltPaginationTask,
+    getReceiveSolidSaltPaginationTask,
+} from '../../share-module/FishWeightBill/task'
 import { NoticeError } from '../../utils/noticeStatus'
 import FillterSaltBox from '../../components/SaltBill/FillterSaltBox'
 
 const SaltReceivePage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
+    const [formSolidSalt] = Form.useForm()
     const navigation = useNavigation()
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
     const [totalList, setTotalList] = useState(0)
 
+    const [currentPageSolidSalt, setCurrentPageSolidSalt] = useState(1)
+    const [sourceDataSolidSalt, setSourceDataDataSolidSalt] = useState([])
+    const [totalListSolidSalt, setTotalListSolidSalt] = useState(0)
+
     const getReceiveSaltPagination = getReceiveSaltPaginationTask.useTask()
     const fillterReceiveSalt = fillterReceiveSaltTask.useTask()
+    const getReceiveSolidSaltPagination = getReceiveSolidSaltPaginationTask.useTask()
+    const fillterReceiveSolidSalt = fillterReceiveSolidSaltTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -44,7 +56,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
             render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
         },
         {
-            title: 'ราคา / ลิตร',
+            title: 'ราคา / กก.',
             dataIndex: 'price_per_weigh',
             key: 'price_per_weigh',
         },
@@ -75,8 +87,9 @@ const SaltReceivePage: NextPageWithLayout = () => {
     useEffect(() => {
         ;(async () => {
             await handleGetListReceive()
+            await handleGetListsolidSaltReceive()
         })()
-    }, [currentPage])
+    }, [currentPage, currentPageSolidSalt])
 
     const handleGetListReceive = async () => {
         try {
@@ -87,9 +100,22 @@ const SaltReceivePage: NextPageWithLayout = () => {
             NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
         }
     }
+    const handleGetListsolidSaltReceive = async () => {
+        try {
+            const res = await getReceiveSolidSaltPagination.onRequest({ page: currentPageSolidSalt - 1, offset: OFFSET_PAGE })
+            setSourceDataDataSolidSalt(res.data)
+            setTotalListSolidSalt(res.total)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
 
     const handleChangePagination = (pagination: any) => {
         setCurrentPage(pagination.current)
+    }
+
+    const handleChangePaginationSolidSalt = (pagination: any) => {
+        setCurrentPageSolidSalt(pagination.current)
     }
 
     const handleSubmit = async (values: any) => {
@@ -101,50 +127,129 @@ const SaltReceivePage: NextPageWithLayout = () => {
             NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
         }
     }
+    const handleSubmitSolidSalt = async (values: any) => {
+        try {
+            const res = await fillterReceiveSolidSalt.onRequest(values)
+            setSourceDataDataSolidSalt(res)
+            setTotalListSolidSalt(100)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
 
     return (
-        <>
-            <StyledNavMenu>
-                <div className='container'>
-                    <Button
-                        onClick={() => {
-                            navigation.navigateTo.createSaltBillReceive()
-                        }}
-                        type='primary'
-                    >
-                        ลงทะเบียนบิลเกลือ
-                    </Button>
-                </div>
-            </StyledNavMenu>
-            <SectionFillter>
-                <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
-                    <FillterSaltBox />
-                </StyledForm>
-            </SectionFillter>
-
-            <SectionFillter>
-                <Container>
-                    <Divider style={{ backgroundColor: '#FFFFFF66' }} type='horizontal' />{' '}
-                </Container>
-            </SectionFillter>
-
-            <SectionTable>
-                <Container>
-                    <h3>รายการบิลเกลือ</h3>
-                    <StyledTable
-                        columns={columns}
-                        dataSource={sourceData}
-                        loading={getReceiveSaltPagination.loading || fillterReceiveSalt.loading}
-                        onChange={handleChangePagination}
-                        pagination={{
-                            total: totalList,
-                            current: currentPage,
-                            showSizeChanger: false,
-                        }}
-                    />
-                </Container>
-            </SectionTable>
-        </>
+        <StyledNavMenu>
+            <Tabs
+                defaultActiveKey='1'
+                items={[
+                    {
+                        label: 'บิลน้ำเกลือ',
+                        key: '1',
+                        children: (
+                            <>
+                                <StyledNavMenu>
+                                    <div className='container'>
+                                        <Button
+                                            onClick={() => {
+                                                navigation.navigateTo.createSaltBillReceive()
+                                            }}
+                                            type='primary'
+                                        >
+                                            ลงทะเบียนบิลน้ำเกลือ
+                                        </Button>
+                                    </div>
+                                </StyledNavMenu>
+                                <SectionFillter>
+                                    <StyledForm
+                                        autoComplete='off'
+                                        form={form}
+                                        hideRequiredMark
+                                        layout='vertical'
+                                        onFinish={handleSubmit}
+                                    >
+                                        <FillterSaltBox />
+                                    </StyledForm>
+                                </SectionFillter>
+                                <SectionFillter>
+                                    <Container>
+                                        <Divider style={{ backgroundColor: '#FFFFFF66' }} type='horizontal' />{' '}
+                                    </Container>
+                                </SectionFillter>
+                                <SectionTable>
+                                    <Container>
+                                        <h3>รายการบิลเกลือ</h3>
+                                        <StyledTable
+                                            columns={columns}
+                                            dataSource={sourceData}
+                                            loading={getReceiveSaltPagination.loading || fillterReceiveSalt.loading}
+                                            onChange={handleChangePagination}
+                                            pagination={{
+                                                total: totalList,
+                                                current: currentPage,
+                                                showSizeChanger: false,
+                                            }}
+                                        />
+                                    </Container>
+                                </SectionTable>
+                            </>
+                        ),
+                    },
+                    {
+                        label: 'บิลเกลือ',
+                        key: '2',
+                        children: (
+                            <>
+                                <StyledNavMenu>
+                                    <div className='container'>
+                                        <Button
+                                            onClick={() => {
+                                                navigation.navigateTo.createSolidSaltBillReceive()
+                                            }}
+                                            type='primary'
+                                        >
+                                            ลงทะเบียนบิลเกลือ
+                                        </Button>
+                                    </div>
+                                </StyledNavMenu>
+                                <SectionFillter>
+                                    <StyledForm
+                                        autoComplete='off'
+                                        form={formSolidSalt}
+                                        hideRequiredMark
+                                        layout='vertical'
+                                        onFinish={handleSubmitSolidSalt}
+                                    >
+                                        <FillterSaltBox />
+                                    </StyledForm>
+                                </SectionFillter>
+                                <SectionFillter>
+                                    <Container>
+                                        <Divider style={{ backgroundColor: '#FFFFFF66' }} type='horizontal' />{' '}
+                                    </Container>
+                                </SectionFillter>
+                                <SectionTable>
+                                    <Container>
+                                        <h3>รายการบิลเกลือ</h3>
+                                        <StyledTable
+                                            columns={columns}
+                                            dataSource={sourceDataSolidSalt}
+                                            loading={getReceiveSolidSaltPagination.loading || fillterReceiveSalt.loading}
+                                            onChange={handleChangePaginationSolidSalt}
+                                            pagination={{
+                                                total: totalListSolidSalt,
+                                                current: currentPageSolidSalt,
+                                                showSizeChanger: false,
+                                            }}
+                                        />
+                                    </Container>
+                                </SectionTable>
+                            </>
+                        ),
+                    },
+                ]}
+                type='card'
+            />
+        </StyledNavMenu>
     )
 }
 

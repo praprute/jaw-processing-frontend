@@ -54,3 +54,19 @@ export interface ILogSaltBillDto {
     weigh_net: number
     stock: number
 }
+
+export interface ISolidSaltBillDto {
+    idsolid_salt_receipt: number
+    no: string
+    product_name: string
+    weigh_net: number
+    price_per_weigh: number
+    price_net: number
+    customer: string
+    stock: number
+    date_create: string
+}
+export interface IListSolidSaltBill {
+    data: ISolidSaltBillDto[]
+    total: number
+}

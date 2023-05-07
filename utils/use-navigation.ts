@@ -44,6 +44,9 @@ export const useNavigation = () => {
             processManagementSetting: async () => {
                 await history.push('process-management-setting')
             },
+            createSolidSaltBillReceive: async () => {
+                await history.push(`salt-bill/solid-salt/create`)
+            },
         },
     }
 }

@@ -1,15 +1,10 @@
 import { Col, Input, Row, Form, Button } from 'antd'
 import styled from 'styled-components'
 
-// TODO
-// const config = {
-//     rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
-// }
-
-const CreateSaltBillBox = () => {
+const CreateFormSolidSaltBill = () => {
     return (
         <BoxFillter>
-            <HeaderFillterBox>ลงทะเบียนบิลน้ำเกลือ</HeaderFillterBox>
+            <HeaderFillterBox>ลงทะเบียนบิลเกลือ</HeaderFillterBox>
             <ContentFillter>
                 <Row gutter={[16, 8]}>
                     <Col md={12} sm={24} xs={24}>
@@ -80,7 +75,7 @@ const CreateSaltBillBox = () => {
     )
 }
 
-export default CreateSaltBillBox
+export default CreateFormSolidSaltBill
 
 const StyldeButtonSubmit = styled(Button)`
     width: 100%;
