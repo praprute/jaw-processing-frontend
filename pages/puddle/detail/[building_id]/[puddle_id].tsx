@@ -407,10 +407,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     }
 
     const handleChangeLitToKGSaltWater = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSaltWaterKG(Number(e.target.value) * 1.2)
+        // setSaltWaterKG(Number(e.target.value) * 1.2)
+        setSaltWaterKG(Number(e.target.value))
     }
     const handleChangeLitToKGFishSauceWater = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFishSauceWaterKG(Number(e.target.value) * 1.2)
+        // setFishSauceWaterKG(Number(e.target.value) * 1.2)
+        setFishSauceWaterKG(Number(e.target.value))
     }
 
     const handleSubmitTypeProcessTask = async () => {
@@ -884,8 +886,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
                             <StyledFormItems
-                                extra={`~ ${saltWaterKG} KG.`}
-                                label='ปริมาตรน้ำเกลือที่เติมเพิ่ม (L.)'
+                                // extra={`~ ${saltWaterKG} KG.`}
+                                label='ปริมาตรน้ำเกลือที่เติมเพิ่ม (KG.)'
                                 name='volume'
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                             >
@@ -927,8 +929,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
                             <StyledFormItems
-                                extra={`~ ${fishSauceWaterKG} KG.`}
-                                label='ปริมาตรน้ำปลาที่เติมเพิ่ม (L.)'
+                                // extra={`~ ${fishSauceWaterKG} KG.`}
+                                label='ปริมาตรน้ำปลาที่เติมเพิ่ม (KG.)'
                                 name='volume'
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                             >
