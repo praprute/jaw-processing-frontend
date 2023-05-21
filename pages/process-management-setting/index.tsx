@@ -7,8 +7,11 @@ import { NextPageWithLayout } from '../_app'
 import { getTypeProcessTask, submitTypeProcessTask } from '../../share-module/puddle/task'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 import {
+    createFishTypeTask,
+    deleteFishTypeTask,
     getAllFeeLaborFermentTask,
     getAllFeeLaborPerBuildingTask,
+    getListFishTypeTask,
     updateFeeLaborFermentTask,
     updateFeeLaborPerBuildingTask,
 } from '../../share-module/order/task'
@@ -29,6 +32,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
     const [visibleModal, setVisibleModal] = useState(false)
     const [stateUpdateCostPerBuilding, setStateUpdateCostPerBuilding] = useState<ICostLaborPerBuildingDto>(null)
     const [valueCostLaborByBuilding, setValueCostLaborByBuilding] = useState('0')
+    const [valueFishType, setValueFishType] = useState(null)
 
     const getTypeProcess = getTypeProcessTask.useTask()
     const submitTypeProcess = submitTypeProcessTask.useTask()
@@ -36,11 +40,15 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
     const updateFeeLaborFerment = updateFeeLaborFermentTask.useTask()
     const getAllFeeLaborPerBuilding = getAllFeeLaborPerBuildingTask.useTask()
     const updateFeeLaborPerBuilding = updateFeeLaborPerBuildingTask.useTask()
+    const getListFishType = getListFishTypeTask.useTask()
+    const createFishType = createFishTypeTask.useTask()
+    const deleteFishType = deleteFishTypeTask.useTask()
 
     useEffect(() => {
         ;(async () => {
             await getTypeProcess.onRequest()
             await getAllFeeLaborPerBuilding.onRequest()
+            await getListFishType.onRequest()
             const costLaborFerment = await getAllFeeLaborFerment.onRequest()
             setIdCostLaborFerment(costLaborFerment.idlabor_price_ferment)
         })()
@@ -62,6 +70,33 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
         } catch (e: any) {
             NoticeError('ทำรายการไม่สำเร็จ')
             setValueCostLaborFerment('0')
+        }
+    }
+
+    const handleSubmitCreateFishType = async () => {
+        try {
+            if (valueFishType === null || valueFishType === '') {
+                return
+            } else {
+                await createFishType.onRequest({ name: valueFishType })
+                await getListFishType.onRequest()
+                NoticeSuccess('ทำรายการสำเร็จ')
+                setValueFishType(null)
+            }
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+            setValueFishType(null)
+        }
+    }
+    const handleDeleteFishType = async (id: number) => {
+        try {
+            await deleteFishType.onRequest({ idfish_type: id })
+            await getListFishType.onRequest()
+            NoticeSuccess('ทำรายการสำเร็จ')
+            setValueFishType(null)
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+            setValueFishType(null)
         }
     }
 
@@ -182,6 +217,53 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                                 <Spin size='large' tip='Loading...' />
                             </LoadingSections>
                         )}
+                    </Content>
+                </BoxContent>
+
+                <BoxContent>
+                    <HeaderBoxContent>ชนิดของปลา</HeaderBoxContent>
+                    <Content>
+                        {getListFishType?.data ? (
+                            <StyledTable>
+                                <tr>
+                                    {/* <th>id</th> */}
+                                    <th>ปลา</th>
+                                    <th>action</th>
+                                </tr>
+                                {getListFishType?.data.map((data, index) => (
+                                    <tr key={index}>
+                                        {/* <td>{data.idfish_type}</td> */}
+                                        <td>{data.name}</td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    handleDeleteFishType(data.idfish_type)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ลบ
+                                            </StyledButton>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {/* {!getAllFeeLaborPerBuilding.data ?} */}
+                            </StyledTable>
+                        ) : (
+                            <LoadingSections>
+                                <Spin size='large' tip='Loading...' />
+                            </LoadingSections>
+                        )}
+                        <br />
+                        <Input
+                            onChange={(e) => {
+                                setValueFishType(e.target.value)
+                            }}
+                            placeholder='เพิ่มชนิดของปลา'
+                            value={valueFishType}
+                        />
+                        <StyledButton block onClick={handleSubmitCreateFishType} type='primary'>
+                            ตกลง
+                        </StyledButton>
                     </Content>
                 </BoxContent>
             </Container>

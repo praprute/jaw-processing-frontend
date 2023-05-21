@@ -1,5 +1,5 @@
-import { Layout, Form } from 'antd'
 import { ReactElement } from 'react'
+import { Layout, Form } from 'antd'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
 
@@ -17,6 +17,12 @@ const CreateFishSauceBillPage: NextPageWithLayout = () => {
     const navigation = useNavigation()
 
     const createReceiveFishSauce = createReceiveFishSauceTask.useTask()
+
+    const handleChangeValue = (changedValues: any, allValues: any) => {
+        form.setFieldsValue({
+            price_net: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
+        })
+    }
 
     const handleSubmit = async (values: any) => {
         try {
@@ -59,6 +65,7 @@ const CreateFishSauceBillPage: NextPageWithLayout = () => {
                     layout='vertical'
                     name='create_salt_bill'
                     onFinish={handleSubmit}
+                    onValuesChange={handleChangeValue}
                 >
                     <CreateFishSauceBillBox />
                 </StyledForm>

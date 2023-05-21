@@ -22,10 +22,11 @@ export const loginTask = createReduxAsyncTask({
                 const config = yield configAPI()
                 const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/signin`, action.payload, config)
                 Cookies.set('accessToken', data.message.token, {
-                    expires: new Date(Date.now() + 3600 * 1000),
+                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
                     // expires: new Date(new Date().getTime() + 15 * 60 * 1000),
                 })
                 //   expires: new Date(Date.now() + 3600 * 1000), 24 hr
+                //   expires: new Date(Date.now() + 1000*60*60*24*365), 1 Y
                 yield put(actions.success(data))
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))

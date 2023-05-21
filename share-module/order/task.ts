@@ -412,3 +412,57 @@ export const updateFeeLaborPerBuildingTask = createReduxAsyncTask({
             }
         },
 })
+
+export const getListFishTypeTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getListFishType',
+    defaultData: {} as {
+        idfish_type: number
+        name: string
+    }[],
+    saga: ({ actions }) =>
+        function* () {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getListFishType`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const createFishTypeTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createFishType',
+    defaultData: {} as any,
+    defaultPayload: {} as { name: string },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createFishType`, action.payload, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const deleteFishTypeTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'deleteFishType',
+    defaultData: {} as any,
+    defaultPayload: {} as { idfish_type: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { idfish_type } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.delete(`${process.env.NEXT_PUBLIC_HOST}/deleteFishType/${idfish_type}`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})

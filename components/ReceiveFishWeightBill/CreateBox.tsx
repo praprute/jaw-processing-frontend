@@ -1,12 +1,20 @@
-import { Col, Input, Row, Form, Button } from 'antd'
+import { Col, Input, Row, Form, Button, Select } from 'antd'
 import styled from 'styled-components'
+const { Option } = Select
 
+interface ICreateFishWeightBox {
+    listFish: {
+        idfish_type: number
+        name: string
+    }[]
+}
 // TODO
 // const config = {
 //     rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
 // }
 
-const CreateFishWeightBox = () => {
+const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
+    const { listFish } = props
     return (
         <BoxFillter>
             <HeaderFillterBox>ลงทะเบียนใบชั่งปลา</HeaderFillterBox>
@@ -86,7 +94,14 @@ const CreateFishWeightBox = () => {
                             name='product_name'
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
-                            <Input placeholder='ชื่อสินค้า' size='large' style={{ color: 'black' }} />
+                            <Select placeholder='ชื่อสินค้า'>
+                                {listFish &&
+                                    listFish.map((data, index) => (
+                                        <Option key={index} value={data.name}>
+                                            {data.name}
+                                        </Option>
+                                    ))}
+                            </Select>
                         </StyledFormItems>
                     </Col>
                     <Col md={12} sm={24} xs={24}>

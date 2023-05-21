@@ -18,6 +18,12 @@ const CreateSolidSaltBillPage: NextPageWithLayout = () => {
 
     const createReceiveSolidSalt = createReceiveSolidSaltTask.useTask()
 
+    const handleChangeValue = (changedValues: any, allValues: any) => {
+        form.setFieldsValue({
+            price_net: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
+        })
+    }
+
     const handleSubmit = async (values: any) => {
         try {
             const payload = {
@@ -59,6 +65,7 @@ const CreateSolidSaltBillPage: NextPageWithLayout = () => {
                     layout='vertical'
                     name='create_salt_bill'
                     onFinish={handleSubmit}
+                    onValuesChange={handleChangeValue}
                 >
                     <CreateFormSolidSaltBill />
                 </StyledForm>

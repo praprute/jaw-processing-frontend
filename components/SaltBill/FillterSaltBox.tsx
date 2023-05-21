@@ -4,7 +4,7 @@ import styled from 'styled-components'
 const FillterSaltBox = () => {
     return (
         <BoxFillter>
-            <HeaderFillterBox>เรียกดูบิลน้ำเกลือ</HeaderFillterBox>
+            <HeaderFillterBox>เรียกดูบิลเกลือ</HeaderFillterBox>
             <ContentFillter>
                 <Row gutter={[16, 8]}>
                     <Col md={12} sm={24} xs={24}>

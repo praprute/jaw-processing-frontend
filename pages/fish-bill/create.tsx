@@ -1,5 +1,5 @@
 import { Layout, Form } from 'antd'
-import { ReactElement } from 'react'
+import { ReactElement, useEffect } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
 
@@ -9,6 +9,7 @@ import { NextPageWithLayout } from '../_app'
 import { useNavigation } from '../../utils/use-navigation'
 import CreateFishWeightBox from '../../components/ReceiveFishWeightBill/CreateBox'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
+import { getListFishTypeTask } from '../../share-module/order/task'
 
 const { Content } = Layout
 
@@ -17,6 +18,19 @@ const CreateFishWeightPage: NextPageWithLayout = () => {
     const navigation = useNavigation()
 
     const createReceiveWeightFish = createReceiveWeightFishTask.useTask()
+    const getListFishType = getListFishTypeTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            await getListFishType.onRequest()
+        })()
+    }, [])
+
+    const handleChangeValue = (changedValues: any, allValues: any) => {
+        form.setFieldsValue({
+            amount_price: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
+        })
+    }
 
     const handleSubmit = async (values: any) => {
         try {
@@ -62,8 +76,9 @@ const CreateFishWeightPage: NextPageWithLayout = () => {
                     layout='vertical'
                     name='create_fishWeight_bill'
                     onFinish={handleSubmit}
+                    onValuesChange={handleChangeValue}
                 >
-                    <CreateFishWeightBox />
+                    <CreateFishWeightBox listFish={getListFishType.data} />
                 </StyledForm>
             </SectionFillter>
         </MainLayout>
