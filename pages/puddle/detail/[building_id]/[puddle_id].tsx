@@ -1,17 +1,44 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
-import { Alert, Breadcrumb, Button, Divider, Drawer, Empty, Form, Input, Modal, Space, Spin, Select, Row, Col, Steps } from 'antd'
+import {
+    Alert,
+    Breadcrumb,
+    Button,
+    Divider,
+    Drawer,
+    Empty,
+    Form,
+    Input,
+    Modal,
+    Space,
+    Spin,
+    Select,
+    Row,
+    Col,
+    Steps,
+    DatePicker,
+} from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import { LabeledValue } from 'antd/lib/select'
 import axios from 'axios'
 import Table, { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
+import { CheckOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
+import type { DatePickerProps } from 'antd'
 
 import AppLayout from '../../../../components/Layouts'
 import { NextPageWithLayout } from '../../../_app'
 import { useNavigation } from '../../../../utils/use-navigation'
-import { getAllBuildingTask, getPuddleByIdBuildingTask, getPuddleDetailByIdTask } from '../../../../share-module/building/task'
+import {
+    changeWorkingStatusPuddleTask,
+    getAllBuildingTask,
+    getPuddleByIdBuildingTask,
+    getPuddleDetailByIdTask,
+    updateDateStartFermantTask,
+    updateStatusTopSaltTask,
+} from '../../../../share-module/building/task'
 import BadgeStatus from '../../../../components/BadgeStatus'
 import {
     getOrdersDetailFromIdTask,
@@ -25,6 +52,7 @@ import {
     submitAddOnSaltWaterTask,
     submitAddOnFishSauceTask,
     submitTransferSaltWaterTask,
+    getWorkingStatusTypeTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -39,8 +67,10 @@ import { configAPI } from '../../../../share-module/configApi'
 import { getTypeProcessTask, submitTypeProcessTask } from '../../../../share-module/puddle/task'
 import {
     getLogReceiveSaltByOrdersIdTask,
-    getReceiveFishSaucePaginationTask,
-    getReceiveSaltPaginationTask,
+    // getReceiveFishSaucePaginationTask,
+    getReceiveFishSaucePaginationWithOutEmptyTask,
+    // getReceiveSaltPaginationTask,
+    getReceiveSaltPaginationWithOutEmptyTask,
     getReceiveWeightFishByOrderIdTask,
 } from '../../../../share-module/FishWeightBill/task'
 import { numberWithCommas } from '../../../../utils/format-number'
@@ -118,6 +148,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     //  0 = น้ำปลา , 1 = น้ำเกลือ
     const [itemsGetIn, setItemsGetIn] = useState(0)
 
+    const [visibleModalWorkingStatus, setVisibleModalWorkingStatus] = useState(false)
+    const [visibleModalConfirmTopSalt, setVisibleModalConfirmTopSalt] = useState(false)
     // TODO
     // const [actionPuddle, setActionPuddle] = useState(null)
 
@@ -130,7 +162,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         idtarget_puddle: null,
     })
     const [typeProcessImport, setTypeProcessImport] = useState(TypeProcess.IMPORT)
-
     const [valueTypeProcess, setValueTypeProcess] = useState(null)
     const [currentStepSalt, setCurrentStepSalt] = useState(0)
     const [currentStepFishSauce, setCurrentStepFishSauce] = useState(0)
@@ -140,6 +171,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [sourceDataFishSauce, setSourceDataFishSauce] = useState([])
     const [totalListSalt, setTotalListSalt] = useState(0)
     const [totalListFishSauce, setTotalListFishSauce] = useState(0)
+    const [dateStart, setDateStart] = useState(null)
+    const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
+    const [dateTransfer, setDateTransfer] = useState(null)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -156,12 +190,16 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const submitCloseProcess = submitCloseProcessTask.useTask()
     const submitAddOnSaltWater = submitAddOnSaltWaterTask.useTask()
     const getReceiveWeightFishByOrderId = getReceiveWeightFishByOrderIdTask.useTask()
-    const getReceiveSaltPagination = getReceiveSaltPaginationTask.useTask()
-    const getReceiveFishSaucePagination = getReceiveFishSaucePaginationTask.useTask()
+    const getReceiveSaltPagination = getReceiveSaltPaginationWithOutEmptyTask.useTask()
+    const getReceiveFishSaucePagination = getReceiveFishSaucePaginationWithOutEmptyTask.useTask()
     const getLogReceiveSaltByOrdersId = getLogReceiveSaltByOrdersIdTask.useTask()
     // const getLogReceiveFishSauceByOrdersId = getLogReceiveFishSauceByOrdersIdTask.useTask()
     const submitAddOnFishSauce = submitAddOnFishSauceTask.useTask()
     const submitTransferSaltWater = submitTransferSaltWaterTask.useTask()
+    const getListWorkingStatus = getWorkingStatusTypeTask.useTask()
+    const changeWorkingStatusPuddle = changeWorkingStatusPuddleTask.useTask()
+    const updateStatusTopSalt = updateStatusTopSaltTask.useTask()
+    const updateDateStartFermant = updateDateStartFermantTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -325,6 +363,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         ;(async () => {
             await getAllBuildings.onRequest()
             await getTypeProcess.onRequest()
+            await getListWorkingStatus.onRequest()
         })()
     }, [])
 
@@ -339,6 +378,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             if (puddle_id) {
                 await getNoticeTargetPending.onRequest({ puddle_id: Number(puddle_id) })
                 const res = await getPuddleDetailById.onRequest({ puddle_id: Number(puddle_id) })
+
                 await getAllOrdersFromPuddleId.onRequest({ puddle_id: Number(puddle_id) })
                 const resOrderDetail = await getOrdersDetailFromId.onRequest({ order_id: res.lasted_order })
 
@@ -458,15 +498,17 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setTypeProcessImport(TypeProcess.IMPORT)
         }
         let amount_item_cal =
-            getPuddleDetailById.data?.status === TypeOrderPuddle.CIRCULAR ||
-            getPuddleDetailById.data?.status === TypeOrderPuddle.FILTER ||
-            getPuddleDetailById.data?.status === TypeOrderPuddle.BREAK ||
-            getPuddleDetailById.data?.status === TypeOrderPuddle.MIXING ||
-            getPuddleDetailById.data?.status === TypeOrderPuddle.STOCK
+            getPuddleDetailById.data?.status !== TypeOrderPuddle.FERMENT
                 ? getOrdersDetailFromId.data.length === 1
                     ? (result.volume * 100) / volumnPuddle
                     : (result.volume * 100) / volumnPuddle //(result.volume * 100) / remainingVolumnGetIn
                 : (result.volume * remainingItems) / remainingVolumnGetIn ///result.amount_price / result.amount_unit_per_price
+
+        // getPuddleDetailById.data?.status === TypeOrderPuddle.CIRCULAR ||
+        // getPuddleDetailById.data?.status === TypeOrderPuddle.FILTER ||
+        // getPuddleDetailById.data?.status === TypeOrderPuddle.BREAK ||
+        // getPuddleDetailById.data?.status === TypeOrderPuddle.MIXING ||
+        // getPuddleDetailById.data?.status === TypeOrderPuddle.STOCK
 
         // TODO
         // let check =
@@ -517,42 +559,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }
     }
 
-    const submitThrowFish = async () => {
-        try {
-            setModalLoadingVisivble(true)
-            const payload = {
-                order_id: getPuddleDetailById?.data?.lasted_order,
-                type_process: TypeProcess.CLEARING,
-                amount_items: form.getFieldValue('amount_items'),
-                amount_unit_per_price: form.getFieldValue('amount_unit_per_price'),
-                amount_price: form.getFieldValue('amount_price'),
-                remaining_items: form.getFieldValue('remaining_items'),
-                remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
-                remaining_price: form.getFieldValue('remaining_price'),
-                approved: 0,
-                volume: Number(form.getFieldValue('volume')),
-                id_puddle: Number(puddle_id),
-                remaining_volume: Number(form.getFieldValue('remaining_volume')),
-                action_puddle: await getSerial(Number(puddle_id)),
-                target_puddle: Number(form.getFieldValue('id_puddle')),
-                serial_puddle: Number(form.getFieldValue('action_puddle')),
-                process: form.getFieldValue('process') as number,
-            }
-
-            const result = await submitTransfer.onRequest(payload)
-            if (result === 'success') {
-                NoticeSuccess('ทำรายการสำเร็จ')
-                form.resetFields()
-                setTrigger(!trigger)
-                setOpenThrowOtherPuddle(false)
-            }
-        } catch (e: any) {
-            NoticeError('ทำรายการไม่สำเร็จ')
-        } finally {
-            setModalLoadingVisivble(false)
-        }
-    }
-
     const submitImportFishSaurce = async () => {
         try {
             setModalLoadingVisivble(true)
@@ -569,6 +575,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 remaining_volume: Number(formGetIn.getFieldValue('remaining_volume')),
                 action_puddle: Number(formGetIn.getFieldValue('source_puddle')),
                 action_serial_puddle: Number(formGetIn.getFieldValue('action_serial_puddle')),
+                date_action: dateTransfer,
             }
 
             const result = await submitGetInFishSaurce.onRequest(payload)
@@ -581,6 +588,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             NoticeError('ทำรายการไม่สำเร็จ')
         } finally {
             setModalLoadingVisivble(false)
+            formGetIn.resetFields()
         }
     }
 
@@ -600,6 +608,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 approved: 1,
                 volume: remainingVolumnExport,
                 remaining_volume: 0,
+                date_action: dateTransfer,
             }
 
             const result = await submitCloseProcess.onRequest(payload)
@@ -612,6 +621,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             NoticeError('ทำรายการไม่สำเร็จ')
         } finally {
             setModalLoadingVisivble(false)
+            setDateTransfer(null)
         }
     }
 
@@ -642,6 +652,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 new_stock: Number(values.volume),
                 idreceipt: preDataSaltBill.idsalt_receipt,
                 id_puddle: Number(puddle_id),
+                date_action: dateTransfer,
             }
 
             const res = await submitAddOnSaltWater.onRequest(payload)
@@ -657,6 +668,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setVisibleModalAddOn(false)
             await handleGetListReceive()
             setCurrentStepSalt(0)
+            setDateTransfer(null)
+            formAddOn.resetFields()
         }
     }
 
@@ -687,6 +700,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 new_stock: Number(values.volume),
                 idreceipt: preDataFishSauceBill.idfishsauce_receipt,
                 id_puddle: Number(puddle_id),
+                date_action: dateTransfer,
             }
 
             const res = await submitAddOnFishSauce.onRequest(payload)
@@ -700,8 +714,50 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         } finally {
             setModalLoadingVisivble(false)
             setVisibleModalAddOn(false)
+            setVisibleModalAddOnFishSauce(false)
             await handleGetListReceive()
             setCurrentStepSalt(0)
+            setDateTransfer(null)
+            formAddOnFishSauce.resetFields()
+            setCurrentStepFishSauce(0)
+        }
+    }
+
+    const submitThrowFish = async () => {
+        try {
+            setModalLoadingVisivble(true)
+            const payload = {
+                order_id: getPuddleDetailById?.data?.lasted_order,
+                type_process: TypeProcess.CLEARING,
+                amount_items: form.getFieldValue('amount_items'),
+                amount_unit_per_price: form.getFieldValue('amount_unit_per_price'),
+                amount_price: form.getFieldValue('amount_price'),
+                remaining_items: form.getFieldValue('remaining_items'),
+                remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
+                remaining_price: form.getFieldValue('remaining_price'),
+                approved: 0,
+                volume: amountItemsKG, //Number(form.getFieldValue('volume')),
+                id_puddle: Number(puddle_id),
+                remaining_volume: Number(form.getFieldValue('remaining_volume')),
+                action_puddle: await getSerial(Number(puddle_id)),
+                target_puddle: Number(form.getFieldValue('id_puddle')),
+                serial_puddle: Number(form.getFieldValue('action_puddle')),
+                process: form.getFieldValue('process') as number,
+                date_action: dateTransfer,
+            }
+
+            const result = await submitTransfer.onRequest(payload)
+            if (result === 'success') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+                form.resetFields()
+                setTrigger(!trigger)
+                setOpenThrowOtherPuddle(false)
+            }
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setModalLoadingVisivble(false)
+            setDateTransfer(null)
         }
     }
 
@@ -726,6 +782,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     action_puddle: await getSerial(Number(puddle_id)),
                     target_puddle: Number(form.getFieldValue('id_puddle')),
                     serial_puddle: Number(form.getFieldValue('action_puddle')),
+                    date_action: dateTransfer,
                 }
 
                 const payloads = form.getFieldValue('process')
@@ -757,6 +814,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     target_puddle: Number(form.getFieldValue('id_puddle')),
                     serial_puddle: Number(form.getFieldValue('action_puddle')),
                     item_transfer: itemsTransfer,
+                    date_action: dateTransfer,
                 }
 
                 const payloads = form.getFieldValue('process')
@@ -774,7 +832,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         } catch (e: any) {
             NoticeError('ทำรายการไม่สำเร็จ')
         } finally {
+            setDateTransfer(null)
             setModalLoadingVisivble(false)
+            form.resetFields()
         }
     }
 
@@ -836,6 +896,52 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleChangeWorkingStatus = async (id: number) => {
+        try {
+            const res = await changeWorkingStatusPuddle.onRequest({ puddle_id: Number(puddle_id), working_status: id })
+
+            if (res === 'UPDATE_SUCCESS') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+            }
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setVisibleModalWorkingStatus(false)
+            setTrigger(!trigger)
+        }
+    }
+
+    const handleUpdateTopSalt = async () => {
+        try {
+            const res = await updateStatusTopSalt.onRequest({ idpuddle: Number(puddle_id), topSalt: 1 })
+            if (res === 'UPDATE_SUCCESS') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+            }
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setVisibleModalConfirmTopSalt(false)
+            setTrigger(!trigger)
+        }
+    }
+
+    const handleUpdateDateStart = async () => {
+        try {
+            const res = await updateDateStartFermant.onRequest({ idpuddle: Number(puddle_id), start_date: dateStart })
+            if (res === 'UPDATE_SUCCESS') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+            }
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setVisibleModalDateStart(false)
+            setTrigger(!trigger)
+            setDateStart(null)
+        }
+    }
+
+    // updateDateStartFermantTask
+
     // const handleViewFishSauceBill = async (e: number) => {
     //     setIdOrdersOpenFishSauceBill(e)
     //     setVisibleModalViewFishSauceBill(true)
@@ -860,6 +966,15 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const prevFishSauce = () => {
         setCurrentStepFishSauce(currentStepFishSauce - 1)
+    }
+
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        setDateStart(dateString)
+    }
+
+    const onChangeDateTransfer: DatePickerProps['onChange'] = (date, dateString) => {
+        console.log('onChangeDateTransfer dateString :', dateString)
+        setDateTransfer(dateString)
     }
 
     const stepsSalt = [
@@ -898,6 +1013,15 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                     style={{ color: 'black' }}
                                 />
                             </StyledFormItems>
+                            <Col xs={24}>
+                                <StyledFormItems
+                                    label='วันที่ทำรายการ'
+                                    name='date_action'
+                                    rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                                >
+                                    <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                                </StyledFormItems>
+                            </Col>
                         </Col>
                     </Row>
                 </>
@@ -929,7 +1053,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
                             <StyledFormItems
-                                // extra={`~ ${fishSauceWaterKG} KG.`}
                                 label='ปริมาตรน้ำปลาที่เติมเพิ่ม (KG.)'
                                 name='volume'
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
@@ -940,6 +1063,15 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                     size='large'
                                     style={{ color: 'black' }}
                                 />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
                             </StyledFormItems>
                         </Col>
                     </Row>
@@ -982,7 +1114,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <span>
                         บ่อหมายเลข {getPuddleDetailById?.data?.serial} : {getPuddleDetailById.data?.uuid_puddle}
                     </span>
-                    <BadgeStatus status={getPuddleDetailById.data?.status} />
+                    <div style={{ marginBottom: '4px' }}>
+                        <BadgeStatus status={getPuddleDetailById.data?.status} />
+                    </div>
                 </StyledTitleBoxHeader>
 
                 <StyledButton
@@ -999,16 +1133,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </StyledButton>
             </StyledBoxHeader>
             <br />
-            <StyleBoxSetting>
-                <StyledButton
-                    onClick={() => {
-                        setVisibleModalProcess(true)
-                    }}
-                    type='primary'
-                >
-                    เพิ่มรายการการทำงาน
-                </StyledButton>
-            </StyleBoxSetting>
 
             {Boolean(getNoticeTargetPending.data?.length) &&
                 getNoticeTargetPending.data.map((data, index) => (
@@ -1058,7 +1182,36 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 ))}
 
             <StyledBoxContent>
-                <span>รายการล่าสุด</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '8px' }}>
+                    <span>รายการล่าสุด</span>
+                    <StyledButton
+                        onClick={() => {
+                            setVisibleModalWorkingStatus(true)
+                        }}
+                    >
+                        working status{' '}
+                        {getPuddleDetailById?.data?.working_status_title
+                            ? `: ${getPuddleDetailById.data.working_status_title}`
+                            : ''}
+                    </StyledButton>
+                    <StyledButton
+                        disabled={!!getPuddleDetailById?.data?.start_date}
+                        onClick={() => {
+                            setVisibleModalDateStart(true)
+                        }}
+                    >
+                        {!!getPuddleDetailById?.data?.start_date
+                            ? `วันที่เริ่มหมัก : ${dayjs(getPuddleDetailById.data.start_date).format('DD/MM/YYYY')}`
+                            : 'ตั้งวันที่เริ่มหมัก'}
+                    </StyledButton>
+
+                    <span>
+                        สถานะการกลบเกลือของบ่อ :{' '}
+                        {getPuddleDetailById?.data?.topSalt === 1 ? 'กลบเกลือเเล้ว' : 'ยังไม่ได้กลบเกลือ'}
+                    </span>
+                </div>
+
+                <br />
                 {getOrdersDetailFromId.loading ? (
                     <StyledSectionLoading>
                         <Spin size='large' />
@@ -1077,6 +1230,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         )}
                     </>
                 )}
+
                 <StyledSectionAction>
                     <StyledButtonAction
                         onClick={() => {
@@ -1141,8 +1295,32 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         ดูรายการการเติมเกลือจากบิล
                     </StyledButtonAction>
                 </StyledSectionAction>
-            </StyledBoxContent>
 
+                {getPuddleDetailById?.data?.topSalt === 0 && (
+                    <StyledSectionAction>
+                        <ButtonApprove
+                            icon={<CheckOutlined />}
+                            onClick={() => {
+                                setVisibleModalConfirmTopSalt(true)
+                            }}
+                            type='primary'
+                        >
+                            ยืนยันการกลบเกลือ
+                        </ButtonApprove>
+                    </StyledSectionAction>
+                )}
+            </StyledBoxContent>
+            <br />
+            <StyleBoxSetting>
+                <StyledButton
+                    onClick={() => {
+                        setVisibleModalProcess(true)
+                    }}
+                    type='primary'
+                >
+                    เพิ่มรายการการทำงาน
+                </StyledButton>
+            </StyleBoxSetting>
             <Divider />
             <StyledBoxContent>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
@@ -1158,6 +1336,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         lastedOrder={orderDetailLasted}
                         onChangeAmountItems={handleChangeAmountItems}
                         onChangeBuilding={handleChangeBuilding}
+                        onChangeDate={onChangeDateTransfer}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
                         typeProcess={getTypeProcess?.data}
@@ -1170,7 +1349,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             {/* Sidebar GetIn Fishsaurce */}
             <StyledDrawer bodyStyle={{ paddingBottom: 80 }} onClose={onCloseGetIn} open={openGetIN} title='รับเข้า' width={720}>
                 <Form autoComplete='off' form={formGetIn} layout='vertical' onFinish={submitImportFishSaurce}>
-                    <GetInFishsauce />
+                    <GetInFishsauce onChangeDate={onChangeDateTransfer} />
                     <Button htmlType='submit' type='primary'>
                         Submit
                     </Button>
@@ -1193,6 +1372,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         lastedOrder={orderDetailLasted}
                         onChangeAmountItems={handleChangeAmountItems}
                         onChangeBuilding={handleChangeBuilding}
+                        onChangeDate={onChangeDateTransfer}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
                         throwOutProcess
@@ -1261,7 +1441,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 title='ยืนยันรการถ่ายกากทิ้ง'
             >
                 <ModalContent>
-                    <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วย'}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '24px' }}>
+                        <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                        <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วน'}</p>
+                    </div>
                 </ModalContent>
             </Modal>
             {/* modal เลือกการทำงาน */}
@@ -1457,6 +1640,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
             <Modal
                 centered
+                destroyOnClose
                 footer={null}
                 onCancel={() => {
                     setVisibleModalAddOnFishSauce(false)
@@ -1492,6 +1676,96 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </div>{' '}
                 </StyledForm>
             </Modal>
+
+            {/* modal working status */}
+            <Modal
+                centered
+                onCancel={() => {
+                    setVisibleModalWorkingStatus(false)
+                }}
+                onOk={() => {}}
+                open={visibleModalWorkingStatus}
+                title='working status'
+            >
+                <ModalContentTable>
+                    {getListWorkingStatus?.data ? (
+                        <StyledTableWorkingStatus>
+                            <tr>
+                                <th>status</th>
+                                <th>color</th>
+                                <th></th>
+                            </tr>
+                            {getListWorkingStatus?.data.map((data, index) => (
+                                <tr key={index}>
+                                    <td>{data.title}</td>
+                                    <td>
+                                        <div
+                                            style={{
+                                                width: '80px',
+                                                height: '30px',
+                                                borderRadius: '4px',
+                                                backgroundColor: data.color,
+                                            }}
+                                        ></div>
+                                    </td>
+                                    <td>
+                                        <StyledButton
+                                            onClick={() => {
+                                                handleChangeWorkingStatus(data.idworking_status)
+                                            }}
+                                            type='primary'
+                                        >
+                                            เลือก
+                                        </StyledButton>
+                                    </td>
+                                </tr>
+                            ))}
+                        </StyledTableWorkingStatus>
+                    ) : (
+                        <LoadingSections>
+                            <Spin size='large' tip='Loading...' />
+                        </LoadingSections>
+                    )}
+                </ModalContentTable>
+            </Modal>
+
+            {/* modal approve top salt */}
+            <Modal
+                centered
+                onCancel={() => {
+                    setVisibleModalConfirmTopSalt(false)
+                }}
+                onOk={() => {
+                    handleUpdateTopSalt()
+                }}
+                open={visibleModalConfirmTopSalt}
+                title='ยืนยันการกลบเกลือ'
+            >
+                <ModalContent>
+                    <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วน'}</p>
+                </ModalContent>
+            </Modal>
+
+            {/* modal date start ferment */}
+            <Modal
+                centered
+                destroyOnClose
+                onCancel={() => {
+                    setVisibleModalDateStart(false)
+                }}
+                onOk={() => {
+                    handleUpdateDateStart()
+                }}
+                open={visibleModalDateStart}
+                title='ตั้งวันที่เริ่มหมัก'
+            >
+                <ModalContent>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '24px' }}>
+                        <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
+                        <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วน'}</p>
+                    </div>
+                </ModalContent>
+            </Modal>
         </>
     )
 }
@@ -1505,6 +1779,42 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export default DetailPuddlePage
+
+const ButtonApprove = styled(Button)`
+    border-radius: 2px;
+    background-color: #1da57a;
+    border-color: #1da57a;
+
+    &:hover {
+        background-color: #52c41a;
+        border-color: #52c41a;
+    }
+`
+const StyledTableWorkingStatus = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+    td,
+    th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background: #00000011;
+    }
+`
+
+const LoadingSections = styled.div`
+    width: 100%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+`
 
 const StyledTable = styled(Table)`
     width: 100%;
@@ -1535,6 +1845,15 @@ const StyledForm = styled(Form)`
     width: 100%;
 `
 
+const ModalContentTable = styled.div`
+    max-height: 800px;
+    overflow: scroll;
+    p {
+        white-space: pre-line;
+        margin-bottom: 0;
+    }
+`
+
 const ModalContent = styled.div`
     p {
         white-space: pre-line;
@@ -1558,7 +1877,7 @@ const StyledAlert = styled(Alert)`
 
 const StyledDrawer = styled(Drawer)`
     .ant-drawer-header {
-        background: rgb(26, 28, 33) !important;
+        background: #51459e !important;
     }
     .ant-drawer-close {
         color: #ffffff !important;

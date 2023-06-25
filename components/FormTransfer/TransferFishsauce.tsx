@@ -1,4 +1,4 @@
-import { Form, Input, Select } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import { LabeledValue } from 'antd/lib/select'
 import styled from 'styled-components'
 
@@ -18,11 +18,20 @@ interface ITransferFishsauce {
     onSelectAction?: (labelValue: LabeledValue) => void
     typeProcess?: ITypeProcess[]
     throwOutProcess?: boolean
+    onChangeDate?: (value: moment.Moment, dateString: string) => void
 }
 
 const TransferFishsauce = (props: ITransferFishsauce) => {
-    const { puddleOption, onChangeAmountItems, amountItemsKG, buildingOption, onChangeBuilding, onSelectAction, typeProcess } =
-        props
+    const {
+        onChangeDate,
+        puddleOption,
+        onChangeAmountItems,
+        amountItemsKG,
+        buildingOption,
+        onChangeBuilding,
+        onSelectAction,
+        typeProcess,
+    } = props
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>
@@ -132,6 +141,14 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                         ))}
                 </Select>
             </StyledFormItems>
+            <StyledFormItems
+                label='วันที่ทำรายการ'
+                name='date_action'
+                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+            >
+                <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
+            </StyledFormItems>
+
             {/* {throwOutProcess && (
                 <StyledFormItems label='ยืนยันการถ่ายกากไปบ่ออื่น' name='throwOut' rules={[{ required: false }]}>
                     <Select onSelect={onSelectAction} placeholder='ยืนยันการถ่ายกากไปบ่ออื่น' style={{ width: '100%' }}>

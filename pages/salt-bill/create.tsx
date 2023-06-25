@@ -1,10 +1,11 @@
 import { Layout, Form } from 'antd'
-import { ReactElement } from 'react'
+import { ReactElement, useState, useEffect } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
+import type { DatePickerProps } from 'antd'
 
 import AppLayout from '../../components/Layouts'
-import { createReceiveSaltTask } from '../../share-module/FishWeightBill/task'
+import { createReceiveSaltTask, getCustomerByBillTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
 import { useNavigation } from '../../utils/use-navigation'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
@@ -15,13 +16,25 @@ const { Content } = Layout
 const CreateSaltBillPage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const navigation = useNavigation()
+    const [dateBill, setDateBill] = useState(null)
 
     const createReceiveSalt = createReceiveSaltTask.useTask()
+    const getCustomerByBill = getCustomerByBillTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            await getCustomerByBill.onRequest({ type_bill: 4 })
+        })()
+    }, [])
 
     const handleChangeValue = (changedValues: any, allValues: any) => {
         form.setFieldsValue({
             price_net: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
         })
+    }
+
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        setDateBill(dateString)
     }
 
     const handleSubmit = async (values: any) => {
@@ -33,6 +46,7 @@ const CreateSaltBillPage: NextPageWithLayout = () => {
                 price_net: Number(values.price_net),
                 customer: values.customer,
                 product_name: values.product_name,
+                date_action: dateBill,
             }
             const res = await createReceiveSalt.onRequest(payload)
             if (res.success === 'success') {
@@ -67,7 +81,7 @@ const CreateSaltBillPage: NextPageWithLayout = () => {
                     onFinish={handleSubmit}
                     onValuesChange={handleChangeValue}
                 >
-                    <CreateSaltBillBox />
+                    <CreateSaltBillBox customerList={getCustomerByBill.data} onChangeDate={onChangeDate} />
                 </StyledForm>
             </SectionFillter>
         </MainLayout>

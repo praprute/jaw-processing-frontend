@@ -1,10 +1,14 @@
 import { Col, Input, Row, Form, Button } from 'antd'
 import styled from 'styled-components'
 
-const FillterSaltBox = () => {
+interface IFillterBox {
+    title: string
+}
+const FillterSaltBox = (props: IFillterBox) => {
+    const { title } = props
     return (
         <BoxFillter>
-            <HeaderFillterBox>เรียกดูบิลเกลือ</HeaderFillterBox>
+            <HeaderFillterBox>{title}</HeaderFillterBox>
             <ContentFillter>
                 <Row gutter={[16, 8]}>
                     <Col md={12} sm={24} xs={24}>

@@ -1,7 +1,16 @@
-import { Col, Input, Row, Form, Button } from 'antd'
+import { Col, Input, Row, Form, Button, DatePicker, Select } from 'antd'
 import styled from 'styled-components'
 
-const CreateFormSolidSaltBill = () => {
+import { ICustomerList } from '../../share-module/FishWeightBill/type'
+const { Option } = Select
+
+interface ICreateFormSolidSaltBill {
+    customerList: ICustomerList[]
+    onChangeDate: (value: moment.Moment, dateString: string) => void
+}
+
+const CreateFormSolidSaltBill = (props: ICreateFormSolidSaltBill) => {
+    const { onChangeDate, customerList } = props
     return (
         <BoxFillter>
             <HeaderFillterBox>ลงทะเบียนบิลเกลือ</HeaderFillterBox>
@@ -47,11 +56,18 @@ const CreateFormSolidSaltBill = () => {
 
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems
-                            label='ชื่อลูกค้า'
+                            label='ชื่อผู้จำหน่าย'
                             name='customer'
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
-                            <Input placeholder='ชื่อลูกค้า' size='large' style={{ color: 'black' }} />
+                            <Select placeholder='ชื่อผู้จำหน่าย' size='large'>
+                                {customerList &&
+                                    customerList.map((data, index) => (
+                                        <Option key={index} value={data.name}>
+                                            {data.name}
+                                        </Option>
+                                    ))}
+                            </Select>
                         </StyledFormItems>
                     </Col>
                     <Col md={12} sm={24} xs={24}>
@@ -63,7 +79,15 @@ const CreateFormSolidSaltBill = () => {
                             <Input placeholder='ชื่อสินค้า' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
                     </Col>
-
+                    <Col md={24} sm={24} xs={24}>
+                        <StyledFormItems
+                            label='วันที่บิล'
+                            name='date_action'
+                            rules={[{ required: true, message: 'กรุณาระบุวันที่บิล' }]}
+                        >
+                            <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
+                        </StyledFormItems>
+                    </Col>
                     <Col md={24} sm={24} xs={24}>
                         <StyldeButtonSubmit htmlType='submit' type='primary'>
                             ลงทะเบียน

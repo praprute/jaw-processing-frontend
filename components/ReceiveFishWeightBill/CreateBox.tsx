@@ -1,5 +1,7 @@
-import { Col, Input, Row, Form, Button, Select } from 'antd'
+import { Col, Input, Row, Form, Button, Select, DatePicker } from 'antd'
 import styled from 'styled-components'
+
+import { ICustomerList } from '../../share-module/FishWeightBill/type'
 const { Option } = Select
 
 interface ICreateFishWeightBox {
@@ -7,14 +9,12 @@ interface ICreateFishWeightBox {
         idfish_type: number
         name: string
     }[]
+    customerList: ICustomerList[]
+    onChangeDate: (value: moment.Moment, dateString: string) => void
 }
-// TODO
-// const config = {
-//     rules: [{ type: 'object' as const, required: true, message: 'Please select time!' }],
-// }
 
 const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
-    const { listFish } = props
+    const { listFish, onChangeDate, customerList } = props
     return (
         <BoxFillter>
             <HeaderFillterBox>ลงทะเบียนใบชั่งปลา</HeaderFillterBox>
@@ -57,19 +57,7 @@ const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
                             <Input placeholder='ราคารวม' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
                     </Col>
-                    {/* TODO: */}
-                    {/* <Col md={12} sm={24} xs={24}>
-                        <StyledFormItemDatePicker label='เวลาเข้า' name='time_in' {...config}>
-                            <DatePicker
-                                placeholder='เวลาเข้า'
-                                name='time_in'
-                                showTime
-                                format='YYYY-MM-DD HH:mm:ss'
-                                size='large'
-                                style={{ width: '100%' }}
-                            />
-                        </StyledFormItemDatePicker>
-                    </Col> */}
+
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems
                             label='ทะเบียนรถ'
@@ -81,11 +69,18 @@ const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
                     </Col>
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems
-                            label='ชื่อลูกค้า'
+                            label='ชื่อผู้จำหน่าย'
                             name='customer_name'
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
-                            <Input placeholder='ชื่อลูกค้า' size='large' style={{ color: 'black' }} />
+                            <Select placeholder='ชื่อผู้จำหน่าย' size='large'>
+                                {customerList &&
+                                    customerList.map((data, index) => (
+                                        <Option key={index} value={data.name}>
+                                            {data.name}
+                                        </Option>
+                                    ))}
+                            </Select>
                         </StyledFormItems>
                     </Col>
                     <Col md={12} sm={24} xs={24}>
@@ -94,7 +89,7 @@ const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
                             name='product_name'
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
-                            <Select placeholder='ชื่อสินค้า'>
+                            <Select placeholder='ชื่อสินค้า' size='large'>
                                 {listFish &&
                                     listFish.map((data, index) => (
                                         <Option key={index} value={data.name}>
@@ -111,6 +106,15 @@ const CreateFishWeightBox = (props: ICreateFishWeightBox) => {
                             rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                         >
                             <Input placeholder='สถานที่จัดเก็บ' size='large' style={{ color: 'black' }} />
+                        </StyledFormItems>
+                    </Col>
+                    <Col md={24} sm={24} xs={24}>
+                        <StyledFormItems
+                            label='วันที่บิล'
+                            name='date_action'
+                            rules={[{ required: true, message: 'กรุณาระบุวันที่บิล' }]}
+                        >
+                            <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
                         </StyledFormItems>
                     </Col>
                     <Col md={24} sm={24} xs={24}>

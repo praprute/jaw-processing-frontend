@@ -34,8 +34,15 @@ const AppLayout = (props: ILayout) => {
         { key: '/salt-bill', name: 'ระบบบิลเกลือ และ น้ำเกลือ' },
         { key: '/fishsauce-bill', name: 'ระบบบิลน้ำปลา' },
         { key: '/process-management-setting', name: 'ตั้งค่า' },
+
         // { key: '/c', name: 'Accounting Doc' },
         // { key: '/d', name: 'Setting' },
+    ]
+    const menuItems_CUSTOMER = [
+        { key: '/customer-management/fish-customer', name: 'ผู้จำหน่ายปลา' },
+        { key: '/customer-management/fishsauce-customer', name: 'ผู้จำหน่ายปลาน้ำปลา' },
+        { key: '/customer-management/solid-salt-customer', name: 'ผู้จำหน่ายเกลือ' },
+        { key: '/customer-management/salt-water-customer', name: 'ผู้จำหน่ายน้ำเกลือ' },
     ]
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
     const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
@@ -43,6 +50,13 @@ const AppLayout = (props: ILayout) => {
     const menuItems_USER = [{ key: '/menuItems_USER', name: 'Coming soon' }]
 
     const itemsMenu: MenuProps['items'] = menuItems.map((text) => {
+        return {
+            key: `${text.key}`,
+            label: `${text.name}`,
+        }
+    })
+
+    const itemsMenu_CUSTOMER: MenuProps['items'] = menuItems_CUSTOMER.map((text) => {
         return {
             key: `${text.key}`,
             label: `${text.name}`,
@@ -132,9 +146,9 @@ const AppLayout = (props: ILayout) => {
     const CardInfo = () => {
         return (
             <WrapCardInfo>
-                <Avatar size='large' style={{ backgroundColor: '#f0b90b', verticalAlign: 'middle', marginBottom: '16px' }}>
+                <StyledAvatar size='large' style={{ backgroundColor: '#51459E', verticalAlign: 'middle', marginBottom: '16px' }}>
                     {stringAvatar(myInfo?.name)}
-                </Avatar>
+                </StyledAvatar>
                 {myInfo && (
                     <WrapDetailInfo>
                         <p style={{ padding: 0, margin: 0 }}>{myInfo?.name.toUpperCase()}</p>
@@ -161,6 +175,18 @@ const AppLayout = (props: ILayout) => {
                 <StyledMenu
                     defaultSelectedKeys={[defaultKey]}
                     items={itemsMenu}
+                    mode='inline'
+                    onSelect={(values) => {
+                        router.push(values.key)
+                    }}
+                    style={{ height: '100%', borderRight: 0 }}
+                    theme='dark'
+                />
+                {/* itemsMenu_CUSTOMER */}
+                <StyledTitleMenu>CUSTOMER MENAGEMENT</StyledTitleMenu>
+                <StyledMenu
+                    defaultSelectedKeys={[defaultKey]}
+                    items={itemsMenu_CUSTOMER}
                     mode='inline'
                     onSelect={(values) => {
                         router.push(values.key)
@@ -250,21 +276,14 @@ const AppLayout = (props: ILayout) => {
                 }
                 visible={visible}
             >
-                {/* <LeftMenu menus={LeftMenuItems} /> */}
-
                 <MenuPath />
             </WrapperDrawer>
 
             <Layout>
                 {!hideSidebar && (
-                    <WrapSider
-                        breakpoint='lg'
-                        collapsedWidth='0'
-                        style={{ background: 'rgb(35, 37, 43)', padding: '10px 10px' }}
-                        width={245}
-                    >
-                        {/* <LeftMenu menus={LeftMenuItems} /> */}
+                    <WrapSider breakpoint='lg' collapsedWidth='0' style={{ padding: '10px 10px', height: '100%' }} width={295}>
                         <MenuPath />
+
                         <br />
                         <StyledLogOut onClick={handleSignOut} size='large'>
                             SIGNOUT
@@ -289,6 +308,14 @@ const AppLayout = (props: ILayout) => {
 
 export default AppLayout
 
+const StyledAvatar = styled(Avatar)`
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+`
+
 // TODO:
 // const MenuWrapper = styled.div<{ $active: boolean }>`
 //     height: 48px;
@@ -312,7 +339,7 @@ const StyledSearch = styled(Input)`
 `
 const StyledLogOut = styled(Button)`
     width: 100%;
-    border-radius: 2px;
+    border-radius: 8px;
     color: white;
     background: #f5222d;
     border-color: transparent;
@@ -358,13 +385,21 @@ const StyledTitleMenu = styled.p`
     font-size: 12px;
     font-weight: 700;
     margin-bottom: 0;
-    color: #ffffff;
+
+    color: #000000;
 `
 const StyledMenu = styled(Menu)`
     background: transparent;
-    color: black;
+
     &&.ant-menu-dark.ant-menu-inline .ant-menu-item {
-        border-radius: 2px !important;
+        border-radius: 10px !important;
+    }
+
+    &&.ant-menu-dark.ant-menu-inline .ant-menu-item {
+        color: #00000096;
+    }
+    &&.ant-menu-dark.ant-menu-inline .ant-menu-item.ant-menu-item-selected {
+        color: white !important;
     }
 `
 const StyledLayOut = styled(Layout)`
@@ -385,16 +420,18 @@ const StyledContent = styled(Content)<{ isFullscreen?: boolean }>`
     background: #f7f8f9;
     min-height: 100vh;
     color: black;
+    border-left: 1px solid #00000011;
 `
 const WrapHeader = styled(Header)`
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: rgb(35, 37, 43);
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 500;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    height: 75px;
     padding: 0 30px;
     span {
         font-size: 16px;
@@ -422,7 +459,7 @@ const WrapDetailInfo = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: #000000;
 `
 
 const WrapCardInfo = styled.div`
@@ -448,4 +485,5 @@ const WrapSider = styled(Sider)`
     @media only screen and (max-width: 769px) {
         display: none;
     }
+    background: #ffffff;
 `

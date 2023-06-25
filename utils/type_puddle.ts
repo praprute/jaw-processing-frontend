@@ -10,6 +10,7 @@ export enum TypeOrderPuddle {
     STOCK = 7,
     REPELLENT = 8,
     HITMARK = 9,
+    FAIL = 10,
 }
 
 export enum TypeProcess {

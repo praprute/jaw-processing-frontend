@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Button, Input, Modal, Spin } from 'antd'
+import styled, { css } from 'styled-components'
+import { Button, Form, Input, Modal, Spin } from 'antd'
+import { Colorpicker } from 'antd-colorpicker'
 
 import AppLayout from '../../components/Layouts'
 import { NextPageWithLayout } from '../_app'
@@ -8,10 +9,13 @@ import { getTypeProcessTask, submitTypeProcessTask } from '../../share-module/pu
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 import {
     createFishTypeTask,
+    createWorkingStatusTask,
     deleteFishTypeTask,
+    deleteWorkingStatusTask,
     getAllFeeLaborFermentTask,
     getAllFeeLaborPerBuildingTask,
     getListFishTypeTask,
+    getWorkingStatusTypeTask,
     updateFeeLaborFermentTask,
     updateFeeLaborPerBuildingTask,
 } from '../../share-module/order/task'
@@ -33,6 +37,12 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
     const [stateUpdateCostPerBuilding, setStateUpdateCostPerBuilding] = useState<ICostLaborPerBuildingDto>(null)
     const [valueCostLaborByBuilding, setValueCostLaborByBuilding] = useState('0')
     const [valueFishType, setValueFishType] = useState(null)
+    const [titleWorkingStatus, setTitleWorkingStatus] = useState(null)
+    const [colorWorkingStatus, setColorWorkingStatus] = useState(null)
+
+    const initialValues = { color: { r: 26, g: 14, b: 85, a: 1 } }
+
+    // titleWorkingStatus
 
     const getTypeProcess = getTypeProcessTask.useTask()
     const submitTypeProcess = submitTypeProcessTask.useTask()
@@ -43,12 +53,16 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
     const getListFishType = getListFishTypeTask.useTask()
     const createFishType = createFishTypeTask.useTask()
     const deleteFishType = deleteFishTypeTask.useTask()
+    const getListWorkingStatus = getWorkingStatusTypeTask.useTask()
+    const createWorkingStatus = createWorkingStatusTask.useTask()
+    const deleteWorkingStatus = deleteWorkingStatusTask.useTask()
 
     useEffect(() => {
         ;(async () => {
             await getTypeProcess.onRequest()
             await getAllFeeLaborPerBuilding.onRequest()
             await getListFishType.onRequest()
+            await getListWorkingStatus.onRequest()
             const costLaborFerment = await getAllFeeLaborFerment.onRequest()
             setIdCostLaborFerment(costLaborFerment.idlabor_price_ferment)
         })()
@@ -97,6 +111,40 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
         } catch (e: any) {
             NoticeError('ทำรายการไม่สำเร็จ')
             setValueFishType(null)
+        }
+    }
+
+    const handleChangeColor = async (value: any) => {
+        setColorWorkingStatus(value.hex)
+    }
+
+    const handleSubmitCreateWorkingStatus = async () => {
+        try {
+            if (titleWorkingStatus === null || titleWorkingStatus === '') {
+                return
+            } else {
+                await createWorkingStatus.onRequest({ title: titleWorkingStatus, color: colorWorkingStatus.toString() })
+                await getListWorkingStatus.onRequest()
+                NoticeSuccess('ทำรายการสำเร็จ')
+            }
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setTitleWorkingStatus(null)
+            setColorWorkingStatus(null)
+        }
+    }
+
+    const handleDeleteWorkingStatus = async (id: number) => {
+        try {
+            await deleteWorkingStatus.onRequest({ idworking_status: id })
+            await getListWorkingStatus.onRequest()
+            NoticeSuccess('ทำรายการสำเร็จ')
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setTitleWorkingStatus(null)
+            setColorWorkingStatus(null)
         }
     }
 
@@ -266,6 +314,73 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                         </StyledButton>
                     </Content>
                 </BoxContent>
+
+                <BoxContent>
+                    <HeaderBoxContent>Working Status</HeaderBoxContent>
+                    <Content isMinHeight={'800'}>
+                        {getListWorkingStatus?.data ? (
+                            <StyledTable>
+                                <tr>
+                                    <th>status</th>
+                                    <th>color</th>
+                                    <th>action</th>
+                                </tr>
+                                {getListWorkingStatus?.data.map((data, index) => (
+                                    <tr key={index}>
+                                        <td>{data.title}</td>
+                                        <td>
+                                            <div
+                                                style={{
+                                                    width: '80px',
+                                                    height: '30px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: data.color,
+                                                }}
+                                            ></div>
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    handleDeleteWorkingStatus(data.idworking_status)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ลบ
+                                            </StyledButton>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </StyledTable>
+                        ) : (
+                            <LoadingSections>
+                                <Spin size='large' tip='Loading...' />
+                            </LoadingSections>
+                        )}
+                        <br />
+
+                        <Form initialValues={initialValues} style={{ width: '100%' }}>
+                            <Form.Item style={{ width: '100%' }}>
+                                <Input
+                                    onChange={(e) => {
+                                        setTitleWorkingStatus(e.target.value)
+                                    }}
+                                    placeholder='Working Status'
+                                    value={titleWorkingStatus}
+                                />
+                                {/* <Button type='primary' htmlType='submit'>
+                                    Show values in console
+                                </Button> */}
+                            </Form.Item>{' '}
+                            <Form.Item label={'Colorpicker'} name={`color`}>
+                                <Colorpicker onChange={handleChangeColor} popup />
+                            </Form.Item>
+                        </Form>
+
+                        <StyledButton block onClick={handleSubmitCreateWorkingStatus} type='primary'>
+                            ตกลง
+                        </StyledButton>
+                    </Content>
+                </BoxContent>
             </Container>
 
             <StyledModal
@@ -357,7 +472,7 @@ const StyledButton = styled(Button)`
 const StyledUl = styled.ul`
     margin-left: 24px;
 `
-const Content = styled.div`
+const Content = styled.div<{ isMinHeight?: string }>`
     width: 100%;
     height: fit-content;
     max-height: 300px;
@@ -366,6 +481,12 @@ const Content = styled.div`
     display: flex;
     align-items: start;
     flex-direction: column;
+    ${({ isMinHeight }) =>
+        isMinHeight &&
+        css`
+            min-height: ${isMinHeight}px;
+            max-height: 100%;
+        `}
 `
 
 const Main = styled.div`

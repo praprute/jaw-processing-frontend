@@ -1,5 +1,11 @@
 export const MODULE_NAME = '@FishWeightBill'
 
+export interface ICustomerList {
+    idcustomer_bill: number
+    name: string
+    type_bill: number
+    date_create: string
+}
 export interface IDtoFishWeight {
     idreceipt: number
     no: string

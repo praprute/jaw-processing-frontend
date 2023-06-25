@@ -17,7 +17,11 @@ export interface IDetailPuddle {
     update_time: string
     description?: any
     date_create: string
+    date_action?: string
     serial?: string
+    working_status_title?: string
+    topSalt?: number
+    start_date?: string
 }
 
 export interface IAllPuddleDto {
@@ -30,6 +34,10 @@ export interface IAllPuddleDto {
     date_create: string
     description?: string
     serial?: string
+    color?: string
+    working_status_title?: string
+    topSalt?: number
+    start_date?: string
 }
 
 export interface IResAllPuddleDto {

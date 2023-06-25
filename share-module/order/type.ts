@@ -18,6 +18,7 @@ export interface ISubmitGetIn {
     remaining_volume: number
     action_puddle: number
     action_serial_puddle: number
+    date_action?: string
 }
 
 export interface INoticeTargetPendingDto {
@@ -69,6 +70,7 @@ export interface IPayloadTransferFishSauce {
     action_puddle: number
     serial_puddle: number
     process?: number
+    date_action?: string
 }
 export interface IPayloadTransferSaltWater {
     order_id: number
@@ -139,4 +141,5 @@ export interface IOrderDetailDto {
     type_process?: number
     idtype_process?: number
     process_name?: string
+    date_action?: string
 }

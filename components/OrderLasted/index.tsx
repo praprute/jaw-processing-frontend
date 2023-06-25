@@ -1,6 +1,7 @@
 import { Button } from 'antd'
 import React from 'react'
 import styled from 'styled-components'
+import dayjs from 'dayjs'
 
 import { IOrderDetailDto } from '../../share-module/order/type'
 import { numberWithCommas } from '../../utils/format-number'
@@ -43,6 +44,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
         }
     }
 
+    console.log('data : ', data)
     return (
         <StyledContent>
             <span>หมายเลขรายการ : {data[0].idOrders}</span>
@@ -64,7 +66,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.FERMENT && (
                                 <>
                                     <StyledRowTransaction>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td>ปลา</td>
                                         <td>{numberWithCommas(data.fish)}</td>
@@ -125,7 +127,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.TRANSFER && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
@@ -171,7 +173,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.IMPORT && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>
@@ -216,7 +218,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.CLEARING && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>
@@ -262,7 +264,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.GETFISHRESIDUE && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>
@@ -308,7 +310,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.CLEARINGALL && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td>-{numberWithCommas(data.amount_items)}</td>
@@ -354,7 +356,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.ADDONWATERSALT && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>
@@ -399,7 +401,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.ADDONFISHSAUCE && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>
@@ -444,7 +446,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.TRANSFERSALTWATER && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
@@ -491,7 +493,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                             {data.type === TypeProcess.IMPORTSALTWATER && (
                                 <>
                                     <StyledRowTransaction isStatus={data.type}>
-                                        <td>{data.date_create}</td>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
                                         <td>{handleTypeOrder(data.type)}</td>
                                         <td></td>
                                         <td> {numberWithCommas(data.amount_items)}</td>

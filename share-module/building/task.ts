@@ -112,3 +112,65 @@ export const getPuddleByIdBuilding = async (building_id: number) => {
         return { success: 'error', message: e.response?.data[0]?.message }
     }
 }
+
+export const changeWorkingStatusPuddleTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'changeWorkingStatusPuddle',
+    defaultData: {} as any,
+    defaultPayload: {} as { puddle_id: number; working_status: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(
+                    `${process.env.NEXT_PUBLIC_HOST}/changeWorkingStatusPuddle`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const updateStatusTopSaltTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateStatusTopSalt',
+    defaultData: {} as any,
+    defaultPayload: {} as { idpuddle: number; topSalt: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(
+                    `${process.env.NEXT_PUBLIC_HOST}/updateStatusTopSaltTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+export const updateDateStartFermantTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateDateStartFermant',
+    defaultData: {} as any,
+    defaultPayload: {} as { idpuddle: number; start_date: string },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(
+                    `${process.env.NEXT_PUBLIC_HOST}/updateDateStartFermantTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})

@@ -1,7 +1,12 @@
-import { Form, Input } from 'antd'
+import { DatePicker, Form, Input } from 'antd'
 import styled from 'styled-components'
 
-const GetInFishsauce = () => {
+interface ITransferFishsauce {
+    onChangeDate?: (value: moment.Moment, dateString: string) => void
+}
+
+const GetInFishsauce = (props: ITransferFishsauce) => {
+    const { onChangeDate } = props
     return (
         <>
             <StyledFormItems
@@ -102,6 +107,13 @@ const GetInFishsauce = () => {
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
                 <Input placeholder='มูลค่า คงเหลือ' size='large' style={{ color: 'black' }} />
+            </StyledFormItems>
+            <StyledFormItems
+                label='วันที่ทำรายการ'
+                name='date_action'
+                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+            >
+                <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
             </StyledFormItems>
         </>
     )

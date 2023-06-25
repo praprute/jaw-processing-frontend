@@ -1,17 +1,20 @@
 import { LeftOutlined } from '@ant-design/icons'
-import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox, Tabs } from 'antd'
+import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox, Tabs, DatePicker } from 'antd'
 import { useRouter } from 'next/router'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
 import type { CheckboxChangeEvent } from 'antd/es/checkbox'
+import type { DatePickerProps } from 'antd'
 
 import AppLayout from '../../../components/Layouts'
 import ModalLoading from '../../../components/Modal/ModalLoading'
 import {
-    getReceiveFishWeightPaginationTask,
-    getReceiveSolidSaltPaginationTask,
+    // getReceiveFishWeightPaginationTask,
+    getReceiveFishWeightPaginationWithOutEmptyTask,
+    // getReceiveSolidSaltPaginationTask,
+    getReceiveSolidSaltPaginationWithOutEmptyTask,
     insertLogBillOpenOrderTask,
     insertLogSolidSaltBillOpenOrderTask,
 } from '../../../share-module/FishWeightBill/task'
@@ -82,6 +85,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [checkedCostLaborBuilding, setCheckedLaborBuilding] = useState(false)
     const [checkedCostLaborFerment, setCheckedCostLaborFerment] = useState(false)
     const [checkedCostLaborFree, setCheckedCostLaborFree] = useState(false)
+    const [dateStart, setDateStart] = useState(null)
 
     const createOrder = createOrderTask.useTask()
 
@@ -93,12 +97,12 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [sourceDataSolidSalt, setSourceDataSolidSalt] = useState([])
     const [totalListSolidSalt, setTotalListSolidSalt] = useState(0)
 
-    const getReceiveFishWeight = getReceiveFishWeightPaginationTask.useTask()
+    const getReceiveFishWeight = getReceiveFishWeightPaginationWithOutEmptyTask.useTask()
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const insertLogBillOpenOrder = insertLogBillOpenOrderTask.useTask()
     const getFeeLaborPerBuildingByBuilding = getFeeLaborPerBuildingByBuildingTask.useTask()
     const getAllFeeLaborFerment = getAllFeeLaborFermentTask.useTask()
-    const getReceiveSolidSaltPagination = getReceiveSolidSaltPaginationTask.useTask()
+    const getReceiveSolidSaltPagination = getReceiveSolidSaltPaginationWithOutEmptyTask.useTask()
     const insertLogSolidSaltBillOpenOrder = insertLogSolidSaltBillOpenOrderTask.useTask()
 
     const OFFSET_PAGE = 10
@@ -246,33 +250,41 @@ const CreateOrderPage: NextPageWithLayout = () => {
             label: 'บ่อหมัก',
         },
         {
-            value: TypeOrderPuddle.CIRCULAR,
-            label: 'บ่อเวียน',
+            value: TypeOrderPuddle.FREE,
+            label: 'บ่อว่าง',
         },
         {
-            value: TypeOrderPuddle.BREAK,
-            label: 'บ่อพักใส',
+            value: TypeOrderPuddle.FAIL,
+            label: 'บ่อชำรุด',
         },
-        {
-            value: TypeOrderPuddle.MIXING,
-            label: 'บ่อผสม',
-        },
-        {
-            value: TypeOrderPuddle.FILTER,
-            label: 'บ่อกรอง',
-        },
-        {
-            value: TypeOrderPuddle.STOCK,
-            label: 'บ่อพัก',
-        },
-        {
-            value: TypeOrderPuddle.REPELLENT,
-            label: 'บ่อไล่น้ำสอง',
-        },
-        {
-            value: TypeOrderPuddle.HITMARK,
-            label: 'บ่อตีกาก',
-        },
+        // {
+        //     value: TypeOrderPuddle.CIRCULAR,
+        //     label: 'บ่อเวียน',
+        // },
+        // {
+        //     value: TypeOrderPuddle.BREAK,
+        //     label: 'บ่อพักใส',
+        // },
+        // {
+        //     value: TypeOrderPuddle.MIXING,
+        //     label: 'บ่อผสม',
+        // },
+        // {
+        //     value: TypeOrderPuddle.FILTER,
+        //     label: 'บ่อกรอง',
+        // },
+        // {
+        //     value: TypeOrderPuddle.STOCK,
+        //     label: 'บ่อพัก',
+        // },
+        // {
+        //     value: TypeOrderPuddle.REPELLENT,
+        //     label: 'บ่อไล่น้ำสอง',
+        // },
+        // {
+        //     value: TypeOrderPuddle.HITMARK,
+        //     label: 'บ่อตีกาก',
+        // },
     ]
 
     const summaryPricePerUnit = useMemo(() => {
@@ -295,15 +307,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     }, [summaryPricePerUnit])
 
     useEffect(() => {
-        if (
-            statusPuddleOrder === TypeOrderPuddle.CIRCULAR ||
-            statusPuddleOrder === TypeOrderPuddle.FILTER ||
-            statusPuddleOrder === TypeOrderPuddle.BREAK ||
-            statusPuddleOrder === TypeOrderPuddle.MIXING ||
-            statusPuddleOrder === TypeOrderPuddle.STOCK ||
-            statusPuddleOrder === TypeOrderPuddle.REPELLENT ||
-            statusPuddleOrder === TypeOrderPuddle.HITMARK
-        ) {
+        if (statusPuddleOrder !== TypeOrderPuddle.FERMENT) {
             form.setFieldsValue({
                 fish: 0,
                 fish_price: 0,
@@ -392,6 +396,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 salt_price: parseFloat2Decimals(form.getFieldValue('salt_price')),
                 laber_price: parseFloat2Decimals(form.getFieldValue('laber_price')),
                 amount_items: statusPuddleOrder === TypeOrderPuddle.FERMENT ? MAX_ITEMS_PERCENTAGE : 0,
+                start_date: dateStart,
             }
 
             const result = await createOrder.onRequest(payload)
@@ -431,6 +436,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 // )
 
                 navigation.navigateTo.toBack()
+
+                form.resetFields()
             }
         } catch (err: any) {
             NoticeError('ทำรายการไม่สำเร็จ')
@@ -540,6 +547,10 @@ const CreateOrderPage: NextPageWithLayout = () => {
             setCheckedCostLaborFerment(false)
         }
         setCheckedCostLaborFree(e.target.checked)
+    }
+
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        setDateStart(dateString)
     }
 
     return (
@@ -685,13 +696,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                         <Input placeholder='ปริมาตรตั้งต้น' size='large' style={{ color: 'black' }} />
                                     </StyledFormItems>
                                 )}
-                                {(statusPuddleOrder === TypeOrderPuddle.CIRCULAR ||
-                                    statusPuddleOrder === TypeOrderPuddle.FILTER ||
-                                    statusPuddleOrder === TypeOrderPuddle.BREAK ||
-                                    statusPuddleOrder === TypeOrderPuddle.MIXING ||
-                                    statusPuddleOrder === TypeOrderPuddle.REPELLENT ||
-                                    statusPuddleOrder === TypeOrderPuddle.HITMARK ||
-                                    statusPuddleOrder === TypeOrderPuddle.STOCK) && (
+                                {statusPuddleOrder !== TypeOrderPuddle.FERMENT && (
                                     <StyledFormItems
                                         label='ความจุของบ่อนี้'
                                         name='volume'
@@ -707,7 +712,30 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                 <StyledFormItems
                                     label='ราคาต่อหน่วย'
                                     name='price_per_unit'
-                                    rules={[{ required: true, message: 'กรุณาเลือกประเภทบ่อ' }]}
+                                    rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                                >
+                                    <Input disabled placeholder='ราคาต่อหน่วย' size='large' style={{ color: 'black' }} />
+                                </StyledFormItems>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                            <Col span={12} xs={24}>
+                                <StyledFormItems
+                                    label='วันที่ทำรายการ'
+                                    name='start_date'
+                                    rules={[{ required: true, message: 'กรุณาเลือกวันที่ทำรายการ' }]}
+                                >
+                                    <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
+                                    {/* <Input disabled placeholder='ราคาต่อหน่วย' size='large' style={{ color: 'black' }} /> */}
+                                </StyledFormItems>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                            <Col span={12} xs={24}>
+                                <StyledFormItems
+                                    label='ราคาต่อหน่วย'
+                                    name='price_per_unit'
+                                    rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                                 >
                                     <Input disabled placeholder='ราคาต่อหน่วย' size='large' style={{ color: 'black' }} />
                                 </StyledFormItems>

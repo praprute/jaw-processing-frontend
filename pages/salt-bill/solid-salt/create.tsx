@@ -1,11 +1,12 @@
 import { Layout, Form } from 'antd'
-import { ReactElement } from 'react'
+import { ReactElement, useState, useEffect } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
+import type { DatePickerProps } from 'antd'
 
 import { NextPageWithLayout } from '../../_app'
 import { useNavigation } from '../../../utils/use-navigation'
-import { createReceiveSolidSaltTask } from '../../../share-module/FishWeightBill/task'
+import { createReceiveSolidSaltTask, getCustomerByBillTask } from '../../../share-module/FishWeightBill/task'
 import { NoticeError, NoticeSuccess } from '../../../utils/noticeStatus'
 import AppLayout from '../../../components/Layouts'
 import CreateFormSolidSaltBill from '../../../components/SaltBill/CreateFormSolidSaltBill'
@@ -15,13 +16,24 @@ const { Content } = Layout
 const CreateSolidSaltBillPage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const navigation = useNavigation()
-
+    const [dateBill, setDateBill] = useState(null)
     const createReceiveSolidSalt = createReceiveSolidSaltTask.useTask()
+    const getCustomerByBill = getCustomerByBillTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            await getCustomerByBill.onRequest({ type_bill: 3 })
+        })()
+    }, [])
 
     const handleChangeValue = (changedValues: any, allValues: any) => {
         form.setFieldsValue({
             price_net: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
         })
+    }
+
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        setDateBill(dateString)
     }
 
     const handleSubmit = async (values: any) => {
@@ -33,6 +45,7 @@ const CreateSolidSaltBillPage: NextPageWithLayout = () => {
                 price_net: Number(values.price_net),
                 customer: values.customer,
                 product_name: values.product_name,
+                date_action: dateBill,
             }
             const res = await createReceiveSolidSalt.onRequest(payload)
             if (res.success === 'success') {
@@ -67,7 +80,7 @@ const CreateSolidSaltBillPage: NextPageWithLayout = () => {
                     onFinish={handleSubmit}
                     onValuesChange={handleChangeValue}
                 >
-                    <CreateFormSolidSaltBill />
+                    <CreateFormSolidSaltBill customerList={getCustomerByBill.data} onChangeDate={onChangeDate} />
                 </StyledForm>
             </SectionFillter>
         </MainLayout>

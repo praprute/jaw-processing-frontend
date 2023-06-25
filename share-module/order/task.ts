@@ -32,6 +32,7 @@ export const createOrderTask = createReduxAsyncTask({
         salt_price: number
         laber_price: number
         amount_items: number
+        start_date: string
     },
     saga: ({ actions }) =>
         function* (action) {
@@ -220,6 +221,7 @@ export const submitCloseProcessTask = createReduxAsyncTask({
         approved: number
         volume: number
         remaining_volume: number
+        date_action: string
     },
     saga: ({ actions }) =>
         function* (action) {
@@ -256,6 +258,7 @@ export const submitAddOnSaltWaterTask = createReduxAsyncTask({
         new_stock: number
         idreceipt: number
         id_puddle: number
+        date_action?: string
     },
     saga: ({ actions }) =>
         function* (action) {
@@ -288,6 +291,7 @@ export const submitAddOnFishSauceTask = createReduxAsyncTask({
         new_stock: number
         idreceipt: number
         id_puddle: number
+        date_action: string
     },
     saga: ({ actions }) =>
         function* (action) {
@@ -460,6 +464,66 @@ export const deleteFishTypeTask = createReduxAsyncTask({
                 const { idfish_type } = action.payload
                 const config = yield configAPI()
                 const { data } = yield axios.delete(`${process.env.NEXT_PUBLIC_HOST}/deleteFishType/${idfish_type}`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+// Settign Working Status
+
+export const getWorkingStatusTypeTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getWorkingStatusType',
+    defaultData: {} as {
+        idworking_status: number
+        title: string
+        color: string
+    }[],
+    saga: ({ actions }) =>
+        function* () {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getListWorkingStatus`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const createWorkingStatusTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createWorkingStatus',
+    defaultData: {} as any,
+    defaultPayload: {} as { title: string; color: string },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createWorkingStatus`, action.payload, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const deleteWorkingStatusTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'deleteWorkingStatus',
+    defaultData: {} as any,
+    defaultPayload: {} as { idworking_status: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { idworking_status } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.delete(
+                    `${process.env.NEXT_PUBLIC_HOST}/deleteWorkingStatus/${idworking_status}`,
+                    config,
+                )
                 yield put(actions.success(data.message))
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))

@@ -1,10 +1,11 @@
-import { ReactElement } from 'react'
+import { ReactElement, useState, useEffect } from 'react'
 import { Layout, Form } from 'antd'
 import { LeftOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
+import type { DatePickerProps } from 'antd'
 
 import AppLayout from '../../components/Layouts'
-import { createReceiveFishSauceTask } from '../../share-module/FishWeightBill/task'
+import { createReceiveFishSauceTask, getCustomerByBillTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
 import { useNavigation } from '../../utils/use-navigation'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
@@ -15,13 +16,24 @@ const { Content } = Layout
 const CreateFishSauceBillPage: NextPageWithLayout = () => {
     const [form] = Form.useForm()
     const navigation = useNavigation()
-
+    const [dateBill, setDateBill] = useState(null)
     const createReceiveFishSauce = createReceiveFishSauceTask.useTask()
+    const getCustomerByBill = getCustomerByBillTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            await getCustomerByBill.onRequest({ type_bill: 1 })
+        })()
+    }, [])
 
     const handleChangeValue = (changedValues: any, allValues: any) => {
         form.setFieldsValue({
             price_net: Number(allValues.price_per_weigh) * Number(allValues.weigh_net),
         })
+    }
+
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        setDateBill(dateString)
     }
 
     const handleSubmit = async (values: any) => {
@@ -33,6 +45,7 @@ const CreateFishSauceBillPage: NextPageWithLayout = () => {
                 price_net: Number(values.price_net),
                 customer: values.customer,
                 product_name: values.product_name,
+                date_action: dateBill,
             }
             const res = await createReceiveFishSauce.onRequest(payload)
             if (res.success === 'success') {
@@ -67,7 +80,7 @@ const CreateFishSauceBillPage: NextPageWithLayout = () => {
                     onFinish={handleSubmit}
                     onValuesChange={handleChangeValue}
                 >
-                    <CreateFishSauceBillBox />
+                    <CreateFishSauceBillBox customerList={getCustomerByBill.data} onChangeDate={onChangeDate} />
                 </StyledForm>
             </SectionFillter>
         </MainLayout>

@@ -105,6 +105,7 @@ const PuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    //
     return (
         <>
             <Head>
@@ -149,6 +150,7 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     data.status !== 999 &&
                                                         navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
                                                 }}
+                                                style={{ backgroundColor: data.color }}
                                             >
                                                 <StyledTitleBetween>
                                                     <span>{data?.serial}</span>
@@ -156,7 +158,22 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
                                                     </span>
                                                     <span>{mapStatusPuddle(data.status)}</span>
-                                                    {/* <span>{data.description}</span> */}
+                                                </StyledTitleBetween>
+                                                <StyledTitleBetween>
+                                                    <span>
+                                                        {!!data?.working_status_title
+                                                            ? data?.working_status_title
+                                                            : 'non process'}
+                                                    </span>
+                                                    {!!data?.start_date
+                                                        ? `${dayjs().diff(dayjs(data?.start_date), 'day')} วัน`
+                                                        : '0  วัน'}
+
+                                                    {data?.topSalt === 1 ? (
+                                                        <span>กลบเกลือแล้ว</span>
+                                                    ) : (
+                                                        <span>ยังไม่กลบเกลือ</span>
+                                                    )}
                                                 </StyledTitleBetween>
                                             </StyledGlassBox>
                                         </Col>
@@ -173,6 +190,7 @@ const PuddlePage: NextPageWithLayout = () => {
                                                 data.status !== 999 &&
                                                     navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
                                             }}
+                                            style={{ backgroundColor: data.color }}
                                         >
                                             <StyledTitleBetween>
                                                 <span>{data?.serial}</span>
@@ -180,7 +198,15 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
                                                 </span>
                                                 <span>{mapStatusPuddle(data.status)}</span>
-                                                {/* <span>{data.description}</span> */}
+                                            </StyledTitleBetween>
+                                            <StyledTitleBetween>
+                                                <span>
+                                                    {!!data?.working_status_title ? data?.working_status_title : 'non process'}
+                                                </span>
+                                                {!!data?.start_date
+                                                    ? `${dayjs().diff(dayjs(data?.start_date), 'day')} วัน`
+                                                    : '0  วัน'}
+                                                {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
                                             </StyledTitleBetween>
                                         </StyledGlassBox>
                                     ))}
@@ -297,7 +323,14 @@ const StyledGlassBox = styled.div<{ isStatus: number }>`
     backdrop-filter: blur(5.3px);
     -webkit-backdrop-filter: blur(5.3px);
     width: 100%;
-    padding: 10px 20px;
+    padding: 10px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 75px;
     cursor: pointer;
 `
 const StyledBoxHeader = styled.div`

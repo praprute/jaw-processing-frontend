@@ -44,9 +44,9 @@ const SaltReceivePage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -167,7 +167,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
                                         layout='vertical'
                                         onFinish={handleSubmit}
                                     >
-                                        <FillterSaltBox />
+                                        <FillterSaltBox title={'บิลน้ำเกลือ'} />
                                     </StyledForm>
                                 </SectionFillter>
                                 <SectionFillter>
@@ -177,7 +177,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
                                 </SectionFillter>
                                 <SectionTable>
                                     <Container>
-                                        <h3>รายการบิลเกลือ</h3>
+                                        <h3>รายการบิลน้ำเกลือ</h3>
                                         <StyledTable
                                             columns={columns}
                                             dataSource={sourceData}
@@ -219,7 +219,7 @@ const SaltReceivePage: NextPageWithLayout = () => {
                                         layout='vertical'
                                         onFinish={handleSubmitSolidSalt}
                                     >
-                                        <FillterSaltBox />
+                                        <FillterSaltBox title={'บิลเกลือ'} />
                                     </StyledForm>
                                 </SectionFillter>
                                 <SectionFillter>

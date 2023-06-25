@@ -32,9 +32,9 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
