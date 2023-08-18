@@ -2,6 +2,8 @@ import { Button } from 'antd'
 import React from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
+import { DownloadOutlined } from '@ant-design/icons'
 
 import { IOrderDetailDto } from '../../share-module/order/type'
 import { numberWithCommas } from '../../utils/format-number'
@@ -44,11 +46,36 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
         }
     }
 
-    console.log('data : ', data)
+    const handleExport = (type?: any, fn?: any, dl?: any) => {
+        // var wb = XLSX.utils.book_new(),
+        //     ws = XLSX.utils.json_to_sheet(data)
+        // XLSX.utils.book_append_sheet(wb, ws, 'Report')
+
+        // XLSX.writeFile(wb, 'Report.xlsx')
+
+        var elt = document.getElementById('tbl_exporttable_to_xls')
+        var wb = XLSX.utils.table_to_book(elt, { sheet: 'sheet1' })
+        return dl
+            ? XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' })
+            : XLSX.writeFile(wb, fn || 'MySheetName.' + (type || 'xlsx'))
+    }
+
     return (
         <StyledContent>
-            <span>หมายเลขรายการ : {data[0].idOrders}</span>
-            <StyledTable>
+            <HeadTableRow>
+                <span>หมายเลขรายการ : {data[0].idOrders}</span>
+                <StyledButtonAction
+                    icon={<DownloadOutlined />}
+                    onClick={() => {
+                        handleExport('xlsx')
+                    }}
+                    type='primary'
+                >
+                    Export
+                </StyledButtonAction>
+            </HeadTableRow>
+
+            <StyledTable id='tbl_exporttable_to_xls'>
                 <tr>
                     <th>วันที่</th>
                     <th>การทำงาน</th>
@@ -544,6 +571,13 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
 
 export default OrderLastedSection
 
+const HeadTableRow = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+`
 const StyledButton = styled(Button)`
     border-radius: 4px;
 `
@@ -587,4 +621,8 @@ const StyledContent = styled.div`
     align-items: start;
     justify-content: center;
     flex-direction: column;
+`
+
+const StyledButtonAction = styled(Button)`
+    border-radius: 2px;
 `

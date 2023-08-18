@@ -31,7 +31,9 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
         onChangeBuilding,
         onSelectAction,
         typeProcess,
+        lastedOrder,
     } = props
+    console.log('lastedOrder : ', lastedOrder)
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>

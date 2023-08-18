@@ -17,6 +17,7 @@ import {
     Col,
     Steps,
     DatePicker,
+    InputNumber,
 } from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
@@ -53,6 +54,7 @@ import {
     submitAddOnFishSauceTask,
     submitTransferSaltWaterTask,
     getWorkingStatusTypeTask,
+    updateChemOrderTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -152,6 +154,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalConfirmTopSalt, setVisibleModalConfirmTopSalt] = useState(false)
     // TODO
     // const [actionPuddle, setActionPuddle] = useState(null)
+    const [visibleEditChem, setVisibleEditChem] = useState(false)
+    const [selectedChem, setSelectedChem] = useState(null)
 
     const [remainingVolumnGetIn, setRemainingVolumnGetIn] = useState(0)
     const [remainingVolumnExport, setRemainingVolumnExport] = useState(0)
@@ -163,6 +167,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     })
     const [typeProcessImport, setTypeProcessImport] = useState(TypeProcess.IMPORT)
     const [valueTypeProcess, setValueTypeProcess] = useState(null)
+    const [valueChem, setValueChem] = useState(null)
     const [currentStepSalt, setCurrentStepSalt] = useState(0)
     const [currentStepFishSauce, setCurrentStepFishSauce] = useState(0)
     const [currentPageSalt, setCurrentPageSalt] = useState(1)
@@ -174,6 +179,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [dateStart, setDateStart] = useState(null)
     const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
     const [dateTransfer, setDateTransfer] = useState(null)
+    const [lastedOrderId, setLastedOrderId] = useState(null)
+    const [chemDisplay, setChemDisplay] = useState({
+        ph: 0,
+        nacl: 0,
+        tn: 0,
+    })
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -200,6 +211,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const changeWorkingStatusPuddle = changeWorkingStatusPuddleTask.useTask()
     const updateStatusTopSalt = updateStatusTopSaltTask.useTask()
     const updateDateStartFermant = updateDateStartFermantTask.useTask()
+    const updateChemOrder = updateChemOrderTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -374,6 +386,18 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     }, [getOrdersDetailFromId?.data, trigger])
 
     useEffect(() => {
+        if (lastedOrderId && getAllOrdersFromPuddleId.data) {
+            const found = getAllOrdersFromPuddleId.data.find((element) => element.idorders === lastedOrderId)
+
+            setChemDisplay({
+                ph: found.ph || 0,
+                nacl: found.nacl || 0,
+                tn: found.tn || 0,
+            })
+        }
+    }, [lastedOrderId, trigger, getAllOrdersFromPuddleId.data])
+
+    useEffect(() => {
         ;(async () => {
             if (puddle_id) {
                 await getNoticeTargetPending.onRequest({ puddle_id: Number(puddle_id) })
@@ -382,6 +406,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 await getAllOrdersFromPuddleId.onRequest({ puddle_id: Number(puddle_id) })
                 const resOrderDetail = await getOrdersDetailFromId.onRequest({ order_id: res.lasted_order })
 
+                setLastedOrderId(res.lasted_order)
                 setRemainingItems(
                     resOrderDetail?.length === 1
                         ? resOrderDetail[resOrderDetail?.length - 1]?.amount_items
@@ -436,23 +461,54 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const handleChangeAmountItems = (e: React.ChangeEvent<HTMLInputElement>) => {
         let volumn = remainingVolumnExport
+        console.log(orderDetailLasted.remaining_volume, Number(e.target.value))
         setAmountItemsKG(Number(e.target.value) * 1.2)
         setAmountItemsPercent(parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)))
+
         form.setFieldsValue({
             amount_items: parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
             remaining_items:
                 remainingItems - parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
             remaining_volume: remainingVolumnExport - Number(e.target.value) * 1.2,
         })
+
+        // if (Number(e.target.value) * 1.2 > orderDetailLasted.remaining_volume) {
+        //     setAmountItemsKG(orderDetailLasted.remaining_volume * 1.2)
+        //     setAmountItemsPercent(parseFloat2Decimals(((orderDetailLasted.remaining_volume * remainingItems * 1.2 ) / volumn).toFixed(2)))
+
+        //     form.setFieldsValue({
+        //         volume: orderDetailLasted.remaining_volume,
+        //         amount_items: parseFloat2Decimals(
+        //             ((orderDetailLasted.remaining_volume* remainingItems ) / orderDetailLasted.remaining_volume).toFixed(2),
+        //         ),
+        //         remaining_items:
+        //             remainingItems -
+        //             parseFloat2Decimals(
+        //                 ((orderDetailLasted.remaining_volume * remainingItems ) / orderDetailLasted.remaining_volume).toFixed(2),
+        //             ),
+        //         remaining_volume: remainingVolumnExport - orderDetailLasted.remaining_volume,
+        //     })
+        // } else {
+        //     setAmountItemsKG(Number(e.target.value) * 1.2)
+        //     setAmountItemsPercent(parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)))
+
+        //     form.setFieldsValue({
+        //         amount_items: parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
+        //         remaining_items:
+        //             remainingItems - parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
+        //         remaining_volume: remainingVolumnExport - Number(e.target.value) * 1.2,
+        //     })
+        // }
     }
 
-    const handleChangeLitToKGSaltWater = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeLitToKGSaltWater = (e: number) => {
         // setSaltWaterKG(Number(e.target.value) * 1.2)
-        setSaltWaterKG(Number(e.target.value))
+        setSaltWaterKG(Number(e))
     }
-    const handleChangeLitToKGFishSauceWater = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //  React.ChangeEvent<HTMLInputElement>
+    const handleChangeLitToKGFishSauceWater = (e: number) => {
         // setFishSauceWaterKG(Number(e.target.value) * 1.2)
-        setFishSauceWaterKG(Number(e.target.value))
+        setFishSauceWaterKG(Number(e))
     }
 
     const handleSubmitTypeProcessTask = async () => {
@@ -576,6 +632,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 action_puddle: Number(formGetIn.getFieldValue('source_puddle')),
                 action_serial_puddle: Number(formGetIn.getFieldValue('action_serial_puddle')),
                 date_action: dateTransfer,
+                id_puddle: Number(puddle_id),
             }
 
             const result = await submitGetInFishSaurce.onRequest(payload)
@@ -609,6 +666,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 volume: remainingVolumnExport,
                 remaining_volume: 0,
                 date_action: dateTransfer,
+                id_puddle: Number(puddle_id),
             }
 
             const result = await submitCloseProcess.onRequest(payload)
@@ -716,6 +774,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setVisibleModalAddOn(false)
             setVisibleModalAddOnFishSauce(false)
             await handleGetListReceive()
+            await handleGetListFishSauceReceive()
             setCurrentStepSalt(0)
             setDateTransfer(null)
             formAddOnFishSauce.resetFields()
@@ -973,8 +1032,43 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     }
 
     const onChangeDateTransfer: DatePickerProps['onChange'] = (date, dateString) => {
-        console.log('onChangeDateTransfer dateString :', dateString)
         setDateTransfer(dateString)
+    }
+
+    const handleChangeChem = async () => {
+        try {
+            let chem = null
+            switch (selectedChem) {
+                case 'PH':
+                    chem = 'ph'
+                    break
+                case 'SALT':
+                    chem = 'nacl'
+                    break
+                case 'TN':
+                    chem = 'tn'
+                    break
+                default:
+                    chem = null
+                    break
+            }
+            const payload = {
+                chem: chem,
+                value: Number(valueChem),
+                idorders: getPuddleDetailById?.data?.lasted_order,
+            }
+
+            const res = await updateChemOrder.onRequest(payload)
+            if (res === 'UPDATE_SUCCESS') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+            }
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setVisibleEditChem(false)
+            setTrigger(!trigger)
+            setDateStart(null)
+        }
     }
 
     const stepsSalt = [
@@ -1006,12 +1100,21 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 name='volume'
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                             >
-                                <Input
+                                {/* <Input
                                     onChange={handleChangeLitToKGSaltWater}
                                     placeholder='ปริมาตรน้ำเกลือที่เติมเพิ่ม'
                                     size='large'
                                     style={{ color: 'black' }}
-                                />
+                                /> */}
+
+                                {Number(preDataSaltBill?.stock) && (
+                                    <StyledInputNumber
+                                        max={Number(preDataSaltBill.stock)}
+                                        min={0}
+                                        onChange={handleChangeLitToKGSaltWater}
+                                        size='large'
+                                    />
+                                )}
                             </StyledFormItems>
                             <Col xs={24}>
                                 <StyledFormItems
@@ -1057,12 +1160,21 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 name='volume'
                                 rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
                             >
-                                <Input
+                                {/* <Input
                                     onChange={handleChangeLitToKGFishSauceWater}
                                     placeholder='ปริมาตรน้ำปลาที่เติมเพิ่ม'
                                     size='large'
                                     style={{ color: 'black' }}
-                                />
+                                /> */}
+
+                                {Number(preDataFishSauceBill?.stock) && (
+                                    <StyledInputNumber
+                                        max={Number(preDataFishSauceBill.stock)}
+                                        min={0}
+                                        onChange={handleChangeLitToKGFishSauceWater}
+                                        size='large'
+                                    />
+                                )}
                             </StyledFormItems>
                         </Col>
                         <Col xs={24}>
@@ -1209,6 +1321,35 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         สถานะการกลบเกลือของบ่อ :{' '}
                         {getPuddleDetailById?.data?.topSalt === 1 ? 'กลบเกลือเเล้ว' : 'ยังไม่ได้กลบเกลือ'}
                     </span>
+                    <RowChem>
+                        <BoxChem
+                            onClick={() => {
+                                setVisibleEditChem(true)
+                                setSelectedChem('PH')
+                            }}
+                        >
+                            <span>PH : {chemDisplay.ph}</span>
+                        </BoxChem>
+                        <BoxChem
+                            onClick={() => {
+                                setVisibleEditChem(true)
+                                setSelectedChem('SALT')
+                            }}
+                        >
+                            <span>SALT : {chemDisplay.nacl}</span>
+                        </BoxChem>
+                        <BoxChem
+                            onClick={() => {
+                                setVisibleEditChem(true)
+                                setSelectedChem('TN')
+                            }}
+                        >
+                            <span>TN : {chemDisplay.tn}</span>
+                        </BoxChem>
+                    </RowChem>
+                    <a href='http://128.199.228.63/dashboard' rel="noreferrer" target='_blank'>
+                        ไปที่โปรแกรม Lab
+                    </a>
                 </div>
 
                 <br />
@@ -1766,6 +1907,40 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </div>
                 </ModalContent>
             </Modal>
+
+            <Modal
+                centered
+                destroyOnClose
+                onCancel={() => {
+                    setVisibleEditChem(false)
+                    setValueChem(null)
+                }}
+                onOk={() => {
+                    handleChangeChem()
+                    // handleUpdateDateStart()
+                }}
+                open={visibleEditChem}
+                title={`แก้ไขค่า ${selectedChem}`}
+            >
+                <ModalContent>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '24px' }}>
+                        {/* <DatePicker onChange={onChangeDate} style={{ width: '100%' }} /> */}
+                        <InputNumber
+                            max={100}
+                            min={0}
+                            onChange={(e) => {
+                                console.log('e : ', e)
+                                setValueChem(e)
+                            }}
+                            placeholder='กรุณาระบุค่าทางเคมี'
+                            step={0.1}
+                            style={{ width: '100%' }}
+                            value={valueChem}
+                        />
+                        {/* <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วน'}</p> */}
+                    </div>
+                </ModalContent>
+            </Modal>
         </>
     )
 }
@@ -1779,6 +1954,29 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export default DetailPuddlePage
+
+const StyledInputNumber = styled(InputNumber)`
+    width: 100%;
+    .ant-input-number-handler-wrap {
+        display: none;
+    }
+`
+
+const RowChem = styled.div`
+    display: flex;
+    gap: 8px;
+`
+const BoxChem = styled.div`
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 2px;
+    min-width: 150px;
+    height: 50px;
+    background: #51459e98;
+    color: white;
+    padding: 8px;
+`
 
 const ButtonApprove = styled(Button)`
     border-radius: 2px;

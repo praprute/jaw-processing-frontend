@@ -222,6 +222,7 @@ export const submitCloseProcessTask = createReduxAsyncTask({
         volume: number
         remaining_volume: number
         date_action: string
+        id_puddle?: number
     },
     saga: ({ actions }) =>
         function* (action) {
@@ -272,6 +273,7 @@ export const submitAddOnSaltWaterTask = createReduxAsyncTask({
             }
         },
 })
+
 export const submitAddOnFishSauceTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'submitAddOnFishSauce',
@@ -524,6 +526,23 @@ export const deleteWorkingStatusTask = createReduxAsyncTask({
                     `${process.env.NEXT_PUBLIC_HOST}/deleteWorkingStatus/${idworking_status}`,
                     config,
                 )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+export const updateChemOrderTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateChemOrder',
+    defaultData: {} as any,
+    defaultPayload: {} as { chem: string; value: number; idorders: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(`${process.env.NEXT_PUBLIC_HOST}/updateChemOrderTask`, action.payload, config)
                 yield put(actions.success(data.message))
             } catch (error: any) {
                 yield put(actions.failure(error.response.data))

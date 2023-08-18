@@ -34,6 +34,7 @@ const Home: NextPageWithLayout = () => {
                 <meta content='width=device-width, initial-scale=1' name='viewport' />
                 <link href='/favicon.ico' rel='icon' />
             </Head>
+
             <Breadcrumb style={{ margin: '16px 0', fontSize: '12px' }}>
                 <Breadcrumb.Item>Process Menagement</Breadcrumb.Item>
                 <Breadcrumb.Item>อาคารทั้งหมด</Breadcrumb.Item>

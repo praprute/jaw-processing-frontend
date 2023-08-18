@@ -19,6 +19,7 @@ export interface ISubmitGetIn {
     action_puddle: number
     action_serial_puddle: number
     date_action?: string
+    id_puddle?: number
 }
 
 export interface INoticeTargetPendingDto {
@@ -102,6 +103,9 @@ export interface IOrderDto {
     puddle_owner: number
     user_create: number
     date_create: string
+    ph?: number
+    nacl?: number
+    tn?: number
 }
 export interface IOrderDetailDto {
     idorders: number

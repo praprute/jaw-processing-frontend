@@ -11,7 +11,7 @@ import { createPuddleTask, getPuddleByIdBuildingTask } from '../../share-module/
 import FormInsertPuddle from '../../components/FormInsertPuddle'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 import { useNavigation } from '../../utils/use-navigation'
-import { TypeOrderPuddle } from '../../utils/type_puddle'
+import { TypeOrderPuddle, TypeProcess } from '../../utils/type_puddle'
 
 const PuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
@@ -105,6 +105,34 @@ const PuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleTypeOrder = (type: number) => {
+        switch (type) {
+            case TypeProcess.FERMENT:
+                return 'ลงปลา'
+            case TypeProcess.TRANSFER:
+                return 'ปล่อยน้ำปลาออก'
+            case TypeProcess.IMPORT:
+                return 'เติมน้ำปลา'
+            case TypeProcess.CLEARING:
+                return 'ถ่ายกาก'
+            case TypeProcess.GETFISHRESIDUE:
+                return 'รับกาก'
+            case TypeProcess.CLEARINGALL:
+                return 'ถ่ายกากทิ้ง'
+            case TypeProcess.ADDONWATERSALT:
+                return 'เติมน้ำเกลือ'
+            case TypeProcess.ADDONFISHSAUCE:
+                return 'เติมน้ำปลาพรพิมล'
+            case TypeProcess.TRANSFERSALTWATER:
+                return 'ปล่อยน้ำเกลือ'
+            case TypeProcess.IMPORTSALTWATER:
+                return 'เติมน้ำเกลือเข้าจากภายใน'
+            default:
+                return ' '
+                break
+        }
+    }
+
     //
     return (
         <>
@@ -175,6 +203,9 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         <span>ยังไม่กลบเกลือ</span>
                                                     )}
                                                 </StyledTitleBetween>
+                                                <StyledTitleBetween>
+                                                    <span>{handleTypeOrder(data?.type_process)}</span>
+                                                </StyledTitleBetween>
                                             </StyledGlassBox>
                                         </Col>
                                     ))}
@@ -207,6 +238,9 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     ? `${dayjs().diff(dayjs(data?.start_date), 'day')} วัน`
                                                     : '0  วัน'}
                                                 {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
+                                            </StyledTitleBetween>
+                                            <StyledTitleBetween>
+                                                <span>{handleTypeOrder(data?.type_process)}</span>
                                             </StyledTitleBetween>
                                         </StyledGlassBox>
                                     ))}

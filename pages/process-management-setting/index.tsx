@@ -481,6 +481,7 @@ const Content = styled.div<{ isMinHeight?: string }>`
     display: flex;
     align-items: start;
     flex-direction: column;
+    background: white;
     ${({ isMinHeight }) =>
         isMinHeight &&
         css`

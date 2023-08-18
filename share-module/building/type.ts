@@ -38,6 +38,7 @@ export interface IAllPuddleDto {
     working_status_title?: string
     topSalt?: number
     start_date?: string
+    type_process?: number
 }
 
 export interface IResAllPuddleDto {

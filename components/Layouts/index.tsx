@@ -44,6 +44,7 @@ const AppLayout = (props: ILayout) => {
         { key: '/customer-management/solid-salt-customer', name: 'ผู้จำหน่ายเกลือ' },
         { key: '/customer-management/salt-water-customer', name: 'ผู้จำหน่ายน้ำเกลือ' },
     ]
+
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
     const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
     const menuItems_STOCK = [{ key: '/menuItems_STOCK', name: 'Coming soon' }]

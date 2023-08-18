@@ -97,6 +97,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [sourceDataSolidSalt, setSourceDataSolidSalt] = useState([])
     const [totalListSolidSalt, setTotalListSolidSalt] = useState(0)
 
+    // const [solidSaltStockOld, setSolidSaltStockOld] = useState(0)
+
     const getReceiveFishWeight = getReceiveFishWeightPaginationWithOutEmptyTask.useTask()
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const insertLogBillOpenOrder = insertLogBillOpenOrderTask.useTask()
@@ -167,6 +169,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                             stock_old: numberWithCommas(data.stock),
                             price_per_kg: data.price_per_weigh,
                         })
+                        // setSolidSaltStockOld(data.stock)
                     }}
                     type='primary'
                 >
@@ -839,7 +842,18 @@ const CreateOrderPage: NextPageWithLayout = () => {
                             <StyledFormItems
                                 label='จำนวนที่นำไปใช้'
                                 name='new_stock'
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                                rules={[
+                                    { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
+                                    // ({ getFieldValue }) => ({
+                                    //     validator(_, value) {
+                                    //         if (value > solidSaltStockOld) {
+                                    //             console.log('getFieldValue :', value, solidSaltStockOld)
+                                    //             return Promise.reject(new Error('Over maximum'))
+                                    //         }
+                                    //         return Promise.resolve()
+                                    //     },
+                                    // }),
+                                ]}
                             >
                                 <StyledInputNumber
                                     defaultValue={0}
