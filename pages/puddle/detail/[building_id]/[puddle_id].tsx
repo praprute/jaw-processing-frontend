@@ -18,6 +18,7 @@ import {
     Steps,
     DatePicker,
     InputNumber,
+    Checkbox,
 } from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
@@ -28,6 +29,8 @@ import moment from 'moment'
 import { CheckOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import type { DatePickerProps } from 'antd'
+import type { CheckboxValueType } from 'antd/es/checkbox/Group'
+import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 
 import AppLayout from '../../../../components/Layouts'
 import { NextPageWithLayout } from '../../../_app'
@@ -54,7 +57,10 @@ import {
     submitAddOnFishSauceTask,
     submitTransferSaltWaterTask,
     getWorkingStatusTypeTask,
-    updateChemOrderTask,
+    getSpecificChemTask,
+    addOrderSpecificTask,
+    submitAddOnAmpanTask,
+    submitAddOnFishyTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -69,8 +75,10 @@ import { configAPI } from '../../../../share-module/configApi'
 import { getTypeProcessTask, submitTypeProcessTask } from '../../../../share-module/puddle/task'
 import {
     getLogReceiveSaltByOrdersIdTask,
+    getReceiveAmpanPaginationWithOutEmptyTask,
     // getReceiveFishSaucePaginationTask,
     getReceiveFishSaucePaginationWithOutEmptyTask,
+    getReceiveFishyPaginationWithOutEmptyTask,
     // getReceiveSaltPaginationTask,
     getReceiveSaltPaginationWithOutEmptyTask,
     getReceiveWeightFishByOrderIdTask,
@@ -102,6 +110,30 @@ interface ISelectFishSauceBillDto {
     date_create: string
 }
 
+interface ISelectAmpanBillDto {
+    idampan_receipt: number
+    no: string
+    product_name: string
+    weigh_net: number
+    price_per_weigh: number
+    price_net: number
+    customer: string
+    stock: number
+    date_create: string
+}
+
+interface ISelectFishyBillDto {
+    idfishy_receipt: number
+    no: string
+    product_name: string
+    weigh_net: number
+    price_per_weigh: number
+    price_net: number
+    customer: string
+    stock: number
+    date_create: string
+}
+
 const DetailPuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
     const navigation = useNavigation()
@@ -110,6 +142,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [formGetIn] = Form.useForm()
     const [formAddOn] = Form.useForm()
     const [formAddOnFishSauce] = Form.useForm()
+    const [formSendToLabs] = Form.useForm()
+    const [formHitWater] = Form.useForm()
+    const [formWaterFish] = Form.useForm()
+    const [formFishy] = Form.useForm()
 
     const [open, setOpen] = useState(false)
     const [openGetIN, setOpenGetIn] = useState(false)
@@ -133,11 +169,15 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
     const [visibleModalAddOnFishSauce, setVisibleModalAddOnFishSauce] = useState(false)
     const [saltWaterKG, setSaltWaterKG] = useState(0)
-    const [fishSauceWaterKG, setFishSauceWaterKG] = useState(0)
+    // const [fishSauceWaterKG, setFishSauceWaterKG] = useState(0)
+    const [fishSauceWaterKGAddon, setFishSauceWaterKGAddon] = useState(0)
+    const [ampanKG, setAmpanKG] = useState(0)
     const [visibleModalBillFerment, setVisibleModalBillFerment] = useState(false)
     const [idOrdersOpenWeightBill, setIdOrdersOpenWeightBill] = useState(null)
     const [preDataSaltBill, setPreDataSaltBill] = useState<ISelectSaltBillDto>(null)
     const [preDataFishSauceBill, setPreDataFishSauceBill] = useState<ISelectFishSauceBillDto>(null)
+    const [preDataAmpanBill, setPreDataAmpanBill] = useState<ISelectAmpanBillDto>(null)
+    const [preDataFishyBill, setPreDataFishyBill] = useState<ISelectFishyBillDto>(null)
     const [visibleModalViewSaltBill, setVisibleModalViewSaltBill] = useState(false)
     // const [visibleModalViewFishSauceBill, setVisibleModalViewFishSauceBill] = useState(false)
     const [idOrdersOpenSaltBill, setIdOrdersOpenSaltBill] = useState(null)
@@ -154,8 +194,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalConfirmTopSalt, setVisibleModalConfirmTopSalt] = useState(false)
     // TODO
     // const [actionPuddle, setActionPuddle] = useState(null)
-    const [visibleEditChem, setVisibleEditChem] = useState(false)
-    const [selectedChem, setSelectedChem] = useState(null)
+    // const [visibleEditChem, setVisibleEditChem] = useState(false)
+    // const [selectedChem, setSelectedChem] = useState(null)
 
     const [remainingVolumnGetIn, setRemainingVolumnGetIn] = useState(0)
     const [remainingVolumnExport, setRemainingVolumnExport] = useState(0)
@@ -167,24 +207,39 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     })
     const [typeProcessImport, setTypeProcessImport] = useState(TypeProcess.IMPORT)
     const [valueTypeProcess, setValueTypeProcess] = useState(null)
-    const [valueChem, setValueChem] = useState(null)
+    // const [valueChem, setValueChem] = useState(null)
     const [currentStepSalt, setCurrentStepSalt] = useState(0)
     const [currentStepFishSauce, setCurrentStepFishSauce] = useState(0)
+    const [currentStepAmpan, setCurrentStepAmpan] = useState(0)
+    const [currentStepFishy, setCurrentStepFishy] = useState(0)
     const [currentPageSalt, setCurrentPageSalt] = useState(1)
     const [currentPageFishSauce, setCurrentPageFishSauce] = useState(1)
+    const [currentPageAmpan, setCurrentPageAmpan] = useState(1)
+    const [currentPageFishy, setCurrentPageFishy] = useState(1)
     const [sourceDataSalt, setSourceDataSalt] = useState([])
     const [sourceDataFishSauce, setSourceDataFishSauce] = useState([])
+    const [sourceDataAmpan, setSourceDataAmpan] = useState([])
+    const [sourceDataFishy, setSourceDataFishy] = useState([])
+    const [totalListFishy, setTotalListFishy] = useState(0)
+    const [totalListAmpan, setTotalListAmpna] = useState(0)
     const [totalListSalt, setTotalListSalt] = useState(0)
     const [totalListFishSauce, setTotalListFishSauce] = useState(0)
     const [dateStart, setDateStart] = useState(null)
     const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
     const [dateTransfer, setDateTransfer] = useState(null)
     const [lastedOrderId, setLastedOrderId] = useState(null)
-    const [chemDisplay, setChemDisplay] = useState({
-        ph: 0,
-        nacl: 0,
-        tn: 0,
-    })
+    // const [chemDisplay, setChemDisplay] = useState({
+    //     ph: 0,
+    //     nacl: 0,
+    //     tn: 0,
+    // })
+    const [visibleModalSendToLabs, setVisibleModalSendToLabs] = useState(false)
+    const [chemCheck, setChemCheck] = useState([])
+    const [microCheck, setMicroCheck] = useState({ Micro: false })
+    const [visibleModalWaterFish, setVisibleModalWaterFish] = useState(false)
+    const [visibleModalHitWaterFish, setVisibleModalHitWaterFish] = useState(false)
+    const [defaultDateActionGetIn, setDefaultDateActionGetIn] = useState(null)
+    const [idSuborderToLabs, setIdSuborderToLabs] = useState(null)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -204,6 +259,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const getReceiveSaltPagination = getReceiveSaltPaginationWithOutEmptyTask.useTask()
     const getReceiveFishSaucePagination = getReceiveFishSaucePaginationWithOutEmptyTask.useTask()
     const getLogReceiveSaltByOrdersId = getLogReceiveSaltByOrdersIdTask.useTask()
+    const getReceiveAmpanPaginationWithOutEmpty = getReceiveAmpanPaginationWithOutEmptyTask.useTask()
+    const getReceiveFishyPaginationWithOutEmpty = getReceiveFishyPaginationWithOutEmptyTask.useTask()
     // const getLogReceiveFishSauceByOrdersId = getLogReceiveFishSauceByOrdersIdTask.useTask()
     const submitAddOnFishSauce = submitAddOnFishSauceTask.useTask()
     const submitTransferSaltWater = submitTransferSaltWaterTask.useTask()
@@ -211,7 +268,13 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const changeWorkingStatusPuddle = changeWorkingStatusPuddleTask.useTask()
     const updateStatusTopSalt = updateStatusTopSaltTask.useTask()
     const updateDateStartFermant = updateDateStartFermantTask.useTask()
-    const updateChemOrder = updateChemOrderTask.useTask()
+    // const updateChemOrder = updateChemOrderTask.useTask()
+    const getSpecific = getSpecificChemTask.useTask()
+    const addOrderSpecific = addOrderSpecificTask.useTask()
+    // const addOnNonePrice = addOnNonePriceTask.useTask()
+    const submitAddOnAmpan = submitAddOnAmpanTask.useTask()
+    const submitAddOnFishy = submitAddOnFishyTask.useTask()
+    // const specificChem = getSpecificChemTask2.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -321,6 +384,168 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         },
     ]
 
+    const columnsAmpan: ColumnsType<any> = [
+        {
+            title: 'ลำดับที่',
+            dataIndex: 'no',
+            key: 'no',
+        },
+        {
+            title: 'วันที่',
+            dataIndex: 'date_create',
+            key: 'date_create',
+            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+        },
+
+        {
+            title: 'น้ำหนักสุทธิ',
+            dataIndex: 'weigh_net',
+            key: 'weigh_net',
+            render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
+        },
+        {
+            title: 'ชื่อลูกค้า',
+            dataIndex: 'customer',
+            key: 'customer',
+        },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'product_name',
+            key: 'product_name',
+        },
+        {
+            title: 'stock คงเหลือ',
+            dataIndex: 'stock',
+            key: 'stock',
+            render: (stock: number) => <span>{numberWithCommas(stock)}</span>,
+        },
+        {
+            title: '',
+            dataIndex: 'idsalt_receipt',
+            key: 'idsalt_receipt',
+            render: (_: any, data: ISelectAmpanBillDto) => (
+                <Button
+                    onClick={() => {
+                        setPreDataAmpanBill(data)
+                        nextStepAmpan()
+                    }}
+                    type='primary'
+                >
+                    เลือก
+                </Button>
+            ),
+        },
+    ]
+
+    const columnsFishy: ColumnsType<any> = [
+        {
+            title: 'ลำดับที่',
+            dataIndex: 'no',
+            key: 'no',
+        },
+        {
+            title: 'วันที่',
+            dataIndex: 'date_create',
+            key: 'date_create',
+            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+        },
+
+        {
+            title: 'น้ำหนักสุทธิ',
+            dataIndex: 'weigh_net',
+            key: 'weigh_net',
+            render: (weigh_net: number) => <span>{numberWithCommas(weigh_net)}</span>,
+        },
+        {
+            title: 'ชื่อลูกค้า',
+            dataIndex: 'customer',
+            key: 'customer',
+        },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'product_name',
+            key: 'product_name',
+        },
+        {
+            title: 'stock คงเหลือ',
+            dataIndex: 'stock',
+            key: 'stock',
+            render: (stock: number) => <span>{numberWithCommas(stock)}</span>,
+        },
+        {
+            title: '',
+            dataIndex: 'idsalt_receipt',
+            key: 'idsalt_receipt',
+            render: (_: any, data: ISelectFishyBillDto) => (
+                <Button
+                    onClick={() => {
+                        setPreDataFishyBill(data)
+                        nextStepFishy()
+                    }}
+                    type='primary'
+                >
+                    เลือก
+                </Button>
+            ),
+        },
+    ]
+
+    useEffect(() => {
+        ;(async () => {
+            await getSpecific.onRequest()
+        })()
+    }, [])
+
+    const onChange = (checkedValues: CheckboxValueType[]) => {
+        console.log('checked = ', checkedValues)
+        setChemCheck(checkedValues)
+    }
+
+    const onChangeMicro = (e: CheckboxChangeEvent) => {
+        console.log(`checked = ${e.target.checked}`)
+        setMicroCheck({ Micro: e.target.checked })
+    }
+
+    const handleAddToLab = async () => {
+        try {
+            let cc = {
+                Tn: chemCheck.includes('Tn'),
+                Salt: chemCheck.includes('Salt'),
+                PH: chemCheck.includes('PH'),
+                Histamine: chemCheck.includes('Histamine'),
+                Tss: chemCheck.includes('Tss'),
+                Aw: chemCheck.includes('Aw'),
+                Spg: chemCheck.includes('Spg'),
+                AN: chemCheck.includes('AN'),
+                Acidity: chemCheck.includes('Acidity'),
+                Viscosity: chemCheck.includes('Viscosity'),
+                SaltMeter: chemCheck.includes('SaltMeter'),
+                Color: chemCheck.includes('Color'),
+            }
+
+            const payload = {
+                ProductName: formSendToLabs.getFieldValue('ProductName'),
+                idScfChem: formSendToLabs.getFieldValue('idScfChem'),
+                Micro: microCheck.Micro,
+                idScfMicro: 1,
+                Priority: 0,
+                ref: idSuborderToLabs,
+                ...cc,
+            }
+
+            const res = await addOrderSpecific.onRequest(payload)
+
+            if (res.success === 'success') {
+                NoticeSuccess('ส่งรายการไปที่ Lab เรียบร้อย')
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        } finally {
+            formSendToLabs.resetFields()
+            setVisibleModalSendToLabs(false)
+        }
+    }
+
     useEffect(() => {
         ;(async () => {
             await handleGetListReceive()
@@ -332,6 +557,37 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             await handleGetListFishSauceReceive()
         })()
     }, [currentPageFishSauce])
+
+    useEffect(() => {
+        ;(async () => {
+            await handleGetListAmpanReceive()
+        })()
+    }, [setCurrentPageAmpan])
+
+    useEffect(() => {
+        ;(async () => {
+            await handleGetListFishyReceive()
+        })()
+    }, [currentPageFishy])
+
+    const handleGetListAmpanReceive = async () => {
+        try {
+            const res = await getReceiveAmpanPaginationWithOutEmpty.onRequest({ page: currentPageSalt - 1, offset: OFFSET_PAGE })
+            setSourceDataAmpan(res.data)
+            setTotalListAmpna(res.total)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+    const handleGetListFishyReceive = async () => {
+        try {
+            const res = await getReceiveFishyPaginationWithOutEmpty.onRequest({ page: currentPageSalt - 1, offset: OFFSET_PAGE })
+            setSourceDataFishy(res.data)
+            setTotalListFishy(res.total)
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
 
     const handleGetListReceive = async () => {
         try {
@@ -355,11 +611,20 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const handleChangePagination = (pagination: any) => {
         setCurrentPageSalt(pagination.current)
     }
+
     const handleChangePaginationFishSauce = (pagination: any) => {
         setCurrentPageFishSauce(pagination.current)
     }
 
-    // setCurrentPageFishSauce
+    const handleChangePaginationAmpan = (pagination: any) => {
+        setCurrentPageAmpan(pagination.current)
+    }
+
+    const handleChangePaginationFishy = (pagination: any) => {
+        setCurrentPageFishy(pagination.current)
+    }
+
+    // setCurrentPageFishy
 
     useEffect(() => {
         if (building_id && puddle_id) {
@@ -376,6 +641,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             await getAllBuildings.onRequest()
             await getTypeProcess.onRequest()
             await getListWorkingStatus.onRequest()
+            await getSpecific.onRequest()
         })()
     }, [])
 
@@ -387,13 +653,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     useEffect(() => {
         if (lastedOrderId && getAllOrdersFromPuddleId.data) {
-            const found = getAllOrdersFromPuddleId.data.find((element) => element.idorders === lastedOrderId)
-
-            setChemDisplay({
-                ph: found.ph || 0,
-                nacl: found.nacl || 0,
-                tn: found.tn || 0,
-            })
+            // const found = getAllOrdersFromPuddleId.data.find((element) => element.idorders === lastedOrderId)
+            // setChemDisplay({
+            //     ph: found.ph || 0,
+            //     nacl: found.nacl || 0,
+            //     tn: found.tn || 0,
+            // })
         }
     }, [lastedOrderId, trigger, getAllOrdersFromPuddleId.data])
 
@@ -505,10 +770,19 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         // setSaltWaterKG(Number(e.target.value) * 1.2)
         setSaltWaterKG(Number(e))
     }
+    const handleChangeLitToKG = (e: number) => {
+        // setSaltWaterKG(Number(e.target.value) * 1.2)
+        setAmpanKG(Number(e) * 1.2)
+    }
     //  React.ChangeEvent<HTMLInputElement>
-    const handleChangeLitToKGFishSauceWater = (e: number) => {
+    // const handleChangeLitToKGFishSauceWater = (e: number) => {
+    //     // setFishSauceWaterKG(Number(e.target.value) * 1.2)
+    //     setFishSauceWaterKG(Number(e))
+    // }
+
+    const handleChangeLitToKGFishSauceWaterAddon = (e: number) => {
         // setFishSauceWaterKG(Number(e.target.value) * 1.2)
-        setFishSauceWaterKG(Number(e))
+        setFishSauceWaterKGAddon(Number(e) * 1.2)
     }
 
     const handleSubmitTypeProcessTask = async () => {
@@ -577,6 +851,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         //             : (result.volume * 100) / volumnPuddle
         //         : (result.volume * remainingItems) / remainingVolumnGetIn
 
+       
+        setDefaultDateActionGetIn(result?.date_action)
+        // date_action
+
         formGetIn.setFieldsValue({
             order_id: result.idOrders,
             volume: result.volume,
@@ -590,8 +868,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + result.volume,
             source_puddle: result?.source_puddle,
             action_serial_puddle: result?.source_serial_puddle,
+            date_action: moment(result?.date_action, 'YYYY-MM-DD'),
         })
-
+        // date_action: result?.date_action,
         showDrawerGetIn()
     }
 
@@ -631,10 +910,16 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 remaining_volume: Number(formGetIn.getFieldValue('remaining_volume')),
                 action_puddle: Number(formGetIn.getFieldValue('source_puddle')),
                 action_serial_puddle: Number(formGetIn.getFieldValue('action_serial_puddle')),
-                date_action: dateTransfer,
+                date_action: moment(formGetIn.getFieldValue('date_action'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD'),
                 id_puddle: Number(puddle_id),
+                round: Number(formGetIn.getFieldValue('round')),
             }
 
+            console.log(
+                'payload : ',
+                payload,
+                moment(formGetIn.getFieldValue('date_action'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD'),
+            )
             const result = await submitGetInFishSaurce.onRequest(payload)
             if (result.success === 'success') {
                 NoticeSuccess('ทำรายการสำเร็จ')
@@ -645,7 +930,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             NoticeError('ทำรายการไม่สำเร็จ')
         } finally {
             setModalLoadingVisivble(false)
-            formGetIn.resetFields()
+            // formGetIn.resetFields()
         }
     }
 
@@ -731,31 +1016,141 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleSubmitWaterFish = async (values: any) => {
+        try {
+            setModalLoadingVisivble(true)
+            // let amount_item_cal =
+            //     getOrdersDetailFromId.data.length === 1
+            //         ? (fishSauceWaterKG * 100) / volumnPuddle
+            //         : (fishSauceWaterKG * remainingItems) / remainingVolumnGetIn
+            // let price_net = 0
+
+            let amount_item_cal =
+                getOrdersDetailFromId.data.length === 1
+                    ? (ampanKG * 100) / volumnPuddle
+                    : (ampanKG * remainingItems) / remainingVolumnGetIn
+            let price_net = Number(values.volume) * preDataFishyBill.price_per_weigh
+
+            const payload = {
+                order_id: getPuddleDetailById?.data?.lasted_order,
+                type_process: TypeProcess.IMPORTWATERFISH,
+                amount_items: amount_item_cal,
+                amount_unit_per_price: price_net / ampanKG,
+                amount_price: price_net,
+                remaining_items: remainingItems + amount_item_cal,
+                remaining_unit_per_price:
+                    (lastedPrice + price_net) /
+                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG),
+                remaining_price: lastedPrice + price_net,
+                volume: ampanKG,
+                remaining_volume: getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG,
+                process: 10,
+                new_stock: Number(values.volume) * 1.2,
+                idreceipt: preDataFishyBill.idfishy_receipt,
+                id_puddle: Number(puddle_id),
+                date_action: dateTransfer,
+            }
+
+            const res = await submitAddOnFishy.onRequest(payload)
+            if (res.success === 'success') {
+                NoticeSuccess(`ทำรายการสำเร็จ`)
+                setTrigger(!trigger)
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        } finally {
+            setVisibleModalWaterFish(false)
+            setVisibleModalHitWaterFish(false)
+            setModalLoadingVisivble(false)
+
+            await handleGetListFishyReceive()
+            setCurrentStepSalt(0)
+            setCurrentPageFishy(0)
+            setDateTransfer(null)
+            formWaterFish.resetFields()
+            formFishy.resetFields()
+            setCurrentStepFishSauce(0)
+            setAmpanKG(0)
+        }
+    }
+
+    const handleSubmitHitWater = async (values: any) => {
+        try {
+            setModalLoadingVisivble(true)
+            let amount_item_cal =
+                getOrdersDetailFromId.data.length === 1
+                    ? (ampanKG * 100) / volumnPuddle
+                    : (ampanKG * remainingItems) / remainingVolumnGetIn
+            let price_net = Number(values.volume) * preDataAmpanBill.price_per_weigh
+
+            const payload = {
+                order_id: getPuddleDetailById?.data?.lasted_order,
+                type_process: TypeProcess.IMPORTHITWATER,
+                amount_items: amount_item_cal,
+                amount_unit_per_price: price_net / ampanKG,
+                amount_price: price_net,
+                remaining_items: remainingItems + amount_item_cal,
+                remaining_unit_per_price:
+                    (lastedPrice + price_net) /
+                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG),
+                remaining_price: lastedPrice + price_net,
+                volume: ampanKG,
+                remaining_volume: getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG,
+                process: 10,
+                new_stock: Number(values.volume) * 1.2,
+                idreceipt: preDataAmpanBill.idampan_receipt,
+                id_puddle: Number(puddle_id),
+                date_action: dateTransfer,
+            }
+
+            const res = await submitAddOnAmpan.onRequest(payload)
+            if (res.success === 'success') {
+                formAddOn.resetFields()
+                NoticeSuccess(`ทำรายการสำเร็จ`)
+                setTrigger(!trigger)
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        } finally {
+            setVisibleModalHitWaterFish(false)
+            setModalLoadingVisivble(false)
+            await handleGetListReceive()
+            await handleGetListFishSauceReceive()
+            await handleGetListAmpanReceive()
+            setCurrentStepAmpan(0)
+            setDateTransfer(null)
+            formHitWater.resetFields()
+            setCurrentPageAmpan(1)
+            setAmpanKG(0)
+        }
+    }
+
     const handleSubmitAddOnFishSauce = async (values: any) => {
         try {
             setModalLoadingVisivble(true)
 
             let amount_item_cal =
                 getOrdersDetailFromId.data.length === 1
-                    ? (fishSauceWaterKG * 100) / volumnPuddle
-                    : (fishSauceWaterKG * remainingItems) / remainingVolumnGetIn
+                    ? (fishSauceWaterKGAddon * 100) / volumnPuddle
+                    : (fishSauceWaterKGAddon * remainingItems) / remainingVolumnGetIn
             let price_net = Number(values.volume) * preDataFishSauceBill.price_per_weigh
             const payload = {
                 order_id: getPuddleDetailById?.data?.lasted_order,
                 type_process: TypeProcess.ADDONFISHSAUCE,
                 amount_items: amount_item_cal,
-                amount_unit_per_price: price_net / fishSauceWaterKG,
+                amount_unit_per_price: price_net / fishSauceWaterKGAddon,
                 amount_price: price_net,
                 remaining_items: remainingItems + amount_item_cal,
                 remaining_unit_per_price:
                     (lastedPrice + price_net) /
-                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + fishSauceWaterKG),
+                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume +
+                        fishSauceWaterKGAddon),
                 remaining_price: lastedPrice + price_net,
-                volume: fishSauceWaterKG,
+                volume: fishSauceWaterKGAddon,
                 remaining_volume:
-                    getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + fishSauceWaterKG,
+                    getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + fishSauceWaterKGAddon,
                 process: 7,
-                new_stock: Number(values.volume),
+                new_stock: Number(values.volume * 1.2),
                 idreceipt: preDataFishSauceBill.idfishsauce_receipt,
                 id_puddle: Number(puddle_id),
                 date_action: dateTransfer,
@@ -842,6 +1237,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     target_puddle: Number(form.getFieldValue('id_puddle')),
                     serial_puddle: Number(form.getFieldValue('action_puddle')),
                     date_action: dateTransfer,
+                    round: Number(form.getFieldValue('round')),
                 }
 
                 const payloads = form.getFieldValue('process')
@@ -1027,6 +1423,22 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         setCurrentStepFishSauce(currentStepFishSauce - 1)
     }
 
+    const nextStepAmpan = () => {
+        setCurrentStepAmpan(currentStepAmpan + 1)
+    }
+
+    const prevAmpan = () => {
+        setCurrentStepAmpan(currentStepAmpan - 1)
+    }
+
+    const nextStepFishy = () => {
+        setCurrentStepFishy(currentStepFishy + 1)
+    }
+
+    const prevFishy = () => {
+        setCurrentStepFishy(currentStepFishy - 1)
+    }
+
     const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
         setDateStart(dateString)
     }
@@ -1035,41 +1447,41 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         setDateTransfer(dateString)
     }
 
-    const handleChangeChem = async () => {
-        try {
-            let chem = null
-            switch (selectedChem) {
-                case 'PH':
-                    chem = 'ph'
-                    break
-                case 'SALT':
-                    chem = 'nacl'
-                    break
-                case 'TN':
-                    chem = 'tn'
-                    break
-                default:
-                    chem = null
-                    break
-            }
-            const payload = {
-                chem: chem,
-                value: Number(valueChem),
-                idorders: getPuddleDetailById?.data?.lasted_order,
-            }
+    // const handleChangeChem = async () => {
+    //     try {
+    //         let chem = null
+    //         switch (selectedChem) {
+    //             case 'PH':
+    //                 chem = 'ph'
+    //                 break
+    //             case 'SALT':
+    //                 chem = 'nacl'
+    //                 break
+    //             case 'TN':
+    //                 chem = 'tn'
+    //                 break
+    //             default:
+    //                 chem = null
+    //                 break
+    //         }
+    //         const payload = {
+    //             chem: chem,
+    //             value: Number(valueChem),
+    //             idorders: getPuddleDetailById?.data?.lasted_order,
+    //         }
 
-            const res = await updateChemOrder.onRequest(payload)
-            if (res === 'UPDATE_SUCCESS') {
-                NoticeSuccess('ทำรายการสำเร็จ')
-            }
-        } catch (e) {
-            NoticeError('ทำรายการไม่สำเร็จ')
-        } finally {
-            setVisibleEditChem(false)
-            setTrigger(!trigger)
-            setDateStart(null)
-        }
-    }
+    //         const res = await updateChemOrder.onRequest(payload)
+    //         if (res === 'UPDATE_SUCCESS') {
+    //             NoticeSuccess('ทำรายการสำเร็จ')
+    //         }
+    //     } catch (e) {
+    //         NoticeError('ทำรายการไม่สำเร็จ')
+    //     } finally {
+    //         setVisibleEditChem(false)
+    //         setTrigger(!trigger)
+    //         setDateStart(null)
+    //     }
+    // }
 
     const stepsSalt = [
         {
@@ -1098,7 +1510,18 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 // extra={`~ ${saltWaterKG} KG.`}
                                 label='ปริมาตรน้ำเกลือที่เติมเพิ่ม (KG.)'
                                 name='volume'
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                                rules={[
+                                    { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
+                                    {
+                                        validator: async (_, value) => {
+                                            if (value >= Number(preDataSaltBill?.stock)) {
+                                                return Promise.reject(
+                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataSaltBill?.stock)}`),
+                                                )
+                                            }
+                                        },
+                                    },
+                                ]}
                             >
                                 {/* <Input
                                     onChange={handleChangeLitToKGSaltWater}
@@ -1109,7 +1532,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
                                 {Number(preDataSaltBill?.stock) && (
                                     <StyledInputNumber
-                                        max={Number(preDataSaltBill.stock)}
+                                        // max={Number(preDataSaltBill.stock)}
                                         min={0}
                                         onChange={handleChangeLitToKGSaltWater}
                                         size='large'
@@ -1155,23 +1578,32 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 <>
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
+                            <>
+                                Stock ที่มีอยู่ : {Number(preDataFishSauceBill?.stock)} KG. ~{' '}
+                                {Number(preDataFishSauceBill?.stock / 1.2)} L
+                            </>
                             <StyledFormItems
-                                label='ปริมาตรน้ำปลาที่เติมเพิ่ม (KG.)'
+                                label='ปริมาตรน้ำปลาที่เติมเพิ่ม (L.)'
                                 name='volume'
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
-                            >
-                                {/* <Input
-                                    onChange={handleChangeLitToKGFishSauceWater}
-                                    placeholder='ปริมาตรน้ำปลาที่เติมเพิ่ม'
-                                    size='large'
-                                    style={{ color: 'black' }}
-                                /> */}
+                                rules={[
+                                    { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
 
+                                    {
+                                        validator: async (_, value) => {
+                                            if (value > Number(preDataFishSauceBill?.stock / 1.2)) {
+                                                return Promise.reject(
+                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataFishSauceBill?.stock / 1.2)}`),
+                                                )
+                                            }
+                                        },
+                                    },
+                                ]}
+                            >
                                 {Number(preDataFishSauceBill?.stock) && (
                                     <StyledInputNumber
-                                        max={Number(preDataFishSauceBill.stock)}
+                                        // max={Number(preDataFishSauceBill.stock)}
                                         min={0}
-                                        onChange={handleChangeLitToKGFishSauceWater}
+                                        onChange={handleChangeLitToKGFishSauceWaterAddon}
                                         size='large'
                                     />
                                 )}
@@ -1192,8 +1624,138 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         },
     ]
 
+    const stepsAmpan = [
+        {
+            title: 'เลือกบิลน้ำรถน้าอำพัน',
+            content: (
+                <StyledTable
+                    columns={columnsAmpan}
+                    dataSource={sourceDataAmpan}
+                    loading={getReceiveAmpanPaginationWithOutEmpty.loading}
+                    onChange={handleChangePaginationAmpan}
+                    pagination={{
+                        total: totalListAmpan,
+                        current: currentPageAmpan,
+                        showSizeChanger: false,
+                    }}
+                />
+            ),
+        },
+        {
+            title: 'กรอกปริมาตรที่ใช้',
+            content: (
+                <>
+                    <Row gutter={[16, 0]} style={{ width: '100%' }}>
+                        <Col xs={24}>
+                            <>
+                                Stock ที่มีอยู่ : {Number(preDataAmpanBill?.stock)} KG. ~ {Number(preDataAmpanBill?.stock / 1.2)}{' '}
+                                L
+                            </>
+                            <StyledFormItems
+                                label='ปริมาตรน้ำรถน้าอำพันที่เติมเพิ่ม (L.)'
+                                name='volume'
+                                rules={[
+                                    { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
+
+                                    {
+                                        validator: async (_, value) => {
+                                            if (value > Number(preDataAmpanBill?.stock / 1.2)) {
+                                                return Promise.reject(
+                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataAmpanBill?.stock / 1.2)}`),
+                                                )
+                                            }
+                                        },
+                                    },
+                                ]}
+                            >
+                                {Number(preDataAmpanBill?.stock) && (
+                                    <StyledInputNumber min={0} onChange={handleChangeLitToKG} size='large' />
+                                )}
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                            </StyledFormItems>
+                        </Col>
+                    </Row>
+                </>
+            ),
+        },
+    ]
+
+    const stepFishy = [
+        {
+            title: 'เลือกบิลน้ำรถน้าตาว',
+            content: (
+                <StyledTable
+                    columns={columnsFishy}
+                    dataSource={sourceDataFishy}
+                    loading={getReceiveFishyPaginationWithOutEmpty.loading}
+                    onChange={handleChangePaginationFishy}
+                    pagination={{
+                        total: totalListFishy,
+                        current: currentPageFishy,
+                        showSizeChanger: false,
+                    }}
+                />
+            ),
+        },
+        {
+            title: 'กรอกปริมาตรที่ใช้',
+            content: (
+                <>
+                    <Row gutter={[16, 0]} style={{ width: '100%' }}>
+                        <Col xs={24}>
+                            <>
+                                Stock ที่มีอยู่ : {Number(preDataFishyBill?.stock)} KG. ~ {Number(preDataFishyBill?.stock / 1.2)}{' '}
+                                L
+                            </>
+                            <StyledFormItems
+                                label='ปริมาตรน้ำคาวที่เติมเพิ่ม (L.)'
+                                name='volume'
+                                rules={[
+                                    { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
+
+                                    {
+                                        validator: async (_, value) => {
+                                            if (value > Number(preDataFishyBill?.stock / 1.2)) {
+                                                return Promise.reject(
+                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataFishyBill?.stock / 1.2)}`),
+                                                )
+                                            }
+                                        },
+                                    },
+                                ]}
+                            >
+                                {Number(preDataFishyBill?.stock) && (
+                                    <StyledInputNumber min={0} onChange={handleChangeLitToKG} size='large' />
+                                )}
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                            </StyledFormItems>
+                        </Col>
+                    </Row>
+                </>
+            ),
+        },
+    ]
+
     const itemsStepsSalt = stepsSalt.map((item) => ({ key: item.title, title: item.title }))
     const itemsStepsFishSauce = stepsFishSauce.map((item) => ({ key: item.title, title: item.title }))
+    const itemsStepsAmpan = stepsAmpan.map((item) => ({ key: item.title, title: item.title }))
+    const itemsStepsFishy = stepFishy.map((item) => ({ key: item.title, title: item.title }))
 
     return (
         <>
@@ -1249,6 +1811,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             {Boolean(getNoticeTargetPending.data?.length) &&
                 getNoticeTargetPending.data.map((data, index) => (
                     <React.Fragment key={index}>
+                        {/* <>{JSON.stringify(data)}</> */}
                         <StyledAlert
                             action={
                                 <>
@@ -1321,7 +1884,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         สถานะการกลบเกลือของบ่อ :{' '}
                         {getPuddleDetailById?.data?.topSalt === 1 ? 'กลบเกลือเเล้ว' : 'ยังไม่ได้กลบเกลือ'}
                     </span>
-                    <RowChem>
+                    {/* <RowChem>
                         <BoxChem
                             onClick={() => {
                                 setVisibleEditChem(true)
@@ -1347,9 +1910,14 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             <span>TN : {chemDisplay.tn}</span>
                         </BoxChem>
                     </RowChem>
-                    <a href='http://128.199.228.63/dashboard' rel="noreferrer" target='_blank'>
-                        ไปที่โปรแกรม Lab
-                    </a>
+                    <StyledButton
+                        type='primary'
+                        onClick={() => {
+                            setVisibleModalSendToLabs(true)
+                        }}
+                    >
+                        ส่งตัวอย่างไปที่ Labs
+                    </StyledButton> */}
                 </div>
 
                 <br />
@@ -1366,6 +1934,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 data={getOrdersDetailFromId.data}
                                 onOpenBill={handleViewFishWeightBill}
                                 onSelected={handleSelectSubOrder}
+                                openModalLabs={setVisibleModalSendToLabs}
+                                setIdRef={setIdSuborderToLabs}
                                 statusPuddle={getPuddleDetailById.data?.status}
                             />
                         )}
@@ -1415,6 +1985,28 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         type='dashed'
                     >
                         เติมน้ำเกลือ
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setVisibleModalHitWaterFish(true)
+                            // setItemsTransfer(1)
+                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
+                            // showDrawer()
+                        }}
+                        type='primary'
+                    >
+                        เติมน้ำรถน้าอำพัน
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setVisibleModalWaterFish(true)
+                            // setItemsTransfer(1)
+                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
+                            // showDrawer()
+                        }}
+                        type='primary'
+                    >
+                        เติมน้ำคาว
                     </StyledButtonAction>
                     <StyledButtonAction
                         onClick={() => {
@@ -1490,7 +2082,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             {/* Sidebar GetIn Fishsaurce */}
             <StyledDrawer bodyStyle={{ paddingBottom: 80 }} onClose={onCloseGetIn} open={openGetIN} title='รับเข้า' width={720}>
                 <Form autoComplete='off' form={formGetIn} layout='vertical' onFinish={submitImportFishSaurce}>
-                    <GetInFishsauce onChangeDate={onChangeDateTransfer} />
+                    <GetInFishsauce defaultDateAction={defaultDateActionGetIn} onChangeDate={onChangeDateTransfer} />
                     <Button htmlType='submit' type='primary'>
                         Submit
                     </Button>
@@ -1651,12 +2243,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <Steps current={currentStepSalt} items={itemsStepsSalt} />
                     <StyledContentSteop>{stepsSalt[currentStepSalt].content}</StyledContentSteop>
                     <div>
-                        {/* TODO */}
-                        {/* {currentStepSalt < stepsSalt.length - 1 && (
-                            <Button type='primary' onClick={() => next()}>
-                                Next
-                            </Button>
-                        )} */}
                         {currentStepSalt === stepsSalt.length - 1 && (
                             <Button htmlType='submit' type='primary'>
                                 ยืนยัน
@@ -1664,7 +2250,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         )}
                         {currentStepSalt > 0 && (
                             <Button onClick={() => prev()} style={{ margin: '0 8px' }}>
-                                Previous
+                                ย้อนกลับ
                             </Button>
                         )}
                     </div>{' '}
@@ -1745,40 +2331,207 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     ))}
             </Modal>
 
-            {/* <Modal
+            <Modal
                 centered
+                destroyOnClose
                 footer={null}
                 onCancel={() => {
-                    setVisibleModalViewFishSauceBill(false)
-                    setIdOrdersOpenFishSauceBill(null)
+                    setVisibleModalSendToLabs(false)
                 }}
-                open={visibleModalViewFishSauceBill}
-                title={`บิลน้ำปลาที่ผูกกับออเดอร์หมายเลข : ${idOrdersOpenSaltBill}`}
-                width={524}
+                open={visibleModalSendToLabs}
+                title={`ส่งข้อมูลไปยังห้อง Labs`}
+                width={600}
             >
-                {!getLogReceiveFishSauceByOrdersId.data ||
-                    (getLogReceiveFishSauceByOrdersId.data.length < 1 && (
-                        <StyledBoxListFishWeightBill>
-                            <span>ไม่มีรายการที่ผูกไว้</span>
-                        </StyledBoxListFishWeightBill>
-                    ))}
-                {getLogReceiveFishSauceByOrdersId.data &&
-                    getLogReceiveFishSauceByOrdersId.data.map((data, index) => (
-                        <React.Fragment key={index}>
-                            <StyledBoxListFishWeightBill>
-                                <span>บิลหมายเลข</span>
-                                <span>{data.no}</span>
-                            </StyledBoxListFishWeightBill>
-                            <StyledBoxListFishWeightBill>
-                                <span>ปริมาณที่ใช้จากบิลนี้</span>
-                                <span>{numberWithCommas(data.amount)} KG</span>
-                            </StyledBoxListFishWeightBill>
+                <>
+                    <Form autoComplete='off' form={formSendToLabs} layout='vertical' onFinish={handleAddToLab}>
+                        {/* Specific Chem */}
 
-                            <Divider />
-                        </React.Fragment>
-                    ))}
-            </Modal> */}
+                        <StyledFormItems
+                            label='Product name'
+                            name='ProductName'
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                },
+                            ]}
+                        >
+                            <Input placeholder='ชื่อตัวอย่าง' size='large' style={{ color: 'black' }} />
+                        </StyledFormItems>
+                        <StyledFormItems
+                            label='เลือกสูตร'
+                            name='idScfChem'
+                            rules={[{ required: true, message: 'กรุณาเลือกสูตร' }]}
+                        >
+                            <Select placeholder='เลือกสูตร' size='large' style={{ width: '100%' }}>
+                                {getSpecific?.data?.message &&
+                                    getSpecific?.data?.message.map((data, index) => (
+                                        <Option key={index} value={data.idPdSpecificChem}>
+                                            <span>{data.name}</span>
+                                        </Option>
+                                    ))}
+                            </Select>
+                        </StyledFormItems>
+                        <Checkbox.Group onChange={onChange} style={{ width: '100%', marginBottom: '24px' }}>
+                            <Row gutter={[16, 8]}>
+                                <Col span={8}>
+                                    <Checkbox value='Tn'>Tn</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Salt'>Salt</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='PH'>PH</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Histamine'>Histamine</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Tss'>Tss</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Aw'>Aw</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Spg'>Spg</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='AN'>AN</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Acidity'>Acidity</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Viscosity'>Viscosity</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='SaltMeter'>SaltMeter</Checkbox>
+                                </Col>
+                                <Col span={8}>
+                                    <Checkbox value='Color'>Color</Checkbox>
+                                </Col>
+                            </Row>
+                        </Checkbox.Group>
 
+                        <StyledFormItems label='Micro' name='Micro'>
+                            <Checkbox onChange={onChangeMicro}>Micro</Checkbox>
+                        </StyledFormItems>
+
+                        <Button htmlType='submit' type='primary'>
+                            Submit
+                        </Button>
+                    </Form>
+                </>
+            </Modal>
+
+            <Modal
+                centered
+                destroyOnClose
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalWaterFish(false)
+                    setIdSubOrdersTarget(null)
+                    setSelectedIdProcess(null)
+                }}
+                open={visibleModalWaterFish}
+                title={`เติมน้ำคาว : ${getPuddleDetailById?.data?.lasted_order}`}
+                width={990}
+            >
+                <StyledForm
+                    autoComplete='off'
+                    form={formFishy}
+                    hideRequiredMark
+                    layout='vertical'
+                    name='formFishy'
+                    onFinish={handleSubmitWaterFish}
+                >
+                    <Steps current={currentStepFishy} items={itemsStepsFishy} />
+                    <StyledContentSteop>{stepFishy[currentStepFishy].content}</StyledContentSteop>
+                    <div>
+                        {currentStepFishy === stepFishy.length - 1 && (
+                            <Button htmlType='submit' type='primary'>
+                                ยืนยัน
+                            </Button>
+                        )}
+                        {currentStepFishy > 0 && (
+                            <Button onClick={() => prevFishy()} style={{ margin: '0 8px' }}>
+                                ย้อนกลับ
+                            </Button>
+                        )}
+                    </div>{' '}
+                </StyledForm>
+                {/* <StyledForm
+                    autoComplete='off'
+                    form={formWaterFish}
+                    hideRequiredMark
+                    layout='vertical'
+                    name='formWaterFish'
+                    onFinish={handleSubmitWaterFish}
+                >
+                    <Row gutter={[16, 0]} style={{ width: '100%' }}>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='ปริมาตรน้ำคาว (KG.)'
+                                name='volume'
+                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
+                            >
+                                <StyledInputNumber min={0} onChange={handleChangeLitToKGFishSauceWater} size='large' />
+                            </StyledFormItems>
+                        </Col>
+                        <Col xs={24}>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                            </StyledFormItems>
+                        </Col>
+                    </Row>
+                    <Button htmlType='submit' type='primary'>
+                        ยืนยัน
+                    </Button>
+                </StyledForm> */}
+            </Modal>
+
+            <Modal
+                centered
+                destroyOnClose
+                footer={null}
+                onCancel={() => {
+                    setVisibleModalHitWaterFish(false)
+                    setIdSubOrdersTarget(null)
+                    setSelectedIdProcess(null)
+                }}
+                open={visibleModalHitWaterFish}
+                title={`เติมน้ำรถน้าอำพัน : ${getPuddleDetailById?.data?.lasted_order}`}
+                width={990}
+            >
+                <StyledForm
+                    autoComplete='off'
+                    form={formHitWater}
+                    hideRequiredMark
+                    layout='vertical'
+                    name='formHitWater'
+                    onFinish={handleSubmitHitWater}
+                >
+                    <Steps current={currentStepAmpan} items={itemsStepsAmpan} />
+                    <StyledContentSteop>{stepsAmpan[currentStepAmpan].content}</StyledContentSteop>
+                    <div>
+                        {currentStepAmpan === stepsAmpan.length - 1 && (
+                            <Button htmlType='submit' type='primary'>
+                                ยืนยัน
+                            </Button>
+                        )}
+                        {currentStepAmpan > 0 && (
+                            <Button onClick={() => prevAmpan()} style={{ margin: '0 8px' }}>
+                                ย้อนกลับ
+                            </Button>
+                        )}
+                    </div>{' '}
+                </StyledForm>
+            </Modal>
+            {/* itemsStepsAmpan */}
             <Modal
                 centered
                 destroyOnClose
@@ -1908,7 +2661,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </ModalContent>
             </Modal>
 
-            <Modal
+            {/* <Modal
                 centered
                 destroyOnClose
                 onCancel={() => {
@@ -1917,19 +2670,16 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 }}
                 onOk={() => {
                     handleChangeChem()
-                    // handleUpdateDateStart()
                 }}
                 open={visibleEditChem}
                 title={`แก้ไขค่า ${selectedChem}`}
             >
                 <ModalContent>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '24px' }}>
-                        {/* <DatePicker onChange={onChangeDate} style={{ width: '100%' }} /> */}
                         <InputNumber
                             max={100}
                             min={0}
                             onChange={(e) => {
-                                console.log('e : ', e)
                                 setValueChem(e)
                             }}
                             placeholder='กรุณาระบุค่าทางเคมี'
@@ -1937,10 +2687,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             style={{ width: '100%' }}
                             value={valueChem}
                         />
-                        {/* <p>{'เมื่อทำรายการนี้เเล้วจะไม่สามารถแก้ไขได้\nกรุณาตรวจสอบข้อมูลให้ครบถ้วน'}</p> */}
                     </div>
                 </ModalContent>
-            </Modal>
+            </Modal> */}
         </>
     )
 }
@@ -1961,22 +2710,21 @@ const StyledInputNumber = styled(InputNumber)`
         display: none;
     }
 `
-
-const RowChem = styled.div`
-    display: flex;
-    gap: 8px;
-`
-const BoxChem = styled.div`
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    border-radius: 2px;
-    min-width: 150px;
-    height: 50px;
-    background: #51459e98;
-    color: white;
-    padding: 8px;
-`
+// const RowChem = styled.div`
+//     display: flex;
+//     gap: 8px;
+// `
+// const BoxChem = styled.div`
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     border-radius: 2px;
+//     min-width: 150px;
+//     height: 50px;
+//     background: #51459e98;
+//     color: white;
+//     padding: 8px;
+// `
 
 const ButtonApprove = styled(Button)`
     border-radius: 2px;

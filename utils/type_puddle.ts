@@ -34,4 +34,8 @@ export enum TypeProcess {
     TRANSFERSALTWATER = 8,
     // ปล่อยน้ำเกลือ
     IMPORTSALTWATER = 9,
+    // เติมน้ำตีกาก
+    IMPORTHITWATER = 10,
+    // เติมน้ำคาว
+    IMPORTWATERFISH = 11,
 }

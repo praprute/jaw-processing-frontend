@@ -1,5 +1,5 @@
 import { Button } from 'antd'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx'
@@ -8,16 +8,38 @@ import { DownloadOutlined } from '@ant-design/icons'
 import { IOrderDetailDto } from '../../share-module/order/type'
 import { numberWithCommas } from '../../utils/format-number'
 import { TypeProcess } from '../../utils/type_puddle'
+import { getResultTestTask } from '../../share-module/order/task'
 
 interface IOrderLastedSection {
     data: IOrderDetailDto[]
     statusPuddle: number
     onSelected: (id: number) => void
     onOpenBill: (id: number) => void
+    openModalLabs?: (visible: boolean) => void
+    setIdRef?: (id: number) => void
 }
 
 const OrderLastedSection = (props: IOrderLastedSection) => {
-    const { data, onSelected, onOpenBill } = props
+    const { data, onSelected, onOpenBill, openModalLabs, setIdRef } = props
+
+    const [resultTest, setResultTest] = useState<any>([])
+
+    const getResultTest = getResultTestTask.useTask()
+
+    useEffect(() => {
+        ;(async () => {
+            if (!!data) {
+                let buffer = []
+                for (const element of data) {
+                    const res = await getResultTest.onRequest({ ref: element.idsub_orders })
+                    if (res.success === 'success') {
+                        buffer.push(res.message[res.message.length - 1])
+                        setResultTest((resultTest: any) => [...resultTest, res.message[res.message.length - 1]])
+                    }
+                }
+            }
+        })()
+    }, [data])
 
     const handleTypeOrder = (type: number) => {
         switch (type) {
@@ -41,6 +63,10 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'ปล่อยน้ำเกลือ'
             case TypeProcess.IMPORTSALTWATER:
                 return 'เติมน้ำเกลือเข้าจากภายใน'
+            case TypeProcess.IMPORTHITWATER:
+                return 'เติมน้ำตีกาก'
+            case TypeProcess.IMPORTWATERFISH:
+                return 'เติมน้ำคาว'
             default:
                 break
         }
@@ -86,6 +112,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                     <th>ปริมาตร</th>
                     <th>สถานะ</th>
                     <th>รายละเอียด</th>
+                    <th>ส่งตัวอย่าง</th>
                 </tr>
                 {data &&
                     data.map((data, index) => (
@@ -102,6 +129,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td></td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction>
                                         <td></td>
@@ -110,6 +138,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.salt)}</td>
                                         <td>{numberWithCommas(data.salt === 0 ? 0 : data.salt_price / data.salt)}</td>
                                         <td>{numberWithCommas(data.salt_price)}</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
@@ -124,6 +153,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td></td>
                                         <td></td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction>
                                         <td></td>
@@ -148,6 +191,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 ดูใบชั่งปลา
                                             </StyledButton>
                                         </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
                                     </StyledRowTransaction>
                                 </>
                             )}
@@ -167,10 +221,24 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
 
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
-                                        <td></td>
+                                        <td>{!!data.round ? `รอบ ${data.round}` : ''}</td>
                                         <td>คงเหลือ</td>
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
@@ -193,6 +261,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -212,10 +291,24 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>บ่อที่มา {data?.action_serial_puddle}</td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
-                                        <td></td>
+                                        <td>{!!data.round ? `รอบ ${data.round}` : ''}</td>
                                         <td>คงเหลือ</td>
                                         <td>{numberWithCommas(data.remaining_items)}</td>
                                         <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
@@ -238,6 +331,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -257,6 +361,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -284,6 +402,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -303,6 +432,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>บ่อที่มา {data?.action_serial_puddle}</td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -330,6 +473,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -349,6 +503,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td></td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -377,6 +545,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 </StyledButton>
                                             )}
                                         </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
                                     </StyledRowTransaction>
                                 </>
                             )}
@@ -395,6 +574,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td></td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -421,6 +614,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -440,6 +644,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td></td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -466,6 +684,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -486,6 +715,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
 
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -512,6 +755,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -532,6 +786,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>บ่อที่มา {data?.action_serial_puddle}</td>
                                         <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
                                     </StyledRowTransaction>
                                     <StyledRowTransaction isStatus={data.type}>
                                         <td></td>
@@ -558,6 +826,158 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                     เพิ่มรายละเอียด
                                                 </StyledButton>
                                             )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+
+                            {data.type === TypeProcess.IMPORTHITWATER && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td> {numberWithCommas(data.amount_items)}</td>
+                                        <td>{numberWithCommas(data.amount_unit_per_price)}</td>
+                                        <td> {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} KG |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+                            {data.type === TypeProcess.IMPORTWATERFISH && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td> {numberWithCommas(data.amount_items)}</td>
+                                        <td>{numberWithCommas(data.amount_unit_per_price)}</td>
+                                        <td> {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} KG |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td></td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
                                         </td>
                                     </StyledRowTransaction>
                                 </>
@@ -596,6 +1016,10 @@ const StyledRowTransaction = styled.tr<{ isStatus?: number }>`
                 return `background:#e5cee6;`
             case TypeProcess.ADDONWATERSALT:
                 return `background:#dfc5be;`
+            case TypeProcess.IMPORTHITWATER:
+                return `background:#BEDFDF;`
+            case TypeProcess.IMPORTWATERFISH:
+                return `background:#CFBEDF;`
         }
     }}
 `

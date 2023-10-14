@@ -8,7 +8,7 @@ import AppLayout from '../../components/Layouts'
 import { useNavigation } from '../../utils/use-navigation'
 import { NextPageWithLayout } from '../_app'
 import { numberWithCommas } from '../../utils/format-number'
-import { fillterReceiveFishSauceTask, getReceiveFishSaucePaginationTask } from '../../share-module/FishWeightBill/task'
+import { getReceiveFishSaucePaginationTask } from '../../share-module/FishWeightBill/task'
 import { NoticeError } from '../../utils/noticeStatus'
 import FillterFishSauceBox from '../../components/FishSauceOutSide/FillterFishSauceBox'
 
@@ -18,9 +18,22 @@ const FishSauceReceivePage: NextPageWithLayout = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
     const [totalList, setTotalList] = useState(0)
+    const [fillterValues, setFillterValues] = useState({
+        no: null,
+        weigh_in: null,
+        weigh_out: null,
+        weigh_net: null,
+        time_in: null,
+        time_out: null,
+        vehicle_register: null,
+        customer_name: null,
+        product_name: null,
+        store_name: null,
+        dateStart: null,
+        dateEnd: null,
+    })
 
     const getReceiveFishSaucePagination = getReceiveFishSaucePaginationTask.useTask()
-    const fillterReceiveFishSauce = fillterReceiveFishSauceTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -74,19 +87,9 @@ const FishSauceReceivePage: NextPageWithLayout = () => {
 
     useEffect(() => {
         ;(async () => {
-            await handleGetListReceive()
+            await handleSubmit(fillterValues)
         })()
     }, [currentPage])
-
-    const handleGetListReceive = async () => {
-        try {
-            const res = await getReceiveFishSaucePagination.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
-            setSourceData(res.data)
-            setTotalList(res.total)
-        } catch (e: any) {
-            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
-        }
-    }
 
     const handleChangePagination = (pagination: any) => {
         setCurrentPage(pagination.current)
@@ -94,9 +97,24 @@ const FishSauceReceivePage: NextPageWithLayout = () => {
 
     const handleSubmit = async (values: any) => {
         try {
-            const res = await fillterReceiveFishSauce.onRequest(values)
-            setSourceData(res)
-            setTotalList(10)
+            setFillterValues(values)
+            const res = await getReceiveFishSaucePagination.onRequest({
+                page: currentPage - 1,
+                offset: OFFSET_PAGE,
+                no: values.no,
+                weigh_net: values.weigh_net,
+                customer_name: values.customer_name,
+                product_name: values.product_name,
+                stock: values.stock,
+                dateStart: !!form.getFieldValue('date_start')
+                    ? moment(form.getFieldValue('date_start'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD')
+                    : null,
+                dateEnd: !!form.getFieldValue('date_end')
+                    ? moment(form.getFieldValue('date_end'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD')
+                    : null,
+            })
+            setSourceData(res.data)
+            setTotalList(res.total)
         } catch (e: any) {
             NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
         }
@@ -134,7 +152,7 @@ const FishSauceReceivePage: NextPageWithLayout = () => {
                     <StyledTable
                         columns={columns}
                         dataSource={sourceData}
-                        loading={getReceiveFishSaucePagination.loading || fillterReceiveFishSauce.loading}
+                        loading={getReceiveFishSaucePagination.loading}
                         onChange={handleChangePagination}
                         pagination={{
                             total: totalList,

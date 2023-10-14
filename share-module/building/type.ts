@@ -22,6 +22,7 @@ export interface IDetailPuddle {
     working_status_title?: string
     topSalt?: number
     start_date?: string
+    action_time?: string
 }
 
 export interface IAllPuddleDto {
@@ -39,6 +40,8 @@ export interface IAllPuddleDto {
     topSalt?: number
     start_date?: string
     type_process?: number
+    action_time?: string
+    round?: number
 }
 
 export interface IResAllPuddleDto {

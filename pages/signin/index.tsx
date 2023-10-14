@@ -51,7 +51,7 @@ const SiginPage = () => {
             }
         } catch (e: any) {
             console.log(e)
-            toast.error(`${e[0].message}`, {
+            toast.error(`${e[0]?.message}`, {
                 position: 'top-right',
                 autoClose: 3000,
                 hideProgressBar: false,

@@ -41,11 +41,17 @@ export const useNavigation = () => {
             createFishSauceBillReceive: async () => {
                 await history.push(`fishsauce-bill/create`)
             },
+            createAmpanBillReceive: async () => {
+                await history.push(`ampan-bill/create`)
+            },
             processManagementSetting: async () => {
                 await history.push('process-management-setting')
             },
             createSolidSaltBillReceive: async () => {
                 await history.push(`salt-bill/solid-salt/create`)
+            },
+            createFishyBillReceive: async () => {
+                await history.push(`fishy-bill/create`)
             },
         },
     }

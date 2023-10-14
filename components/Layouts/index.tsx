@@ -33,6 +33,8 @@ const AppLayout = (props: ILayout) => {
         { key: '/fish-bill', name: 'ระบบบิลปลา' },
         { key: '/salt-bill', name: 'ระบบบิลเกลือ และ น้ำเกลือ' },
         { key: '/fishsauce-bill', name: 'ระบบบิลน้ำปลา' },
+        { key: '/ampan-bill', name: 'ระบบบิลน้ำรถน้าอำพัน' },
+        { key: '/fishy-bill', name: 'ระบบบิลน้ำคาว' },
         { key: '/process-management-setting', name: 'ตั้งค่า' },
 
         // { key: '/c', name: 'Accounting Doc' },
@@ -43,6 +45,8 @@ const AppLayout = (props: ILayout) => {
         { key: '/customer-management/fishsauce-customer', name: 'ผู้จำหน่ายปลาน้ำปลา' },
         { key: '/customer-management/solid-salt-customer', name: 'ผู้จำหน่ายเกลือ' },
         { key: '/customer-management/salt-water-customer', name: 'ผู้จำหน่ายน้ำเกลือ' },
+        { key: '/customer-management/ampan-customer', name: 'ผู้จำหน่ายน้ำรถน้าอำพัน' },
+        { key: '/customer-management/fishy-customer', name: 'ผู้จำหน่ายน้ำคาว' },
     ]
 
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]

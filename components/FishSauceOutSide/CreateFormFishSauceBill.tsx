@@ -13,7 +13,7 @@ const CreateFishSauceBillBox = (props: ICreateFishSauceBillBox) => {
     const { customerList, onChangeDate } = props
     return (
         <BoxFillter>
-            <HeaderFillterBox>ลงทะเบียนบิลเกลือ</HeaderFillterBox>
+            <HeaderFillterBox>ลงทะเบียนบิล</HeaderFillterBox>
             <ContentFillter>
                 <Row gutter={[16, 8]}>
                     <Col md={12} sm={24} xs={24}>

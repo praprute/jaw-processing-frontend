@@ -17,14 +17,30 @@ export const getReceiveFishWeightPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'getReceiveFishWeightPagination',
     defaultData: {} as IListFishWeight,
-    defaultPayload: {} as { page: number; offset: number },
+    defaultPayload: {} as {
+        page: number
+        offset: number
+        no?: string
+        weigh_in?: string
+        weigh_out?: string
+        weigh_net?: string
+        time_in?: string
+        time_out?: string
+        vehicle_register?: string
+        customer_name?: string
+        product_name?: string
+        store_name?: string
+        dateStart?: string
+        dateEnd?: string
+    },
     saga: ({ actions }) =>
         function* (action) {
             try {
                 const { page, offset } = action.payload
                 const config = yield configAPI()
-                const { data } = yield axios.get(
+                const { data } = yield axios.post(
                     `${process.env.NEXT_PUBLIC_HOST}/getReceiveFishWeightPaginationTask/${page}/${offset}`,
+                    action.payload,
                     config,
                 )
 
@@ -444,21 +460,30 @@ export const getLogReceiveSaltByOrdersIdTask = createReduxAsyncTask({
             }
         },
 })
-
-// -------------------- Fish Sauce --------------------
-
-export const getReceiveFishSaucePaginationTask = createReduxAsyncTask({
+// -------------------- Ampan--------------------
+export const getReceiveAmpanPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
-    name: 'getReceiveFishSaucePagination',
+    name: 'getReceiveAmpanPagination',
     defaultData: {} as any,
-    defaultPayload: {} as { page: number; offset: number },
+    defaultPayload: {} as {
+        page: number
+        offset: number
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+        dateStart?: string
+        dateEnd?: string
+    },
     saga: ({ actions }) =>
         function* (action) {
             try {
                 const { page, offset } = action.payload
                 const config = yield configAPI()
-                const { data } = yield axios.get(
-                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFiashSauceBillPaginationTask/${page}/${offset}`,
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveAmpanBillPaginationTask/${page}/${offset}`,
+                    action.payload,
                     config,
                 )
 
@@ -469,6 +494,236 @@ export const getReceiveFishSaucePaginationTask = createReduxAsyncTask({
             }
         },
 })
+
+export const createReceiveAmpanTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createReceiveAmpan',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        no: string
+        weigh_net: number
+        price_per_weigh: number
+        price_net: number
+        customer: string
+        product_name: string
+        date_action: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createAmpanBillTask`, action.payload, config)
+
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const fillterReceiveAmpanTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'fillterReceiveFishSauce',
+    defaultData: {} as IDtoFishWeight[],
+    defaultPayload: {} as {
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/fillterReceiveAmpanTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const getReceiveAmpanPaginationWithOutEmptyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveAmpanPaginationWithOutEmpty',
+    defaultData: {} as any,
+    defaultPayload: {} as { page: number; offset: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveAmpanBillPaginationWithOutEmptyTask/${page}/${offset}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+// -------------------- Fishy Reciept --------------------
+
+export const getReceiveFishyPaginationTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveFishyPagination',
+    defaultData: {} as any,
+    defaultPayload: {} as {
+        page: number
+        offset: number
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+        dateStart?: string
+        dateEnd?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFishyBillPaginationTask/${page}/${offset}`,
+                    action.payload,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const createReceiveFishyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'createReceiveFishy',
+    defaultData: {} as { success: string },
+    defaultPayload: {} as {
+        no: string
+        weigh_net: number
+        price_per_weigh: number
+        price_net: number
+        customer: string
+        product_name: string
+        date_action: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/createFishyBillTask`, action.payload, config)
+
+                const res: { success: string; message: any } = data
+                yield put(actions.success({ success: res.success }))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const fillterReceiveFishyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'fillterReceiveFishy',
+    defaultData: {} as IDtoFishWeight[],
+    defaultPayload: {} as {
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/fillterReceiveFishyTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+export const getReceiveFishyPaginationWithOutEmptyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveFishyPaginationWithOutEmpty',
+    defaultData: {} as any,
+    defaultPayload: {} as { page: number; offset: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFishyBillPaginationWithOutEmptyTask/${page}/${offset}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
+// -------------------- Fish Sauce --------------------
+
+export const getReceiveFishSaucePaginationTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveFishSaucePagination',
+    defaultData: {} as any,
+    defaultPayload: {} as {
+        page: number
+        offset: number
+        no?: string
+        weigh_net?: string
+        customer_name?: string
+        product_name?: string
+        stock?: string
+        dateStart?: string
+        dateEnd?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFiashSauceBillPaginationTask/${page}/${offset}`,
+                    action.payload,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
 export const getReceiveFishSaucePaginationWithOutEmptyTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'getReceiveFishSaucePaginationWithOutEmpty',

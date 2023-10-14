@@ -31,9 +31,8 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
         onChangeBuilding,
         onSelectAction,
         typeProcess,
-        lastedOrder,
     } = props
-    console.log('lastedOrder : ', lastedOrder)
+
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>
@@ -72,12 +71,13 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
             </StyledFormItems> */}
             <StyledFormItems
                 extra={`~ ${amountItemsKG} kg.`}
-                label='จำนวนที่ปล่อยออก'
+                label='จำนวนที่ปล่อยออก L.'
                 name='volume'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
                 <Input onChange={onChangeAmountItems} placeholder='จำนวนที่ปล่อยออก' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
+
             <StyledFormItems
                 label='ปริมาตรที่เหลือ (kg.)'
                 name='remaining_volume'
@@ -89,49 +89,49 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                     },
                 ]}
             >
-                <Input placeholder='ปริมาตรที่เหลือ (L.)' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='ปริมาตรที่เหลือ (L.)' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='ร้อยละที่ปล่อยออก'
                 name='amount_items'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='ร้อยละคงเหลือ'
                 name='remaining_items'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='ราคาต่อหน่วย ล่าสุด'
                 name='amount_unit_per_price'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='จำนวนคงเหลือ' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='จำนวนคงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='ราคาต่อหน่วย คงเหลือ'
                 name='remaining_unit_per_price'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='ราคาต่อหน่วย คงเหลือ' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='ราคาต่อหน่วย คงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='มูลค่า'
                 name='amount_price'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='มูลค่า' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='มูลค่า' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='มูลค่า คงเหลือ'
                 name='remaining_price'
                 rules={[{ pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
             >
-                <Input placeholder='มูลค่า คงเหลือ' size='large' style={{ color: 'black' }} />
+                <Input disabled placeholder='มูลค่า คงเหลือ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems label='เลือกรายการการทำงาน' name='process' rules={[{ required: false }]}>
                 <Select placeholder='เลือกรายการการทำงาน' style={{ width: '100%' }}>
@@ -142,6 +142,15 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                             </Option>
                         ))}
                 </Select>
+            </StyledFormItems>
+            <StyledFormItems
+                label='รอบ'
+                name='round'
+                rules={[
+                    { pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: false, message: 'กรุณากรอกจำนวนให้ครบถ้วน' },
+                ]}
+            >
+                <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
             </StyledFormItems>
             <StyledFormItems
                 label='วันที่ทำรายการ'

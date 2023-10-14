@@ -1,7 +1,13 @@
-import { Col, Input, Row, Form, Button } from 'antd'
+import { Col, Input, Row, Form, Button, DatePicker } from 'antd'
 import styled from 'styled-components'
 
-const FillterBox = () => {
+interface IFillterBox {
+    onChangeDate?: (value: moment.Moment, dateString: string) => void
+    onChangeDateEnd?: (value: moment.Moment, dateString: string) => void
+}
+const FillterBox = (props: IFillterBox) => {
+    const { onChangeDate, onChangeDateEnd } = props
+
     return (
         <BoxFillter>
             <HeaderFillterBox>เรียกดูใบชั่งปลา</HeaderFillterBox>
@@ -12,13 +18,11 @@ const FillterBox = () => {
                             <Input placeholder='ลำดับที่' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
                     </Col>
-
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems label='น้ำหนักสุทธิ' name='weigh_net'>
                             <Input placeholder='น้ำหนักสุทธิ' size='large' style={{ color: 'black' }} />
                         </StyledFormItems>
                     </Col>
-
                     <Col md={12} sm={24} xs={24}>
                         <StyledFormItems label='ทะเบียนรถ' name='vehicle_register'>
                             <Input placeholder='ทะเบียนรถ' size='large' style={{ color: 'black' }} />
@@ -42,6 +46,24 @@ const FillterBox = () => {
                     <Col md={24} sm={24} xs={24}>
                         <StyledFormItems label='stock คงเหลือ' name='stock'>
                             <Input placeholder='stock คงเหลือ' size='large' style={{ color: 'black' }} />
+                        </StyledFormItems>
+                    </Col>
+                    <Col md={12} sm={24} xs={24}>
+                        <StyledFormItems
+                            label='วันที่ทำรายการตั้งต้น'
+                            name='date_start'
+                            rules={[{ required: false, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                        >
+                            <DatePicker onChange={onChangeDate} style={{ width: '100%' }} />
+                        </StyledFormItems>
+                    </Col>{' '}
+                    <Col md={12} sm={24} xs={24}>
+                        <StyledFormItems
+                            label='วันที่ทำรายการสิ้นสุด'
+                            name='date_end'
+                            rules={[{ required: false, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                        >
+                            <DatePicker onChange={onChangeDateEnd} style={{ width: '100%' }} />
                         </StyledFormItems>
                     </Col>
                     <Col md={24} sm={24} xs={24}>

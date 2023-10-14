@@ -127,11 +127,16 @@ const PuddlePage: NextPageWithLayout = () => {
                 return 'ปล่อยน้ำเกลือ'
             case TypeProcess.IMPORTSALTWATER:
                 return 'เติมน้ำเกลือเข้าจากภายใน'
+            case TypeProcess.IMPORTHITWATER:
+                return 'เติมน้ำตีกาก'
+            case TypeProcess.IMPORTWATERFISH:
+                return 'เติมน้ำคาว'
             default:
                 return ' '
                 break
         }
     }
+    console.log('getPuddleByIdBuilding : ', getPuddleByIdBuilding.data)
 
     //
     return (
@@ -203,9 +208,13 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         <span>ยังไม่กลบเกลือ</span>
                                                     )}
                                                 </StyledTitleBetween>
-                                                <StyledTitleBetween>
+                                                <StyledTitleBetweenTag>
                                                     <span>{handleTypeOrder(data?.type_process)}</span>
-                                                </StyledTitleBetween>
+                                                    <span>
+                                                        {!!data?.action_time ? dayjs(data?.action_time).format('DD/MM/YYYY') : ''}
+                                                    </span>
+                                                    <span>รอบ {data?.round}</span>
+                                                </StyledTitleBetweenTag>
                                             </StyledGlassBox>
                                         </Col>
                                     ))}
@@ -239,9 +248,13 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     : '0  วัน'}
                                                 {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
                                             </StyledTitleBetween>
-                                            <StyledTitleBetween>
+                                            <StyledTitleBetweenTag>
                                                 <span>{handleTypeOrder(data?.type_process)}</span>
-                                            </StyledTitleBetween>
+                                                <span>
+                                                    {!!data?.action_time ? dayjs(data?.action_time).format('DD/MM/YYYY') : ''}
+                                                </span>
+                                                <span>รอบ {data?.round}</span>
+                                            </StyledTitleBetweenTag>
                                         </StyledGlassBox>
                                     ))}
                             </WrapGridCustom>
@@ -329,6 +342,16 @@ const StyledTitleBetween = styled.div`
     align-items: center;
     justify-content: space-between;
     font-size: 14px;
+`
+
+const StyledTitleBetweenTag = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    background-color: #51459e;
+    color: #ffffff;
 `
 const StyledGlassBox = styled.div<{ isStatus: number }>`
     ${(p) => {

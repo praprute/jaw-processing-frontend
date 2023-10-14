@@ -20,9 +20,11 @@ export interface ISubmitGetIn {
     action_serial_puddle: number
     date_action?: string
     id_puddle?: number
+    round?: number
 }
 
 export interface INoticeTargetPendingDto {
+    date_action: string
     idtarget_puddle: number
     id_puddle: number
     id_sub_order: number
@@ -72,6 +74,7 @@ export interface IPayloadTransferFishSauce {
     serial_puddle: number
     process?: number
     date_action?: string
+    round?: number
 }
 export interface IPayloadTransferSaltWater {
     order_id: number
@@ -90,6 +93,7 @@ export interface IPayloadTransferSaltWater {
     serial_puddle: number
     process?: number
     item_transfer?: number
+    round?: number
 }
 
 export interface IOrderDto {
@@ -146,4 +150,5 @@ export interface IOrderDetailDto {
     idtype_process?: number
     process_name?: string
     date_action?: string
+    round?: number
 }
