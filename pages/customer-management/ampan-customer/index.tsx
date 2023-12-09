@@ -141,7 +141,7 @@ const CustomerAmpanBill: NextPageWithLayout = () => {
             <br />
             <StyledGlassBox>
                 <WrapContent>
-                    <Title>รานการผู้จำหน่ายน้ำปลา</Title>
+                    <Title>เพิ่มผู้จำหน่ายน้ำรถน้าอำพัน</Title>
 
                     <StyledTable
                         columns={columns}

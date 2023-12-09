@@ -120,7 +120,7 @@ const CustomerFishyBill: NextPageWithLayout = () => {
         <div>
             <StyledGlassBox>
                 <WrapContent>
-                    <Title>เพิ่มผู้จำหน่ายน้ำรถน้าอำพัน</Title>
+                    <Title>เพิ่มผู้จำหน่ายน้ำคาว</Title>
                     <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
                         <Row gutter={[16, 8]} style={{ width: '100%' }}>
                             <Col md={20} sm={24} xs={24}>
@@ -141,7 +141,7 @@ const CustomerFishyBill: NextPageWithLayout = () => {
             <br />
             <StyledGlassBox>
                 <WrapContent>
-                    <Title>รานการผู้จำหน่ายน้ำปลา</Title>
+                    <Title>เพิ่มผู้จำหน่ายน้ำคาว</Title>
 
                     <StyledTable
                         columns={columns}
