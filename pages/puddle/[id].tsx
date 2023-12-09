@@ -100,6 +100,8 @@ const PuddlePage: NextPageWithLayout = () => {
                 return <span>บ่อไล่น้ำสอง</span>
             case TypeOrderPuddle.HITMARK:
                 return <span>บ่อตีกาก</span>
+            case TypeOrderPuddle.MIXED:
+                return <span>ดูดไปผสม</span>
             default:
                 break
         }
@@ -131,12 +133,15 @@ const PuddlePage: NextPageWithLayout = () => {
                 return 'เติมน้ำตีกาก'
             case TypeProcess.IMPORTWATERFISH:
                 return 'เติมน้ำคาว'
+            case TypeProcess.MIXING:
+                return 'ดูดไปผสม'
+            case TypeProcess.EMPTY:
+                return 'บ่อว่าง'
             default:
                 return ' '
                 break
         }
     }
-    console.log('getPuddleByIdBuilding : ', getPuddleByIdBuilding.data)
 
     //
     return (
@@ -178,7 +183,8 @@ const PuddlePage: NextPageWithLayout = () => {
                                     getPuddleByIdBuilding?.data?.map((data, index) => (
                                         <Col key={index} md={columnGrid} sm={24} span={12} xs={24}>
                                             <StyledGlassBox
-                                                isStatus={data.status}
+                                                diff={Number(dayjs().diff(dayjs(data?.action_time), 'day'))}
+                                                isStatus={data.type_process}
                                                 onClick={() => {
                                                     data.status !== 999 &&
                                                         navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
@@ -191,15 +197,23 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
                                                     </span>
                                                     <span>{mapStatusPuddle(data.status)}</span>
-                                                </StyledTitleBetween>
+                                                </StyledTitleBetween>{' '}
+                                                <StyledTitleBetweenTag>
+                                                    <span>{handleTypeOrder(data?.type_process)}</span>
+                                                    <span>
+                                                        {!!data?.action_time ? dayjs(data?.action_time).format('DD/MM/YYYY') : ''}
+                                                    </span>
+                                                    <span>รอบ {data?.round}</span>
+                                                </StyledTitleBetweenTag>
                                                 <StyledTitleBetween>
                                                     <span>
                                                         {!!data?.working_status_title
                                                             ? data?.working_status_title
                                                             : 'non process'}
                                                     </span>
-                                                    {!!data?.start_date
-                                                        ? `${dayjs().diff(dayjs(data?.start_date), 'day')} วัน`
+
+                                                    {!!data?.action_time
+                                                        ? `${dayjs().diff(dayjs(data?.action_time), 'day')} วัน`
                                                         : '0  วัน'}
 
                                                     {data?.topSalt === 1 ? (
@@ -208,13 +222,6 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         <span>ยังไม่กลบเกลือ</span>
                                                     )}
                                                 </StyledTitleBetween>
-                                                <StyledTitleBetweenTag>
-                                                    <span>{handleTypeOrder(data?.type_process)}</span>
-                                                    <span>
-                                                        {!!data?.action_time ? dayjs(data?.action_time).format('DD/MM/YYYY') : ''}
-                                                    </span>
-                                                    <span>รอบ {data?.round}</span>
-                                                </StyledTitleBetweenTag>
                                             </StyledGlassBox>
                                         </Col>
                                     ))}
@@ -224,7 +231,8 @@ const PuddlePage: NextPageWithLayout = () => {
                                 {Boolean(getPuddleByIdBuilding?.data?.length) &&
                                     getPuddleByIdBuilding?.data?.map((data, index) => (
                                         <StyledGlassBox
-                                            isStatus={data.status}
+                                            diff={Number(dayjs().diff(dayjs(data?.action_time), 'day'))}
+                                            isStatus={data.type_process}
                                             key={index}
                                             onClick={() => {
                                                 data.status !== 999 &&
@@ -238,16 +246,7 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     {data.status !== 999 && dayjs(data.update_time).format('DD/MM/YYYY')}{' '}
                                                 </span>
                                                 <span>{mapStatusPuddle(data.status)}</span>
-                                            </StyledTitleBetween>
-                                            <StyledTitleBetween>
-                                                <span>
-                                                    {!!data?.working_status_title ? data?.working_status_title : 'non process'}
-                                                </span>
-                                                {!!data?.start_date
-                                                    ? `${dayjs().diff(dayjs(data?.start_date), 'day')} วัน`
-                                                    : '0  วัน'}
-                                                {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
-                                            </StyledTitleBetween>
+                                            </StyledTitleBetween>{' '}
                                             <StyledTitleBetweenTag>
                                                 <span>{handleTypeOrder(data?.type_process)}</span>
                                                 <span>
@@ -255,6 +254,16 @@ const PuddlePage: NextPageWithLayout = () => {
                                                 </span>
                                                 <span>รอบ {data?.round}</span>
                                             </StyledTitleBetweenTag>
+                                            <StyledTitleBetween>
+                                                <span>
+                                                    {!!data?.working_status_title ? data?.working_status_title : 'non process'}
+                                                </span>
+
+                                                {!!data?.action_time
+                                                    ? `${dayjs().diff(dayjs(data?.action_time), 'day')} วัน`
+                                                    : '0  วัน'}
+                                                {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
+                                            </StyledTitleBetween>
                                         </StyledGlassBox>
                                     ))}
                             </WrapGridCustom>
@@ -353,26 +362,114 @@ const StyledTitleBetweenTag = styled.div`
     background-color: #51459e;
     color: #ffffff;
 `
-const StyledGlassBox = styled.div<{ isStatus: number }>`
+const StyledGlassBox = styled.div<{ isStatus: number; diff: number }>`
     ${(p) => {
-        switch (p.isStatus) {
-            case TypeOrderPuddle.FREE:
-                return `background:#2db7f5;`
-            case TypeOrderPuddle.FERMENT:
-                return `background:#FC0F0f;`
-            case TypeOrderPuddle.CIRCULAR:
-                return `background:#FDD298;`
-            case TypeOrderPuddle.MIXING:
-                return `background:#B49ADF;`
-            case TypeOrderPuddle.FILTER:
-                return `background:#94B2D6;`
-            case TypeOrderPuddle.BREAK:
-                return `background:#82AC64;`
-            case TypeOrderPuddle.REPELLENT:
-                return `background:#35acc6;`
-            case TypeOrderPuddle.HITMARK:
-                return `background:#c68e62;`
+        if (p.isStatus === null) {
+            return ``
         }
+        // if (p.isStatus === TypeProcess.FREE) {
+        //     return `background:#2db7f5;`
+        // }
+        if (p.isStatus === TypeProcess.FERMENT && p.diff < 365) {
+            return `background:#FC0F0f;`
+        }
+
+        if (p.isStatus === TypeProcess.FERMENT && p.diff >= 365) {
+            return `background:#56E033;`
+        }
+
+        if (p.isStatus === TypeProcess.TRANSFER && p.diff >= 7) {
+            return `background:#E78E19;`
+        }
+        if (p.isStatus === TypeProcess.TRANSFER && p.diff < 7) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.IMPORT && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.IMPORT && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.CLEARING) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.GETFISHRESIDUE) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.CLEARINGALL) {
+            return `background:#BA5BE6;`
+        }
+
+        if (p.isStatus === TypeProcess.ADDONWATERSALT && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.ADDONWATERSALT && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.ADDONFISHSAUCE && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.ADDONFISHSAUCE && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.TRANSFERSALTWATER && p.diff >= 7) {
+            return `background:#E78E19;`
+        }
+        if (p.isStatus === TypeProcess.TRANSFERSALTWATER && p.diff < 7) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.IMPORTSALTWATER && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.IMPORTSALTWATER && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.IMPORTHITWATER && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.IMPORTHITWATER && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.IMPORTWATERFISH && p.diff >= 180) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.IMPORTWATERFISH && p.diff < 180) {
+            return `background:#2db7f5;`
+        }
+
+        if (p.isStatus === TypeProcess.MIXING && p.diff >= 90) {
+            return `background:#BA5BE6;`
+        }
+        if (p.isStatus === TypeProcess.MIXING && p.diff < 90) {
+            return `background:#2db7f5;`
+        }
+        // switch (p.isStatus) {
+        //     case TypeOrderPuddle.FREE:
+        //         return `background:#2db7f5;`
+        //     case TypeOrderPuddle.FERMENT && p.diff >= 365:
+        //         return `background:#56E033;`
+        //     case TypeOrderPuddle.FERMENT:
+        //         return `background:#FC0F0f;`
+        //     case TypeOrderPuddle.CIRCULAR:
+        //         return `background:#FDD298;`
+        //     case TypeOrderPuddle.MIXING:
+        //         return `background:#B49ADF;`
+        //     case TypeOrderPuddle.FILTER:
+        //         return `background:#94B2D6;`
+        //     case TypeOrderPuddle.BREAK:
+        //         return `background:#82AC64;`
+        //     case TypeOrderPuddle.REPELLENT:
+        //         return `background:#35acc6;`
+        //     case TypeOrderPuddle.HITMARK:
+        //         return `background:#c68e62;`
+        // }
     }}
     border-radius: 0px;
     border: 0.1px solid #ffffff66;

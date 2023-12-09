@@ -1,5 +1,6 @@
 import { DatePicker, Form, Input, Select } from 'antd'
 import { LabeledValue } from 'antd/lib/select'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { IAllBuildingAndPuddleDto, IAllPuddleDto } from '../../share-module/building/type'
@@ -33,6 +34,20 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
         typeProcess,
     } = props
 
+    const [puddleList, setPuddleList] = useState([])
+
+    useEffect(() => {
+        if (!!puddleOption) {
+            let puddle = puddleOption.map((data) => {
+                return {
+                    value: data.idpuddle,
+                    label: data.serial,
+                }
+            })
+            setPuddleList(puddle)
+        }
+    }, [puddleOption])
+
     return (
         <>
             <StyledFormItems label='เลือกอาคาร' name='id_building' rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}>
@@ -50,14 +65,23 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                 name='id_puddle'
                 rules={[{ required: true, message: 'กรุณาเลือกบ่อปลายทาง' }]}
             >
-                <Select onSelect={onSelectAction} placeholder='เลือกบ่อปลายทาง' style={{ width: '100%' }}>
+                {/* <Select onSelect={onSelectAction} placeholder='เลือกบ่อปลายทาง' style={{ width: '100%' }}>
                     {puddleOption &&
                         puddleOption.map((data, index) => (
                             <Option key={index} value={data.idpuddle}>
                                 <span>{data?.serial}</span>
                             </Option>
                         ))}
-                </Select>
+                </Select> */}
+                <Select
+                    filterOption={(input, option) => (option?.label.toString() ?? '').includes(input)}
+                    onSelect={onSelectAction}
+                    optionFilterProp='children'
+                    options={puddleList}
+                    placeholder='เลือกบ่อปลายทาง'
+                    showSearch
+                    style={{ width: '100%' }}
+                />
             </StyledFormItems>
             <StyledFormItems label='confirmation action puddle serial' name='action_puddle'>
                 <Input disabled placeholder='confirmation action puddle serial' size='large' style={{ color: 'black' }} />

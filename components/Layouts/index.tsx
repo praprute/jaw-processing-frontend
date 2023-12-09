@@ -1,7 +1,7 @@
-import { DeploymentUnitOutlined, MenuOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Divider, Layout, Menu, Drawer, Avatar, Input } from 'antd'
+import { DeploymentUnitOutlined, MenuOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
+import { Button, Divider, Layout, Menu, Drawer, Avatar } from 'antd'
 import { MenuProps } from 'antd/lib/menu'
-import { Fragment, ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
@@ -27,6 +27,7 @@ const AppLayout = (props: ILayout) => {
     const [myInfo, setMyInfo] = useState<IUserInfo>()
     const [visible, setVisible] = useState(false)
     const placement = 'left'
+    const [collapsed, setCollapsed] = useState(false)
 
     const menuItems = [
         { key: '/', name: 'ระบบจัดการ การเดินน้ำปลา' },
@@ -260,7 +261,11 @@ const AppLayout = (props: ILayout) => {
                     />
                     <div className='logo'>{process.env.NEXT_PUBLIC_NAME_PLATFORM}</div>
                 </HeaderLogo>
-                <StyledSearch placeholder='ค้นหาเอกสารที่ต้องการ' suffix={<SearchOutlined />} />
+                {/* <StyledSearch placeholder='ค้นหาเอกสารที่ต้องการ' suffix={<SearchOutlined />} /> */}
+                {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                    className: 'trigger',
+                    onClick: () => setCollapsed(!collapsed),
+                })}
                 <StyledMenuIcon
                     className='menu-icon'
                     onClick={showDrawer}
@@ -286,7 +291,15 @@ const AppLayout = (props: ILayout) => {
 
             <Layout>
                 {!hideSidebar && (
-                    <WrapSider breakpoint='lg' collapsedWidth='0' style={{ padding: '10px 10px', height: '100%' }} width={295}>
+                    <WrapSider
+                        breakpoint='lg'
+                        collapsed={collapsed}
+                        collapsedWidth='0'
+                        collapsible
+                        style={{ padding: '10px 10px', height: '100%' }}
+                        trigger={null}
+                        width={295}
+                    >
                         <MenuPath />
 
                         <br />
@@ -339,9 +352,6 @@ const StyledAvatar = styled(Avatar)`
 //         `}
 // `
 
-const StyledSearch = styled(Input)`
-    width: 400px;
-`
 const StyledLogOut = styled(Button)`
     width: 100%;
     border-radius: 8px;

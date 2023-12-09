@@ -724,3 +724,20 @@ export const addOrderSpecificTask = createReduxAsyncTask({
             }
         },
 })
+
+export const updateVolumeTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'updateVolume',
+    defaultData: {} as { success: string; message?: any },
+    defaultPayload: {} as { volume: number; idsub_orders: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.put(`${process.env.NEXT_PUBLIC_HOST}/changeVolumeForEdit/`, action.payload, config)
+                yield put(actions.success(data))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})

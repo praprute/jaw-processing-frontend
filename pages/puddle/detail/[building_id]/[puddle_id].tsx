@@ -38,6 +38,7 @@ import { useNavigation } from '../../../../utils/use-navigation'
 import {
     changeWorkingStatusPuddleTask,
     getAllBuildingTask,
+    getLastedSubOrderByIdTask,
     getPuddleByIdBuildingTask,
     getPuddleDetailByIdTask,
     updateDateStartFermantTask,
@@ -61,6 +62,7 @@ import {
     addOrderSpecificTask,
     submitAddOnAmpanTask,
     submitAddOnFishyTask,
+    updateVolumeTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -98,6 +100,7 @@ interface ISelectSaltBillDto {
     stock: number
     date_create: string
 }
+
 interface ISelectFishSauceBillDto {
     idfishsauce_receipt: number
     no: string
@@ -134,6 +137,39 @@ interface ISelectFishyBillDto {
     date_create: string
 }
 
+interface ITx {
+    idsub_orders: number
+    idOrders: number
+    type: number
+    fish: number
+    salt: number
+    laber: number
+    other: number
+    fish_sauce: number
+    fish_price: number
+    salt_price: number
+    laber_price: number
+    amount_items: number
+    amount_unit_per_price: number
+    amount_price: number
+    remaining_items: number
+    remaining_unit_per_price: number
+    remaining_price: number
+    description?: any
+    user_create_sub: number
+    date_create: string
+    approved: number
+    volume: number
+    remaining_volume: number
+    action_puddle: number
+    action_serial_puddle: number
+    type_process: number
+    date_action: string
+    tn?: any
+    nacl?: any
+    ph?: any
+    round: number
+}
 const DetailPuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
     const navigation = useNavigation()
@@ -228,11 +264,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
     const [dateTransfer, setDateTransfer] = useState(null)
     const [lastedOrderId, setLastedOrderId] = useState(null)
-    // const [chemDisplay, setChemDisplay] = useState({
-    //     ph: 0,
-    //     nacl: 0,
-    //     tn: 0,
-    // })
+
     const [visibleModalSendToLabs, setVisibleModalSendToLabs] = useState(false)
     const [chemCheck, setChemCheck] = useState([])
     const [microCheck, setMicroCheck] = useState({ Micro: false })
@@ -240,6 +272,26 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalHitWaterFish, setVisibleModalHitWaterFish] = useState(false)
     const [defaultDateActionGetIn, setDefaultDateActionGetIn] = useState(null)
     const [idSuborderToLabs, setIdSuborderToLabs] = useState(null)
+    const [modalMixing, setModalMixing] = useState(false)
+    // ITx
+    const [listSelectdItemsComponent, setListSelectdItemsComponent] = useState<
+        {
+            building: number
+            puddle_id: any
+            tx: ITx[]
+            selectedPuddle: any
+            vloumnTx: number
+            volumnInput: number
+            serialPuddle: any
+        }[]
+    >([{ building: null, puddle_id: [], tx: [], selectedPuddle: null, vloumnTx: 0, volumnInput: 0, serialPuddle: null }])
+
+    const [calTxVolumn, setCalTxVolumn] = useState([{ vloumnTx: 0 }])
+    const [sumCalculatedTxVolumn, setSumCalculatedTxVolumn] = useState(0)
+    const [triggerCal, setTriggerCal] = useState(false)
+    const [visibleModalChangeVoume, setVisibleModalChangeVoume] = useState(false)
+    const [idSubOrderChangeVolume, setIdSubOrderChangeVolume] = useState(null)
+    const [valueVolumeChanged, setValueVolumeChanged] = useState(null)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -274,7 +326,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     // const addOnNonePrice = addOnNonePriceTask.useTask()
     const submitAddOnAmpan = submitAddOnAmpanTask.useTask()
     const submitAddOnFishy = submitAddOnFishyTask.useTask()
+    const getLastedSubOrderById = getLastedSubOrderByIdTask.useTask()
     // const specificChem = getSpecificChemTask2.useTask()
+    const updateVolume = updateVolumeTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -496,13 +550,88 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         })()
     }, [])
 
+    useMemo(() => {
+        let buffer = []
+        listSelectdItemsComponent.map((data) => {
+            buffer.push({ vloumnTx: data.vloumnTx })
+        })
+        setCalTxVolumn(buffer)
+    }, [listSelectdItemsComponent])
+
+    const handleSummaryMixingTN = async () => {
+        let volumn = listSelectdItemsComponent
+            .map((order) => order.volumnInput)
+            .reduce((prev, curr) => {
+                return prev + curr
+            })
+
+        let volumnTx = listSelectdItemsComponent
+            .map((order) => order.vloumnTx)
+            .reduce((prev, curr) => {
+                return prev + curr
+            })
+
+        console.log('handleSummaryMixingTN : ', volumnTx / volumn)
+        setSumCalculatedTxVolumn(volumnTx / volumn)
+    }
+
+    const handleChangeVolumnMixing = (value: any, index: any) => {
+        console.log('handleChangeVolumnMixing : ', value, index)
+        let buffer = listSelectdItemsComponent
+        buffer[index].vloumnTx = Number(value) * buffer[index].tx[0].tn
+        buffer[index].volumnInput = Number(value)
+        // volumnInput
+        setListSelectdItemsComponent(buffer)
+    }
+
+    const handleSelectPuddleByKey = async (labelValue: any, index: any) => {
+        try {
+            const res = await getLastedSubOrderById.onRequest({ puddle_id: Number(labelValue) })
+
+            let buffer = listSelectdItemsComponent
+            buffer[index].tx = res
+            buffer[index].selectedPuddle = Number(labelValue)
+            buffer[index].serialPuddle = await getSerial(Number(labelValue))
+            setListSelectdItemsComponent(buffer)
+
+            // const res = await getSerial(Number(labelValue))
+            // form.setFieldsValue({ action_puddle: res })
+        } catch (e: any) {
+            return '0'
+        }
+    }
+
+    const onChangeBuildingByKeySelect = async (value: any, index: any) => {
+        const res = await getPuddleByIdBuilding.onRequest({ building_id: Number(value) })
+        const fillterPuddle = res.filter((data) => data.idpuddle !== Number(puddle_id))
+        let buffer = listSelectdItemsComponent
+        buffer[index] = {
+            building: value,
+            puddle_id: fillterPuddle.map((data) => {
+                return {
+                    value: data.idpuddle,
+                    label: data.serial,
+                }
+            }),
+            tx: [],
+            selectedPuddle: null,
+            vloumnTx: 0,
+            volumnInput: 0,
+            serialPuddle: null,
+        }
+        setListSelectdItemsComponent(buffer)
+    }
+
+    // const handleChangeBuilding = async (value: number) => {
+    //     const res = await getPuddleByIdBuilding.onRequest({ building_id: Number(value) })
+    //     const fillterPuddle = res.filter((data) => data.idpuddle !== Number(puddle_id))
+    //     setTragetPuddle(fillterPuddle)
+    // }
     const onChange = (checkedValues: CheckboxValueType[]) => {
-        console.log('checked = ', checkedValues)
         setChemCheck(checkedValues)
     }
 
     const onChangeMicro = (e: CheckboxChangeEvent) => {
-        console.log(`checked = ${e.target.checked}`)
         setMicroCheck({ Micro: e.target.checked })
     }
 
@@ -834,24 +963,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     : (result.volume * 100) / volumnPuddle //(result.volume * 100) / remainingVolumnGetIn
                 : (result.volume * remainingItems) / remainingVolumnGetIn ///result.amount_price / result.amount_unit_per_price
 
-        // getPuddleDetailById.data?.status === TypeOrderPuddle.CIRCULAR ||
-        // getPuddleDetailById.data?.status === TypeOrderPuddle.FILTER ||
-        // getPuddleDetailById.data?.status === TypeOrderPuddle.BREAK ||
-        // getPuddleDetailById.data?.status === TypeOrderPuddle.MIXING ||
-        // getPuddleDetailById.data?.status === TypeOrderPuddle.STOCK
-
-        // TODO
-        // let check =
-        //     getPuddleDetailById.data?.status === TypeOrderPuddle.CIRCULAR ||
-        //     getPuddleDetailById.data?.status === TypeOrderPuddle.FILTER ||
-        //     getPuddleDetailById.data?.status === TypeOrderPuddle.BREAK ||
-        //     getPuddleDetailById.data?.status === TypeOrderPuddle.MIXING
-        //         ? getOrdersDetailFromId.data.length === 1
-        //             ? (result.volume * 100) / volumnPuddle
-        //             : (result.volume * 100) / volumnPuddle
-        //         : (result.volume * remainingItems) / remainingVolumnGetIn
-
-       
         setDefaultDateActionGetIn(result?.date_action)
         // date_action
 
@@ -910,16 +1021,11 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 remaining_volume: Number(formGetIn.getFieldValue('remaining_volume')),
                 action_puddle: Number(formGetIn.getFieldValue('source_puddle')),
                 action_serial_puddle: Number(formGetIn.getFieldValue('action_serial_puddle')),
-                date_action: moment(formGetIn.getFieldValue('date_action'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD'),
+                date_action: moment(formGetIn.getFieldValue('date_action'), 'YYYY-MM-DD').utc().local().format('YYYY-MM-DD'),
                 id_puddle: Number(puddle_id),
                 round: Number(formGetIn.getFieldValue('round')),
             }
 
-            console.log(
-                'payload : ',
-                payload,
-                moment(formGetIn.getFieldValue('date_action'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD'),
-            )
             const result = await submitGetInFishSaurce.onRequest(payload)
             if (result.success === 'success') {
                 NoticeSuccess('ทำรายการสำเร็จ')
@@ -1019,11 +1125,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const handleSubmitWaterFish = async (values: any) => {
         try {
             setModalLoadingVisivble(true)
-            // let amount_item_cal =
-            //     getOrdersDetailFromId.data.length === 1
-            //         ? (fishSauceWaterKG * 100) / volumnPuddle
-            //         : (fishSauceWaterKG * remainingItems) / remainingVolumnGetIn
-            // let price_net = 0
 
             let amount_item_cal =
                 getOrdersDetailFromId.data.length === 1
@@ -1213,6 +1314,164 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setModalLoadingVisivble(false)
             setDateTransfer(null)
         }
+    }
+
+    const handleCheckFirstTransaction = async (amount_items: any, remaining_unit_per_price: any, remaining_price: any) => {
+        if (amount_items === 100 && remaining_unit_per_price === 0 && remaining_price === 0) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    const handleSubmitChangeVolume = async () => {
+        try {
+            // valueVolumeChanged
+            const payload = {
+                volume: valueVolumeChanged,
+                idsub_orders: idSubOrderChangeVolume,
+            }
+            const res = await updateVolume.onRequest(payload)
+            if (res.success === 'success') {
+                NoticeSuccess('ทำรายการสำเร็จ')
+                setTrigger(!trigger)
+            }
+        } catch (e) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setValueVolumeChanged(null)
+            setIdSubOrderChangeVolume(null)
+            setTrigger(!trigger)
+            setVisibleModalChangeVoume(false)
+        }
+    }
+    const handleSubMitMixed = async () => {
+        try {
+            // listSelectdItemsComponent.map()
+            for (const result of listSelectdItemsComponent) {
+                let first = await handleCheckFirstTransaction(
+                    result.tx[0].amount_items,
+                    result.tx[0].remaining_unit_per_price,
+                    result.tx[0].remaining_price,
+                )
+                let payload = {
+                    order_id: result.tx[0].idOrders,
+                    type_process: TypeProcess.MIXING,
+                    amount_items: (result.volumnInput * 1.2 * result.tx[0].remaining_items) / result.tx[0].remaining_volume,
+                    amount_unit_per_price: !!first ? result.tx[0].amount_unit_per_price : result.tx[0].remaining_unit_per_price,
+                    amount_price: !!first
+                        ? result.tx[0].amount_unit_per_price * result.volumnInput * 1.2
+                        : result.tx[0].remaining_unit_per_price * result.volumnInput * 1.2,
+                    remaining_items:
+                        result.tx[0].remaining_items -
+                        (result.volumnInput * 1.2 * result.tx[0].remaining_items) / result.tx[0].remaining_volume,
+                    remaining_unit_per_price: !!first
+                        ? result.tx[0].amount_unit_per_price
+                        : result.tx[0].remaining_unit_per_price,
+                    remaining_price: !!first
+                        ? result.tx[0].amount_price - result.tx[0].amount_unit_per_price * result.volumnInput * 1.2
+                        : result.tx[0].remaining_price - result.tx[0].remaining_unit_per_price * result.volumnInput * 1.2,
+                    approved: 0,
+                    volume: result.volumnInput * 1.2, //Number(form.getFieldValue('volume')),
+                    id_puddle: result.selectedPuddle,
+                    remaining_volume: result.tx[0].remaining_volume - result.volumnInput * 1.2,
+                    action_puddle: await getSerial(Number(result.selectedPuddle)),
+                    target_puddle: Number(puddle_id),
+                    serial_puddle: await getSerial(Number(puddle_id)),
+                    date_action: dateTransfer,
+                    round: 0,
+                    // round: Number(form.getFieldValue('round')),
+                }
+
+                // {
+                //     "idsub_orders": 724,
+                //     "idOrders": 341,
+                //     "type": 0,
+                //     "fish": 32520,
+                //     "salt": 1,
+                //     "laber": 1,
+                //     "other": 0,
+                //     "fish_sauce": 0,
+                //     "fish_price": 661456.8,
+                //     "salt_price": 0,
+                //     "laber_price": 0,
+                //     "amount_items": 100,
+                //     "amount_unit_per_price": 20.34,
+                //     "amount_price": 661456.8,
+                //     "remaining_items": 100,
+                //     "remaining_unit_per_price": 0,
+                //     "remaining_price": 0,
+                //     "description": "",
+                //     "user_create_sub": 9,
+                //     "date_create": "2023-11-20 13:56:17",
+                //     "approved": 1,
+                //     "volume": 40000,
+                //     "remaining_volume": 40000,
+                //     "action_puddle": null,
+                //     "action_serial_puddle": null,
+                //     "type_process": null,
+                //     "date_action": "2023-04-24 07:00:00",
+                //     "tn": null,
+                //     "nacl": null,
+                //     "ph": null,
+                //     "round": null
+                // }
+
+                // {
+                //     "order_id": 341,
+                //     "type_process": 12,
+                //     "amount_items": 0.3,
+                //     "amount_unit_per_price": 0,
+                //     "amount_price": 0,
+                //     "remaining_items": 99.7,
+                //     "remaining_unit_per_price": 0,
+                //     "remaining_price": 0,
+                //     "approved": 0,
+                //     "volume": 120,
+                //     "id_puddle": 693,
+                //     "remaining_volume": 39880,
+                //     "action_puddle": 9413,
+                //     "target_puddle": 692,
+                //     "serial_puddle": 9313,
+                //     "date_action": "2023-12-09",
+                //     "round": 0
+                // }
+
+                let rr = await submitTransfer.onRequest(payload)
+                if (rr === 'success') {
+                    NoticeSuccess('ทำรายการสำเร็จ')
+                }
+            }
+
+            setModalLoadingVisivble(true)
+            // console.log('payload')
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setDateTransfer(null)
+            setModalLoadingVisivble(false)
+            setModalMixing(false)
+            setListSelectdItemsComponent([
+                {
+                    building: null,
+                    puddle_id: [],
+                    tx: [],
+                    selectedPuddle: null,
+                    vloumnTx: 0,
+                    volumnInput: 0,
+                    serialPuddle: null,
+                },
+            ])
+            setCalTxVolumn([{ vloumnTx: 0 }])
+            setTrigger(!trigger)
+        }
+    }
+    const onChangewwww = (value: string) => {
+        console.log(`selected ${value}`)
+    }
+
+    const onSearch = (value: string) => {
+        console.log('search:', value)
     }
 
     const handleSubmitTransfer = async () => {
@@ -1884,40 +2143,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         สถานะการกลบเกลือของบ่อ :{' '}
                         {getPuddleDetailById?.data?.topSalt === 1 ? 'กลบเกลือเเล้ว' : 'ยังไม่ได้กลบเกลือ'}
                     </span>
-                    {/* <RowChem>
-                        <BoxChem
-                            onClick={() => {
-                                setVisibleEditChem(true)
-                                setSelectedChem('PH')
-                            }}
-                        >
-                            <span>PH : {chemDisplay.ph}</span>
-                        </BoxChem>
-                        <BoxChem
-                            onClick={() => {
-                                setVisibleEditChem(true)
-                                setSelectedChem('SALT')
-                            }}
-                        >
-                            <span>SALT : {chemDisplay.nacl}</span>
-                        </BoxChem>
-                        <BoxChem
-                            onClick={() => {
-                                setVisibleEditChem(true)
-                                setSelectedChem('TN')
-                            }}
-                        >
-                            <span>TN : {chemDisplay.tn}</span>
-                        </BoxChem>
-                    </RowChem>
-                    <StyledButton
-                        type='primary'
-                        onClick={() => {
-                            setVisibleModalSendToLabs(true)
-                        }}
-                    >
-                        ส่งตัวอย่างไปที่ Labs
-                    </StyledButton> */}
                 </div>
 
                 <br />
@@ -1933,9 +2158,11 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             <OrderLastedSection
                                 data={getOrdersDetailFromId.data}
                                 onOpenBill={handleViewFishWeightBill}
+                                onOpenModalChangeVolums={setVisibleModalChangeVoume}
                                 onSelected={handleSelectSubOrder}
                                 openModalLabs={setVisibleModalSendToLabs}
                                 setIdRef={setIdSuborderToLabs}
+                                setSubIdRef={setIdSubOrderChangeVolume}
                                 statusPuddle={getPuddleDetailById.data?.status}
                             />
                         )}
@@ -2026,6 +2253,17 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         type='link'
                     >
                         ดูรายการการเติมเกลือจากบิล
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setModalMixing(true)
+                            // setItemsTransfer(1)
+                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
+                            // showDrawer()
+                        }}
+                        type='primary'
+                    >
+                        ผสม
                     </StyledButtonAction>
                 </StyledSectionAction>
 
@@ -2460,38 +2698,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         )}
                     </div>{' '}
                 </StyledForm>
-                {/* <StyledForm
-                    autoComplete='off'
-                    form={formWaterFish}
-                    hideRequiredMark
-                    layout='vertical'
-                    name='formWaterFish'
-                    onFinish={handleSubmitWaterFish}
-                >
-                    <Row gutter={[16, 0]} style={{ width: '100%' }}>
-                        <Col xs={24}>
-                            <StyledFormItems
-                                label='ปริมาตรน้ำคาว (KG.)'
-                                name='volume'
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' }]}
-                            >
-                                <StyledInputNumber min={0} onChange={handleChangeLitToKGFishSauceWater} size='large' />
-                            </StyledFormItems>
-                        </Col>
-                        <Col xs={24}>
-                            <StyledFormItems
-                                label='วันที่ทำรายการ'
-                                name='date_action'
-                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
-                            >
-                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
-                            </StyledFormItems>
-                        </Col>
-                    </Row>
-                    <Button htmlType='submit' type='primary'>
-                        ยืนยัน
-                    </Button>
-                </StyledForm> */}
             </Modal>
 
             <Modal
@@ -2660,36 +2866,200 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </div>
                 </ModalContent>
             </Modal>
-
-            {/* <Modal
+            {/* modalMixing */}
+            <Modal
+                bodyStyle={{ height: '100%' }}
                 centered
                 destroyOnClose
                 onCancel={() => {
-                    setVisibleEditChem(false)
-                    setValueChem(null)
+                    setModalMixing(false)
                 }}
                 onOk={() => {
-                    handleChangeChem()
+                    handleSubMitMixed()
                 }}
-                open={visibleEditChem}
-                title={`แก้ไขค่า ${selectedChem}`}
+                open={modalMixing}
+                title='ผสมน้ำปลา'
+                width={990}
+            >
+                <ModalContent>
+                    <>
+                        {listSelectdItemsComponent.map((data, indexList) => (
+                            <div
+                                key={indexList}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-start',
+                                    gap: '16px',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                <StyledFormItems
+                                    label='เลือกอาคาร'
+                                    name='id_building'
+                                    rules={[{ required: false, message: 'กรุณาเลือกบ่อปลายทาง' }]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Select
+                                        onChange={(e) => {
+                                            onChangeBuildingByKeySelect(e, indexList)
+                                        }}
+                                        placeholder='เลือกอาคาร'
+                                        style={{ width: '100%' }}
+                                    >
+                                        {getAllBuildings.data &&
+                                            getAllBuildings.data.map((data, index) => (
+                                                <Option key={index} value={data.idbuilding}>
+                                                    <span>{data.name}</span>
+                                                </Option>
+                                            ))}
+                                    </Select>
+                                </StyledFormItems>
+                                <StyledFormItems
+                                    label='เลือกบ่อปลายทาง'
+                                    name='id_puddle'
+                                    rules={[{ required: false, message: 'กรุณาเลือกบ่อปลายทาง' }]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Select
+                                        filterOption={(input, option) => (option?.label.toString() ?? '').includes(input)}
+                                        onChange={onChangewwww}
+                                        onSearch={onSearch}
+                                        onSelect={(labelValue) => {
+                                            handleSelectPuddleByKey(labelValue, indexList)
+                                        }}
+                                        optionFilterProp='children'
+                                        options={listSelectdItemsComponent[indexList].puddle_id}
+                                        placeholder='Select a person'
+                                        showSearch
+                                    />
+                                </StyledFormItems>
+
+                                <Button
+                                    onClick={() => {
+                                        setListSelectdItemsComponent([
+                                            ...listSelectdItemsComponent,
+                                            {
+                                                building: null,
+                                                puddle_id: [],
+                                                tx: [],
+                                                selectedPuddle: null,
+                                                vloumnTx: 0,
+                                                volumnInput: 0,
+                                                serialPuddle: null,
+                                            },
+                                        ])
+                                        setCalTxVolumn([...calTxVolumn, { vloumnTx: 0 }])
+                                    }}
+                                    type='ghost'
+                                >
+                                    เพิ่ม
+                                </Button>
+                                {/* */}
+                            </div>
+                        ))}
+                        Calculate :
+                        <StyledContentMixing>
+                            <table id='customers' style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 1em' }}>
+                                <tr style={{ marginBottom: '16px' }}>
+                                    <th>บ่อ</th>
+                                    <th>TN</th>
+                                    <th>ปริมาตร</th>
+                                    <th>ผลคูณ</th>
+                                    <th>action</th>
+                                </tr>
+                                {listSelectdItemsComponent.map((data, index) => (
+                                    <tr key={index} style={{ marginBottom: '16px' }}>
+                                        <td>{data.serialPuddle}</td>
+                                        <td>{data?.tx[0]?.tn}</td>
+                                        <td>
+                                            <Input
+                                                onChange={(e) => {
+                                                    handleChangeVolumnMixing(e.target.value, index)
+                                                }}
+                                                style={{ width: '60%' }}
+                                            />
+                                        </td>
+                                        <td>{listSelectdItemsComponent[index]?.vloumnTx}</td>
+                                        <td>
+                                            <Button
+                                                onClick={() => {
+                                                    setTriggerCal(!triggerCal)
+                                                    handleSummaryMixingTN()
+                                                }}
+                                                type='primary'
+                                            >
+                                                คำนวน
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                <tr style={{ marginBottom: '16px' }}>
+                                    <td></td>
+                                    <td>{sumCalculatedTxVolumn}</td>
+
+                                    <td>
+                                        {listSelectdItemsComponent
+                                            .map((order) => order.volumnInput)
+                                            .reduce((prev, curr) => {
+                                                return prev + curr
+                                            })}
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        {' '}
+                                        <Button
+                                            onClick={() => {
+                                                setTriggerCal(!triggerCal)
+                                                handleSummaryMixingTN()
+                                            }}
+                                            type='primary'
+                                        >
+                                            คำนวน
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </table>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                            </StyledFormItems>
+                            {/* {JSON.stringify(listSelectdItemsComponent[0]?.vloumnTx)} */}
+                        </StyledContentMixing>
+                    </>
+                </ModalContent>
+            </Modal>
+
+            <Modal
+                centered
+                destroyOnClose
+                onCancel={() => {
+                    setVisibleModalChangeVoume(false)
+                }}
+                onOk={handleSubmitChangeVolume}
+                open={visibleModalChangeVoume}
+                title={`แก้ไขค่าปริมาตรหมายเลข Transaction ที่ : ${idSubOrderChangeVolume}`}
             >
                 <ModalContent>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '24px' }}>
                         <InputNumber
-                            max={100}
+                            max={1000000}
                             min={0}
                             onChange={(e) => {
-                                setValueChem(e)
+                                setValueVolumeChanged(e)
                             }}
-                            placeholder='กรุณาระบุค่าทางเคมี'
+                            placeholder='กรุณาระบุค่าปริมาตรที่ต้องการจะเปลี่ยน (KG)'
                             step={0.1}
                             style={{ width: '100%' }}
-                            value={valueChem}
+                            value={valueVolumeChanged}
                         />
                     </div>
                 </ModalContent>
-            </Modal> */}
+            </Modal>
         </>
     )
 }
@@ -2704,6 +3074,13 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 
 export default DetailPuddlePage
 
+const StyledContentMixing = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+`
 const StyledInputNumber = styled(InputNumber)`
     width: 100%;
     .ant-input-number-handler-wrap {

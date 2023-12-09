@@ -400,6 +400,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 laber_price: parseFloat2Decimals(form.getFieldValue('laber_price')),
                 amount_items: statusPuddleOrder === TypeOrderPuddle.FERMENT ? MAX_ITEMS_PERCENTAGE : 0,
                 start_date: dateStart,
+                type_process: form.getFieldValue('status_puddle_order') === 0 ? 13 : 0,
             }
 
             const result = await createOrder.onRequest(payload)
@@ -426,17 +427,6 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 }
 
                 NoticeSuccess('ทำรายการสำเร็จ')
-                // const resUpdateLog = await Promise.all(
-                //     dataAddFish.map(async (data) => {
-                //         const resp = await insertLogBillOpenOrder.onRequest({
-                //             new_stock: data.new_stock,
-                //             idreceipt: data.idreceipt,
-                //             order_target: detailPuddle?.lasted_order,
-                //             id_puddle: Number(id),
-                //         })
-                //         return resp
-                //     }),
-                // )
 
                 navigation.navigateTo.toBack()
 

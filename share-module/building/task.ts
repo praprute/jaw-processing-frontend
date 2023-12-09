@@ -154,6 +154,7 @@ export const updateStatusTopSaltTask = createReduxAsyncTask({
             }
         },
 })
+
 export const updateDateStartFermantTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'updateDateStartFermant',
@@ -174,3 +175,42 @@ export const updateDateStartFermantTask = createReduxAsyncTask({
             }
         },
 })
+
+export const getLastedSubOrderByIdTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getLastedSubOrderById',
+    defaultData: {} as any,
+    defaultPayload: {} as { puddle_id: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { puddle_id } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/getLastedSubOrderById?puddle_id=${puddle_id}`,
+                    config,
+                )
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
+// export const getLastedSubOrderByIdTask = async (building_id: number) => {
+//     try {
+//         const getToken = await myToken()
+//         const { data } = await axios.get(`${process.env.NEXT_PUBLIC_HOST}/getLastedSubOrderById/${building_id}`, {
+//             headers: {
+//                 Accept: 'application/json',
+//                 'Content-type': 'application/json',
+//                 'Access-Control-Allow-Credentials': true,
+//                 Authorization: `Bearer ${getToken}`,
+//             },
+//         })
+
+//         return data as IResAllPuddleDto
+//     } catch (e: any) {
+//         return { success: 'error', message: e.response?.data[0]?.message }
+//     }
+// }

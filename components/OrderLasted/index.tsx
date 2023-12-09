@@ -17,10 +17,13 @@ interface IOrderLastedSection {
     onOpenBill: (id: number) => void
     openModalLabs?: (visible: boolean) => void
     setIdRef?: (id: number) => void
+
+    onOpenModalChangeVolums?: (visible: boolean) => void
+    setSubIdRef?: (id: number) => void
 }
 
 const OrderLastedSection = (props: IOrderLastedSection) => {
-    const { data, onSelected, onOpenBill, openModalLabs, setIdRef } = props
+    const { data, onSelected, onOpenBill, openModalLabs, setIdRef, onOpenModalChangeVolums, setSubIdRef } = props
 
     const [resultTest, setResultTest] = useState<any>([])
 
@@ -67,6 +70,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'เติมน้ำตีกาก'
             case TypeProcess.IMPORTWATERFISH:
                 return 'เติมน้ำคาว'
+            case TypeProcess.MIXING:
+                return 'ดูดไปผสม'
             default:
                 break
         }
@@ -152,7 +157,16 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{numberWithCommas(data.laber_price)}</td>
                                         <td></td>
                                         <td></td>
-                                        <td></td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    onOpenBill(data.idOrders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ดูใบชั่งปลา
+                                            </StyledButton>
+                                        </td>
                                         <td>
                                             Tn:
                                             {JSON.stringify(
@@ -181,15 +195,87 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td></td>
                                         <td>
-                                            {' '}
                                             <StyledButton
                                                 onClick={() => {
-                                                    onOpenBill(data.idOrders)
+                                                    console.log('data: ', data)
+                                                    onOpenModalChangeVolums(true)
+                                                    setSubIdRef(data.idsub_orders)
                                                 }}
                                                 type='primary'
                                             >
-                                                ดูใบชั่งปลา
+                                                แก้ไขปริมาตร
                                             </StyledButton>
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+                            {data.type === TypeProcess.MIXING && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
+                                        <td>{data.amount_unit_per_price}</td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
+
+                                        <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td>{!!data.round ? `รอบ ${data.round}` : ''}</td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.process_name ? (
+                                                data?.process_name
+                                            ) : (
+                                                <StyledButton
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
                                         </td>
                                         <td>
                                             <StyledButton
