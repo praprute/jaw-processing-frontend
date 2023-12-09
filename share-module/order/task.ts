@@ -83,6 +83,24 @@ export const getOrdersDetailFromIdTask = createReduxAsyncTask({
         },
 })
 
+export const getOrdersHistoryDetailFromIdTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getOrdersHistoryDetailFromId',
+    defaultData: {} as IOrderDetailDto[],
+    defaultPayload: {} as { order_id: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { order_id } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getOrderDetails/${order_id}`, config)
+                yield put(actions.success(data.message))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
+
 export const submitTransferSaltWaterTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'submitTransferSaltWater',

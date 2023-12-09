@@ -8,10 +8,12 @@ import { IOrderDto } from '../../share-module/order/type'
 interface ITableHistoryOrders {
     data: IOrderDto[]
     loading: boolean
+    onVisibleModal?: (e: boolean) => void
+    onSelectIdHistory?: (id: number) => void
 }
 
 const TableHistoryOrders = (props: ITableHistoryOrders) => {
-    const { data, loading } = props
+    const { data, loading, onVisibleModal, onSelectIdHistory } = props
 
     const columns: ColumnsType<any> = [
         {
@@ -50,9 +52,14 @@ const TableHistoryOrders = (props: ITableHistoryOrders) => {
         {
             title: 'action',
             key: 'action',
-            render: () => {
+            render: (order) => {
                 return (
-                    <Button>
+                    <Button
+                        onClick={() => {
+                            onVisibleModal(true)
+                            onSelectIdHistory(order.idorders)
+                        }}
+                    >
                         <a>เลือก</a>
                     </Button>
                 )

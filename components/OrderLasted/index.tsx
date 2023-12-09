@@ -12,18 +12,30 @@ import { getResultTestTask } from '../../share-module/order/task'
 
 interface IOrderLastedSection {
     data: IOrderDetailDto[]
-    statusPuddle: number
-    onSelected: (id: number) => void
-    onOpenBill: (id: number) => void
+    statusPuddle?: number
+    onSelected?: (id: number) => void
+    onOpenBill?: (id: number) => void
     openModalLabs?: (visible: boolean) => void
     setIdRef?: (id: number) => void
 
     onOpenModalChangeVolums?: (visible: boolean) => void
     setSubIdRef?: (id: number) => void
+    hideHeader?: boolean
+    hideAction?: boolean
 }
 
 const OrderLastedSection = (props: IOrderLastedSection) => {
-    const { data, onSelected, onOpenBill, openModalLabs, setIdRef, onOpenModalChangeVolums, setSubIdRef } = props
+    const {
+        data,
+        onSelected,
+        onOpenBill,
+        openModalLabs,
+        setIdRef,
+        onOpenModalChangeVolums,
+        setSubIdRef,
+        hideHeader = false,
+        hideAction = false,
+    } = props
 
     const [resultTest, setResultTest] = useState<any>([])
 
@@ -42,6 +54,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 }
             }
         })()
+
+        console.log('data : ', data)
     }, [data])
 
     const handleTypeOrder = (type: number) => {
@@ -93,18 +107,20 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
 
     return (
         <StyledContent>
-            <HeadTableRow>
-                <span>หมายเลขรายการ : {data[0].idOrders}</span>
-                <StyledButtonAction
-                    icon={<DownloadOutlined />}
-                    onClick={() => {
-                        handleExport('xlsx')
-                    }}
-                    type='primary'
-                >
-                    Export
-                </StyledButtonAction>
-            </HeadTableRow>
+            {!!!hideHeader && (
+                <HeadTableRow>
+                    <span>หมายเลขรายการ : {data[0]?.idOrders}</span>
+                    <StyledButtonAction
+                        icon={<DownloadOutlined />}
+                        onClick={() => {
+                            handleExport('xlsx')
+                        }}
+                        type='primary'
+                    >
+                        Export
+                    </StyledButtonAction>
+                </HeadTableRow>
+            )}
 
             <StyledTable id='tbl_exporttable_to_xls'>
                 <tr>
@@ -196,6 +212,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td></td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     console.log('data: ', data)
                                                     onOpenModalChangeVolums(true)
@@ -208,6 +225,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -268,6 +286,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -279,6 +298,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -339,6 +359,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -350,6 +371,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -409,6 +431,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -420,6 +443,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -480,6 +504,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -491,6 +516,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -551,6 +577,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -562,6 +589,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -622,6 +650,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -633,6 +662,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -692,6 +722,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -703,6 +734,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -762,6 +794,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -773,6 +806,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -833,6 +867,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -844,6 +879,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -904,6 +940,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -915,6 +952,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -975,6 +1013,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -986,6 +1025,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)
@@ -1045,6 +1085,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                                 data?.process_name
                                             ) : (
                                                 <StyledButton
+                                                    disabled={hideAction}
                                                     onClick={() => {
                                                         onSelected(data.idsub_orders)
                                                     }}
@@ -1056,6 +1097,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>
                                             <StyledButton
+                                                disabled={hideAction}
                                                 onClick={() => {
                                                     openModalLabs(true)
                                                     setIdRef(data.idsub_orders)

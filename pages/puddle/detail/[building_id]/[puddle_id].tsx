@@ -63,6 +63,7 @@ import {
     submitAddOnAmpanTask,
     submitAddOnFishyTask,
     updateVolumeTask,
+    getOrdersHistoryDetailFromIdTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -263,7 +264,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [dateStart, setDateStart] = useState(null)
     const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
     const [dateTransfer, setDateTransfer] = useState(null)
-    const [lastedOrderId, setLastedOrderId] = useState(null)
+    // const [lastedOrderId, setLastedOrderId] = useState(null)
 
     const [visibleModalSendToLabs, setVisibleModalSendToLabs] = useState(false)
     const [chemCheck, setChemCheck] = useState([])
@@ -292,6 +293,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalChangeVoume, setVisibleModalChangeVoume] = useState(false)
     const [idSubOrderChangeVolume, setIdSubOrderChangeVolume] = useState(null)
     const [valueVolumeChanged, setValueVolumeChanged] = useState(null)
+
+    const [visibleHistoryOrder, setVisibleHistoryOrder] = useState(false)
+    const [idHistory, setIdHistory] = useState(null)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -329,6 +333,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const getLastedSubOrderById = getLastedSubOrderByIdTask.useTask()
     // const specificChem = getSpecificChemTask2.useTask()
     const updateVolume = updateVolumeTask.useTask()
+    const getOrdersHistoryDetailFromId = getOrdersHistoryDetailFromIdTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -571,12 +576,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 return prev + curr
             })
 
-        console.log('handleSummaryMixingTN : ', volumnTx / volumn)
         setSumCalculatedTxVolumn(volumnTx / volumn)
     }
 
     const handleChangeVolumnMixing = (value: any, index: any) => {
-        console.log('handleChangeVolumnMixing : ', value, index)
         let buffer = listSelectdItemsComponent
         buffer[index].vloumnTx = Number(value) * buffer[index].tx[0].tn
         buffer[index].volumnInput = Number(value)
@@ -781,15 +784,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     }, [getOrdersDetailFromId?.data, trigger])
 
     useEffect(() => {
-        if (lastedOrderId && getAllOrdersFromPuddleId.data) {
-            // const found = getAllOrdersFromPuddleId.data.find((element) => element.idorders === lastedOrderId)
-            // setChemDisplay({
-            //     ph: found.ph || 0,
-            //     nacl: found.nacl || 0,
-            //     tn: found.tn || 0,
-            // })
+        if (!!idHistory) {
+            ;(async () => {
+                await getOrdersHistoryDetailFromId.onRequest({ order_id: Number(idHistory) })
+            })()
         }
-    }, [lastedOrderId, trigger, getAllOrdersFromPuddleId.data])
+    }, [idHistory])
 
     useEffect(() => {
         ;(async () => {
@@ -800,7 +800,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 await getAllOrdersFromPuddleId.onRequest({ puddle_id: Number(puddle_id) })
                 const resOrderDetail = await getOrdersDetailFromId.onRequest({ order_id: res.lasted_order })
 
-                setLastedOrderId(res.lasted_order)
+                // setLastedOrderId(res.lasted_order)
                 setRemainingItems(
                     resOrderDetail?.length === 1
                         ? resOrderDetail[resOrderDetail?.length - 1]?.amount_items
@@ -2296,8 +2296,26 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             <StyledBoxContent>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
                 <br />
-                <TableHistoryOrders data={getAllOrdersFromPuddleId.data} loading={getAllOrdersFromPuddleId.loading} />
+                <TableHistoryOrders
+                    data={getAllOrdersFromPuddleId.data}
+                    loading={getAllOrdersFromPuddleId.loading}
+                    onSelectIdHistory={setIdHistory}
+                    onVisibleModal={setVisibleHistoryOrder}
+                />
             </StyledBoxContent>
+            <ModalHistory
+                centered
+                footer={null}
+                onCancel={() => {
+                    setVisibleHistoryOrder(false)
+                }}
+                open={visibleHistoryOrder}
+                title={`ประวัติรายการหมายเลข ${idHistory}`}
+            >
+                {getOrdersHistoryDetailFromId.data && (
+                    <OrderLastedSection data={getOrdersHistoryDetailFromId.data} hideAction hideHeader />
+                )}
+            </ModalHistory>
             {/* Sidebar Transfer Fishsaurce */}
             <StyledDrawer bodyStyle={{ paddingBottom: 80 }} onClose={onClose} open={open} title={titleDrawerTransfer} width={720}>
                 <Form autoComplete='off' form={form} layout='vertical' onFinish={handleSubmitTransfer}>
@@ -3074,6 +3092,9 @@ DetailPuddlePage.getLayout = function getLayout(page: ReactElement) {
 
 export default DetailPuddlePage
 
+const ModalHistory = styled(Modal)`
+    width: fit-content !important;
+`
 const StyledContentMixing = styled.div`
     width: 100%;
     display: flex;
