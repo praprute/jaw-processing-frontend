@@ -87,6 +87,7 @@ import {
     getReceiveWeightFishByOrderIdTask,
 } from '../../../../share-module/FishWeightBill/task'
 import { numberWithCommas } from '../../../../utils/format-number'
+import { IAllBuildingAndPuddleDto } from '../../../../share-module/building/type'
 
 const { Option } = Select
 
@@ -184,6 +185,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [formWaterFish] = Form.useForm()
     const [formFishy] = Form.useForm()
 
+    const [building, setBuilding] = useState<IAllBuildingAndPuddleDto[]>([])
     const [open, setOpen] = useState(false)
     const [openGetIN, setOpenGetIn] = useState(false)
     const [openThrowOtherPuddle, setOpenThrowOtherPuddle] = useState(false)
@@ -287,6 +289,15 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }[]
     >([{ building: null, puddle_id: [], tx: [], selectedPuddle: null, vloumnTx: 0, volumnInput: 0, serialPuddle: null }])
 
+    const [listBuildingTransfser, setListBuildingTransfser] = useState<
+        {
+            building: number
+            puddle_id: any
+            selectedPuddle: any
+            serialPuddle: any
+        }[]
+    >([{ building: null, puddle_id: [], selectedPuddle: null, serialPuddle: null }])
+
     const [calTxVolumn, setCalTxVolumn] = useState([{ vloumnTx: 0 }])
     const [sumCalculatedTxVolumn, setSumCalculatedTxVolumn] = useState(0)
     const [triggerCal, setTriggerCal] = useState(false)
@@ -296,6 +307,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const [visibleHistoryOrder, setVisibleHistoryOrder] = useState(false)
     const [idHistory, setIdHistory] = useState(null)
+    const [modeMulti, setModeMulti] = useState(false)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -552,6 +564,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     useEffect(() => {
         ;(async () => {
             await getSpecific.onRequest()
+            const result = await getAllBuildings.onRequest()
+            setBuilding(result)
         })()
     }, [])
 
@@ -604,6 +618,25 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleSelectMultiPuddleByKey = async (labelValue: any, index: any) => {
+        try {
+            // const res = await getLastedSubOrderById.onRequest({ puddle_id: Number(labelValue) })
+
+            let buffer = listBuildingTransfser
+            // buffer[index].tx = res
+            buffer[index].selectedPuddle = Number(labelValue)
+            buffer[index].serialPuddle = await getSerial(Number(labelValue))
+            setListBuildingTransfser(buffer)
+
+            console.log('buffer : ', buffer)
+
+            // const res = await getSerial(Number(labelValue))
+            // form.setFieldsValue({ action_puddle: res })
+        } catch (e: any) {
+            return '0'
+        }
+    }
+
     const onChangeBuildingByKeySelect = async (value: any, index: any) => {
         const res = await getPuddleByIdBuilding.onRequest({ building_id: Number(value) })
         const fillterPuddle = res.filter((data) => data.idpuddle !== Number(puddle_id))
@@ -623,6 +656,24 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             serialPuddle: null,
         }
         setListSelectdItemsComponent(buffer)
+    }
+
+    const onChangeBuildingByKeySelectTransfer = async (value: any, index: any) => {
+        const res = await getPuddleByIdBuilding.onRequest({ building_id: Number(value) })
+        const fillterPuddle = res.filter((data) => data.idpuddle !== Number(puddle_id))
+        let buffer = listBuildingTransfser
+        buffer[index] = {
+            building: value,
+            puddle_id: fillterPuddle.map((data) => {
+                return {
+                    value: data.idpuddle,
+                    label: data.serial,
+                }
+            }),
+            selectedPuddle: null,
+            serialPuddle: null,
+        }
+        setListBuildingTransfser(buffer)
     }
 
     // const handleChangeBuilding = async (value: number) => {
@@ -1417,26 +1468,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 //     "round": null
                 // }
 
-                // {
-                //     "order_id": 341,
-                //     "type_process": 12,
-                //     "amount_items": 0.3,
-                //     "amount_unit_per_price": 0,
-                //     "amount_price": 0,
-                //     "remaining_items": 99.7,
-                //     "remaining_unit_per_price": 0,
-                //     "remaining_price": 0,
-                //     "approved": 0,
-                //     "volume": 120,
-                //     "id_puddle": 693,
-                //     "remaining_volume": 39880,
-                //     "action_puddle": 9413,
-                //     "target_puddle": 692,
-                //     "serial_puddle": 9313,
-                //     "date_action": "2023-12-09",
-                //     "round": 0
-                // }
-
                 let rr = await submitTransfer.onRequest(payload)
                 if (rr === 'success') {
                     NoticeSuccess('ทำรายการสำเร็จ')
@@ -1474,7 +1505,143 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         console.log('search:', value)
     }
 
-    const handleSubmitTransfer = async () => {
+    // const handleDeletePuddleWithMultiListPuddle = async(index:number) => {
+    //     console.log('index : ', index)
+    //     let aa = listBuildingTransfser
+    //     aa.splice(index, 1)
+    //     console.log('aa : ', aa)
+    //     setListBuildingTransfser(aa)
+    // }
+
+    // console.log('listBuildingTransfser : ', listBuildingTransfser)
+
+    const handleMultiTransfer = async () => {
+        try {
+            setModalLoadingVisivble(true)
+
+            let buffer = {
+                remaining_items: form.getFieldValue('remaining_items'),
+                remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
+                remaining_volume: Number(form.getFieldValue('remaining_volume')),
+                remaining_price: form.getFieldValue('remaining_price'),
+            }
+
+            for (const [index, data] of listBuildingTransfser.entries()) {
+                // console.log('data ', data)
+
+                // let buffer = listBuildingTransfser
+
+                // if(index === 0){
+                //     buffer = {
+                //         remaining_items: form.getFieldValue('remaining_items') - 0,
+                //         remaining_unit_per_price:form.getFieldValue('remaining_unit_per_price') - 0,
+                //         remaining_volume:Number(form.getFieldValue('remaining_volume')) - 0,
+                //         remaining_price: form.getFieldValue('remaining_price') - 0,
+                //     }
+                // }else{
+
+                // }
+
+                // console.log('length : ', listBuildingTransfser.length, buffer.remaining_volume, (amountItemsKG / listBuildingTransfser.length))
+                // console.log('getOrdersDetailFromId.data : ', getOrdersDetailFromId.data)
+                // console.log('check vv : ', getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume , (amountItemsKG / listBuildingTransfser.length), getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume - (amountItemsKG / listBuildingTransfser.length))
+                // console.log('buffer v : ', buffer.remaining_volume , (amountItemsKG / listBuildingTransfser.length) , buffer.remaining_volume - (amountItemsKG / listBuildingTransfser.length))
+                let payload = {
+                    order_id: getPuddleDetailById?.data?.lasted_order,
+                    type_process: TypeProcess.TRANSFER,
+                    amount_items: form.getFieldValue('amount_items') / listBuildingTransfser.length,
+                    amount_unit_per_price: form.getFieldValue('amount_unit_per_price') / listBuildingTransfser.length,
+                    amount_price: form.getFieldValue('amount_price') / listBuildingTransfser.length,
+
+                    remaining_items:
+                        index === 0
+                            ? getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_items -
+                              form.getFieldValue('amount_items') / listBuildingTransfser.length
+                            : buffer.remaining_items - form.getFieldValue('amount_items') / listBuildingTransfser.length, //form.getFieldValue('remaining_items') : buffer.remaining_items - form.getFieldValue('amount_items'),
+                    remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
+                    remaining_volume:
+                        index === 0
+                            ? getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume -
+                              amountItemsKG / listBuildingTransfser.length
+                            : buffer.remaining_volume - amountItemsKG / listBuildingTransfser.length,
+                    remaining_price:
+                        index === 0
+                            ? lastedPrice - form.getFieldValue('amount_price') / listBuildingTransfser.length
+                            : buffer.remaining_price - form.getFieldValue('amount_price') / listBuildingTransfser.length,
+
+                    approved: 0,
+                    volume: amountItemsKG / listBuildingTransfser.length, //Number(form.getFieldValue('volume')),
+                    id_puddle: Number(puddle_id),
+                    action_puddle: await getSerial(Number(puddle_id)),
+                    target_puddle: Number(data.selectedPuddle),
+                    serial_puddle: Number(data.serialPuddle),
+                    date_action: dateTransfer,
+                    round: Number(form.getFieldValue('round')),
+                }
+
+                let payloads = form.getFieldValue('process')
+                    ? { ...payload, process: form.getFieldValue('process') as number }
+                    : { ...payload }
+
+                await submitTransfer.onRequest(payloads)
+                const res = await getPuddleDetailById.onRequest({ puddle_id: Number(puddle_id) })
+                await getOrdersDetailFromId.onRequest({ order_id: res.lasted_order })
+
+                buffer = {
+                    remaining_items: payload.remaining_items,
+                    remaining_unit_per_price: payload.remaining_unit_per_price,
+                    remaining_volume: payloads.remaining_volume,
+                    remaining_price: payloads.remaining_price,
+                }
+            }
+
+            // {
+            //     "building": 1,
+            //     "puddle_id": [
+
+            //     ],
+            //     "selectedPuddle": 147,
+            //     "serialPuddle": 1014
+            // }
+            // const payload = {
+            //     order_id: getPuddleDetailById?.data?.lasted_order,
+            //     type_process: TypeProcess.TRANSFER,
+            //     amount_items: form.getFieldValue('amount_items'),
+            //     amount_unit_per_price: form.getFieldValue('amount_unit_per_price'),
+            //     amount_price: form.getFieldValue('amount_price'),
+            //     remaining_items: form.getFieldValue('remaining_items'),
+            //     remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
+            //     remaining_price: form.getFieldValue('remaining_price'),
+            //     approved: 0,
+            //     volume: amountItemsKG, //Number(form.getFieldValue('volume')),
+            //     id_puddle: Number(puddle_id),
+            //     remaining_volume: Number(form.getFieldValue('remaining_volume')),
+            //     action_puddle: await getSerial(Number(puddle_id)),
+            //     target_puddle: Number(form.getFieldValue('id_puddle')),
+            //     serial_puddle: Number(form.getFieldValue('action_puddle')),
+            //     date_action: dateTransfer,
+            //     round: Number(form.getFieldValue('round')),
+            // }
+
+            // const payloads = form.getFieldValue('process')
+            //     ? { ...payload, process: form.getFieldValue('process') as number }
+            //     : { ...payload }
+
+            // console.log('payloads : ', payloads)
+        } catch (e: any) {
+            NoticeError('ทำรายการไม่สำเร็จ')
+        } finally {
+            setModeMulti(false)
+            setTrigger(!trigger)
+            setDateTransfer(null)
+            setModalLoadingVisivble(false)
+            form.resetFields()
+
+            router.reload()
+        }
+    }
+
+    const handleTransfer = async () => {
         try {
             setModalLoadingVisivble(true)
 
@@ -1549,6 +1716,16 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setDateTransfer(null)
             setModalLoadingVisivble(false)
             form.resetFields()
+        }
+    }
+
+    const handleSubmitTransfer = async () => {
+        if (modeMulti) {
+            console.log(1)
+            await handleMultiTransfer()
+        } else {
+            console.log(2)
+            await handleTransfer()
         }
     }
 
@@ -2174,11 +2351,26 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onClick={() => {
                             setItemsTransfer(0)
                             setTitleDrawerTransfer('ปล่อยน้ำปลา')
+                            setModeMulti(false)
                             showDrawer()
                         }}
                         type='primary'
                     >
                         ปล่อยน้ำปลา
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setListBuildingTransfser([
+                                { building: null, puddle_id: [], selectedPuddle: null, serialPuddle: null },
+                            ])
+                            setItemsTransfer(0)
+                            // setTitleDrawerTransfer('ปล่อยน้ำปลา')
+                            setModeMulti(true)
+                            // showDrawer()
+                        }}
+                        type='primary'
+                    >
+                        ปล่อยน้ำปลาแบบหลายบ่อ
                     </StyledButtonAction>
 
                     <StyledButtonAction
@@ -2292,6 +2484,44 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     เพิ่มรายการการทำงาน
                 </StyledButton>
             </StyleBoxSetting>
+            <br />
+            <Divider />
+            <StyledBoxHeader>
+                <span>อาคารทั้งหมด</span>
+            </StyledBoxHeader>
+            <br />
+            <Row gutter={[16, 16]}>
+                {Boolean(building?.length) &&
+                    building.map((data, index) => (
+                        <Col key={index} md={12} sm={24} xs={24}>
+                            <StyledGlassBox>
+                                <StyledTitleBetween>
+                                    <span style={{ fontSize: '16px' }}>{data.name}</span>
+                                    <span>จำนวนบ่อทั้งหมด : {data.allPuddle} บ่อ</span>
+                                </StyledTitleBetween>
+                                <StyledTitleBetween>
+                                    <span style={{ fontSize: '16px' }}></span>
+                                    <span>ลิมิต : {data.limit_pool} บ่อ</span>
+                                </StyledTitleBetween>
+                                <br />
+                                <StyledTitleBetween>
+                                    <span style={{ fontSize: '16px' }}></span>
+
+                                    <StyledButton
+                                        key={index}
+                                        onClick={() => {
+                                            navigation.navigateTo.allPuddle(data.idbuilding.toString())
+                                        }}
+                                        size='middle'
+                                        type='ghost'
+                                    >
+                                        รายละเอียด
+                                    </StyledButton>
+                                </StyledTitleBetween>
+                            </StyledGlassBox>
+                        </Col>
+                    ))}
+            </Row>
             <Divider />
             <StyledBoxContent>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
@@ -2323,15 +2553,22 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         amountItemsKG={amountItemsKG}
                         buildingOption={getAllBuildings.data}
                         lastedOrder={orderDetailLasted}
+                        listBuilding={listBuildingTransfser}
+                        multi={modeMulti}
                         onChangeAmountItems={handleChangeAmountItems}
                         onChangeBuilding={handleChangeBuilding}
                         onChangeDate={onChangeDateTransfer}
+                        onChangeMultiBuilding={onChangeBuildingByKeySelectTransfer}
+                        onChangeMultiuddle={handleSelectMultiPuddleByKey}
+                        onChangewwwwBuff={onChangewwww}
+                        onSearchBuff={onSearch}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
+                        setMultiBuildingTransfser={setListBuildingTransfser}
                         typeProcess={getTypeProcess?.data}
                     />
                     <Button htmlType='submit' type='primary'>
-                        Submit
+                        ตกลง
                     </Button>
                 </Form>
             </StyledDrawer>
@@ -2884,6 +3121,253 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </div>
                 </ModalContent>
             </Modal>
+            {/* modalMultiTransfer */}
+            <Modal
+                bodyStyle={{ height: '100%' }}
+                centered
+                destroyOnClose
+                footer={null}
+                onCancel={() => {
+                    setModeMulti(false)
+                }}
+                onOk={() => {
+                    handleSubMitMixed()
+                }}
+                open={modeMulti}
+                title='ปล่อยแบบหลายบ่อ'
+                width={990}
+            >
+                <ModalContent>
+                    <>
+                        {listBuildingTransfser.map((data, indexList) => (
+                            <div
+                                key={indexList}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-start',
+                                    gap: '16px',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                <StyledFormItems
+                                    label='เลือกอาคาร'
+                                    name='id_building'
+                                    rules={[{ required: false, message: 'กรุณาเลือกบ่อปลายทาง' }]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Select
+                                        onChange={(e) => {
+                                            onChangeBuildingByKeySelectTransfer(e, indexList)
+                                        }}
+                                        placeholder='เลือกอาคาร'
+                                        style={{ width: '100%' }}
+                                    >
+                                        {getAllBuildings.data &&
+                                            getAllBuildings.data.map((data, index) => (
+                                                <Option key={index} value={data.idbuilding}>
+                                                    <span>{data.name}</span>
+                                                </Option>
+                                            ))}
+                                    </Select>
+                                </StyledFormItems>
+                                <StyledFormItems
+                                    label='เลือกบ่อปลายทาง'
+                                    name='id_puddle'
+                                    rules={[{ required: false, message: 'กรุณาเลือกบ่อปลายทาง' }]}
+                                    style={{ marginBottom: 0 }}
+                                >
+                                    <Select
+                                        filterOption={(input, option) => (option?.label.toString() ?? '').includes(input)}
+                                        onChange={onChangewwww}
+                                        onSearch={onSearch}
+                                        onSelect={(labelValue) => {
+                                            handleSelectMultiPuddleByKey(labelValue, indexList)
+                                        }}
+                                        optionFilterProp='children'
+                                        options={listBuildingTransfser[indexList].puddle_id}
+                                        placeholder='Select a person'
+                                        showSearch
+                                    />
+                                </StyledFormItems>
+
+                                <Button
+                                    onClick={() => {
+                                        setListBuildingTransfser([
+                                            ...listBuildingTransfser,
+                                            {
+                                                building: null,
+                                                puddle_id: [],
+                                                selectedPuddle: null,
+                                                serialPuddle: null,
+                                            },
+                                        ])
+                                    }}
+                                    type='primary'
+                                >
+                                    เพิ่ม
+                                </Button>
+                                {/* <Button
+                                    onClick={() => {
+                                        handleDeletePuddleWithMultiListPuddle(indexList)      
+                                    }}
+                                    type='ghost'
+                                >
+                                    ลบ
+                                </Button> */}
+                            </div>
+                        ))}
+
+                        <Form autoComplete='off' form={form} layout='vertical' onFinish={handleSubmitTransfer}>
+                            <StyledFormItems
+                                extra={`~ ${amountItemsKG} kg.`}
+                                label='จำนวนที่ปล่อยออก L.'
+                                name='volume'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    onChange={handleChangeAmountItems}
+                                    placeholder='จำนวนที่ปล่อยออก'
+                                    size='large'
+                                    style={{ color: 'black' }}
+                                />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='ปริมาตรที่เหลือ (kg.)'
+                                name='remaining_volume'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอก ปริมาตรที่เหลือ (L.)',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='ปริมาตรที่เหลือ (L.)' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='ร้อยละที่ปล่อยออก'
+                                name='amount_items'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='ร้อยละคงเหลือ'
+                                name='remaining_items'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='ร้อยละคงเหลือ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='ราคาต่อหน่วย ล่าสุด'
+                                name='amount_unit_per_price'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='จำนวนคงเหลือ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='ราคาต่อหน่วย คงเหลือ'
+                                name='remaining_unit_per_price'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='ราคาต่อหน่วย คงเหลือ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='มูลค่า'
+                                name='amount_price'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='มูลค่า' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='มูลค่า คงเหลือ'
+                                name='remaining_price'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: true,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input disabled placeholder='มูลค่า คงเหลือ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems label='เลือกรายการการทำงาน' name='process' rules={[{ required: false }]}>
+                                <Select placeholder='เลือกรายการการทำงาน' style={{ width: '100%' }}>
+                                    {getTypeProcess?.data &&
+                                        getTypeProcess?.data.map((data, index) => (
+                                            <Option key={index} value={data.idtype_process}>
+                                                <span>{data?.process_name}</span>
+                                            </Option>
+                                        ))}
+                                </Select>
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='รอบ'
+                                name='round'
+                                rules={[
+                                    {
+                                        pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                        required: false,
+                                        message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                    },
+                                ]}
+                            >
+                                <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                            <StyledFormItems
+                                label='วันที่ทำรายการ'
+                                name='date_action'
+                                rules={[{ required: true, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                            >
+                                <DatePicker onChange={onChangeDateTransfer} style={{ width: '100%' }} />
+                            </StyledFormItems>
+
+                            <Button block htmlType='submit' type='primary'>
+                                คกลง
+                            </Button>
+                        </Form>
+                    </>
+                </ModalContent>
+            </Modal>
             {/* modalMixing */}
             <Modal
                 bodyStyle={{ height: '100%' }}
@@ -3095,6 +3579,13 @@ export default DetailPuddlePage
 const ModalHistory = styled(Modal)`
     width: fit-content !important;
 `
+const StyledTitleBetween = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+`
 const StyledContentMixing = styled.div`
     width: 100%;
     display: flex;
@@ -3123,6 +3614,17 @@ const StyledInputNumber = styled(InputNumber)`
 //     color: white;
 //     padding: 8px;
 // `
+
+const StyledGlassBox = styled.div`
+    background: rgba(255, 255, 255, 1);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5.3px);
+    -webkit-backdrop-filter: blur(5.3px);
+    width: 100%;
+    padding: 10px 20px;
+    cursor: pointer;
+`
 
 const ButtonApprove = styled(Button)`
     border-radius: 2px;
