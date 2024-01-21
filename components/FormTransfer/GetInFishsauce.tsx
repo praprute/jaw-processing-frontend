@@ -1,9 +1,9 @@
 import { DatePicker, Form, Input } from 'antd'
+import { Dayjs } from 'dayjs'
 import styled from 'styled-components'
-import moment from 'moment'
 
 interface ITransferFishsauce {
-    onChangeDate?: (value: moment.Moment, dateString: string) => void
+    onChangeDate?: (value: Dayjs, dateString: string) => void
     defaultDateAction?: string
 }
 

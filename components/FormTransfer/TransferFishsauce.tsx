@@ -2,6 +2,7 @@ import { Button, DatePicker, Divider, Form, Input, Select } from 'antd'
 import { LabeledValue } from 'antd/lib/select'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { Dayjs } from 'dayjs'
 
 import { IAllBuildingAndPuddleDto, IAllPuddleDto } from '../../share-module/building/type'
 import { IOrderDetailDto } from '../../share-module/order/type'
@@ -19,7 +20,7 @@ interface ITransferFishsauce {
     onSelectAction?: (labelValue: LabeledValue) => void
     typeProcess?: ITypeProcess[]
     throwOutProcess?: boolean
-    onChangeDate?: (value: moment.Moment, dateString: string) => void
+    onChangeDate?: (value: Dayjs, dateString: string) => void
     multi?: boolean
     listBuilding?: any[]
     onChangeMultiBuilding?: (value: any, index: any) => void

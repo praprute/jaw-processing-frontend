@@ -276,6 +276,7 @@ const AppLayout = (props: ILayout) => {
                 key={placement}
                 onClose={onClose}
                 placement={placement}
+                style={{ background: 'white' }}
                 title={
                     <HeaderLogo>
                         <DeploymentUnitOutlined
@@ -373,7 +374,7 @@ const StyledMenuIcon = styled(MenuOutlined)`
 `
 const WrapperDrawer = styled(Drawer)`
     .ant-drawer-header {
-        background: rgb(35, 37, 43);
+        // background: rgb(35, 37, 43);
     }
     .ant-drawer-title {
         color: #ffffff !important;
@@ -384,9 +385,13 @@ const WrapperDrawer = styled(Drawer)`
     .ant-drawer-body {
         padding: 0px;
         overflow: hidden;
-        background: rgb(26, 28, 33);
+        // background: rgb(26, 28, 33);
         padding: 10px 20px;
     }
+
+    // &&.ant-layout-sider .ant-layout-sider-dark{
+    //     background: red !important;
+    // }
 `
 
 const HeaderLogo = styled.span`
@@ -404,7 +409,11 @@ const StyledTitleMenu = styled.p`
     color: #000000;
 `
 const StyledMenu = styled(Menu)`
-    background: transparent;
+    background: transparent !important;
+
+    // &&.ant-layout-sider .ant-layout-sider-dark{
+    //     background: red !important;
+    // }
 
     &&.ant-menu-dark.ant-menu-inline .ant-menu-item {
         border-radius: 10px !important;
@@ -420,6 +429,10 @@ const StyledMenu = styled(Menu)`
 const StyledLayOut = styled(Layout)`
     min-height: 100vh;
     overflow: hidden;
+    &&.ant-layout .ant-layout-sider {
+        height: 100%;
+        background: white !important;
+    }
 `
 const StyledContent = styled(Content)<{ isFullscreen?: boolean }>`
     width: 100%;

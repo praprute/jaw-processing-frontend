@@ -1,9 +1,10 @@
 import { Col, Input, Row, Form, Button, DatePicker } from 'antd'
 import styled from 'styled-components'
+import { Dayjs } from 'dayjs'
 
 interface IFillterBox {
-    onChangeDate?: (value: moment.Moment, dateString: string) => void
-    onChangeDateEnd?: (value: moment.Moment, dateString: string) => void
+    onChangeDate?: (value: Dayjs, dateString: string) => void
+    onChangeDateEnd?: (value: Dayjs, dateString: string) => void
 }
 const FillterBox = (props: IFillterBox) => {
     const { onChangeDate, onChangeDateEnd } = props

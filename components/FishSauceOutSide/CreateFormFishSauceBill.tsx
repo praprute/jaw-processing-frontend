@@ -1,12 +1,13 @@
 import { Col, Input, Row, Form, Button, DatePicker, Select } from 'antd'
 import styled from 'styled-components'
+import { Dayjs } from 'dayjs'
 
 import { ICustomerList } from '../../share-module/FishWeightBill/type'
 const { Option } = Select
 
 interface ICreateFishSauceBillBox {
     customerList: ICustomerList[]
-    onChangeDate: (value: moment.Moment, dateString: string) => void
+    onChangeDate: (value: Dayjs, dateString: string) => void
 }
 
 const CreateFishSauceBillBox = (props: ICreateFishSauceBillBox) => {

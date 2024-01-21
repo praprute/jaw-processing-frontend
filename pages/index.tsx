@@ -67,7 +67,7 @@ const Home: NextPageWithLayout = () => {
                                             navigation.navigateTo.allPuddle(data.idbuilding.toString())
                                         }}
                                         size='middle'
-                                        type='ghost'
+                                        type='dashed'
                                     >
                                         รายละเอียด
                                     </StyledButton>

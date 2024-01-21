@@ -276,7 +276,7 @@ const PuddlePage: NextPageWithLayout = () => {
                 bodyStyle={{ paddingBottom: 80 }}
                 extra={
                     <Space>
-                        <Button onClick={onClose} style={{ color: '#FFFFFF' }} type='ghost'>
+                        <Button onClick={onClose} style={{ color: '#FFFFFF' }} type='dashed'>
                             Cancel
                         </Button>
                         <Button onClick={handleSubmitCreatePuddle} type='primary'>

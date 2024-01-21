@@ -1,16 +1,17 @@
 import '../styles/globals.css'
-import 'antd/dist/antd.css'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 import 'react-toastify/dist/ReactToastify.css'
 import { ReactElement, ReactNode, useEffect } from 'react'
 import { Provider as ReduxProvider } from 'react-redux'
 import { useRouter } from 'next/router'
+import { ConfigProvider } from 'antd'
 
 import { useStore } from '../share-module/store'
 import { myToken } from '../share-module/auth/task'
 import { useNavigation } from '../utils/use-navigation'
 import RootHoc from '../components/RootHoc'
+import theme from '../theme/ themeConfig'
 
 export type NextPageWithLayout = NextPage & {
     getLayout?: (page: ReactElement) => ReactNode
@@ -37,9 +38,11 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
     return (
         <>
-            <ReduxProvider store={store}>
-                <RootHoc>{getLayout(<Component {...pageProps} />)}</RootHoc>
-            </ReduxProvider>
+            <ConfigProvider theme={theme}>
+                <ReduxProvider store={store}>
+                    <RootHoc>{getLayout(<Component {...pageProps} />)}</RootHoc>
+                </ReduxProvider>
+            </ConfigProvider>
         </>
     )
 }

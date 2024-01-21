@@ -19,6 +19,7 @@ import {
     DatePicker,
     InputNumber,
     Checkbox,
+    FloatButton,
 } from 'antd'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
@@ -26,7 +27,7 @@ import { LabeledValue } from 'antd/lib/select'
 import axios from 'axios'
 import Table, { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
-import { CheckOutlined } from '@ant-design/icons'
+import { BranchesOutlined, CheckOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import type { DatePickerProps } from 'antd'
 import type { CheckboxValueType } from 'antd/es/checkbox/Group'
@@ -357,9 +358,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -627,8 +628,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             buffer[index].selectedPuddle = Number(labelValue)
             buffer[index].serialPuddle = await getSerial(Number(labelValue))
             setListBuildingTransfser(buffer)
-
-            console.log('buffer : ', buffer)
 
             // const res = await getSerial(Number(labelValue))
             // form.setFieldsValue({ action_puddle: res })
@@ -906,7 +905,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const handleChangeAmountItems = (e: React.ChangeEvent<HTMLInputElement>) => {
         let volumn = remainingVolumnExport
-        console.log(orderDetailLasted.remaining_volume, Number(e.target.value))
+        // console.log(orderDetailLasted.remaining_volume, Number(e.target.value))
         setAmountItemsKG(Number(e.target.value) * 1.2)
         setAmountItemsPercent(parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)))
 
@@ -1721,10 +1720,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const handleSubmitTransfer = async () => {
         if (modeMulti) {
-            console.log(1)
+            // console.log(1)
             await handleMultiTransfer()
         } else {
-            console.log(2)
+            // console.log(2)
             await handleTransfer()
         }
     }
@@ -1881,6 +1880,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const onChangeDateTransfer: DatePickerProps['onChange'] = (date, dateString) => {
         setDateTransfer(dateString)
+        // console.log('date : ', date, dateString)
     }
 
     // const handleChangeChem = async () => {
@@ -1918,6 +1918,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     //         setDateStart(null)
     //     }
     // }
+    // console.log('sourceDataSalt : ', sourceDataSalt)
 
     const stepsSalt = [
         {
@@ -1942,15 +1943,19 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 <>
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
+                            <>
+                                Stock ที่มีอยู่ : {Number(preDataSaltBill?.stock)} KG. ~ {Number(preDataSaltBill?.stock / 1.2)} L
+                            </>
                             <StyledFormItems
                                 // extra={`~ ${saltWaterKG} KG.`}
+
                                 label='ปริมาตรน้ำเกลือที่เติมเพิ่ม (KG.)'
                                 name='volume'
                                 rules={[
                                     { required: true, message: 'กรุณากรอกข้อมูลให้ครบถ้วน' },
                                     {
                                         validator: async (_, value) => {
-                                            if (value >= Number(preDataSaltBill?.stock)) {
+                                            if (value > Number(preDataSaltBill?.stock)) {
                                                 return Promise.reject(
                                                     new Error(`ค่าต้องไม่เกิน ${Number(preDataSaltBill?.stock)}`),
                                                 )
@@ -2484,12 +2489,12 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     เพิ่มรายการการทำงาน
                 </StyledButton>
             </StyleBoxSetting>
-            <br />
+
             <Divider />
-            <StyledBoxHeader>
+            {/* <StyledBoxHeader>
                 <span>อาคารทั้งหมด</span>
-            </StyledBoxHeader>
-            <br />
+            </StyledBoxHeader> */}
+            {/* <br />
             <Row gutter={[16, 16]}>
                 {Boolean(building?.length) &&
                     building.map((data, index) => (
@@ -2513,7 +2518,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                             navigation.navigateTo.allPuddle(data.idbuilding.toString())
                                         }}
                                         size='middle'
-                                        type='ghost'
+                                        type='dashed'
                                     >
                                         รายละเอียด
                                     </StyledButton>
@@ -2521,7 +2526,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             </StyledGlassBox>
                         </Col>
                     ))}
-            </Row>
+            </Row> */}
             <Divider />
             <StyledBoxContent>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
@@ -3454,7 +3459,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                         ])
                                         setCalTxVolumn([...calTxVolumn, { vloumnTx: 0 }])
                                     }}
-                                    type='ghost'
+                                    type='dashed'
                                 >
                                     เพิ่ม
                                 </Button>
@@ -3562,6 +3567,18 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     </div>
                 </ModalContent>
             </Modal>
+            <FloatButton.Group icon={<BranchesOutlined />} style={{ right: 24 }} trigger='click' type='primary'>
+                {Boolean(building?.length) &&
+                    building.map((data, index) => (
+                        <FloatButton
+                            description={data.name}
+                            key={index}
+                            onClick={() => {
+                                navigation.navigateTo.allPuddle(data.idbuilding.toString())
+                            }}
+                        />
+                    ))}
+            </FloatButton.Group>
         </>
     )
 }
@@ -3579,13 +3596,13 @@ export default DetailPuddlePage
 const ModalHistory = styled(Modal)`
     width: fit-content !important;
 `
-const StyledTitleBetween = styled.div`
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-`
+// const StyledTitleBetween = styled.div`
+//     width: 100%;
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     font-size: 14px;
+// `
 const StyledContentMixing = styled.div`
     width: 100%;
     display: flex;
@@ -3615,16 +3632,16 @@ const StyledInputNumber = styled(InputNumber)`
 //     padding: 8px;
 // `
 
-const StyledGlassBox = styled.div`
-    background: rgba(255, 255, 255, 1);
-    border-radius: 8px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5.3px);
-    -webkit-backdrop-filter: blur(5.3px);
-    width: 100%;
-    padding: 10px 20px;
-    cursor: pointer;
-`
+// const StyledGlassBox = styled.div`
+//     background: rgba(255, 255, 255, 1);
+//     border-radius: 8px;
+//     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+//     backdrop-filter: blur(5.3px);
+//     -webkit-backdrop-filter: blur(5.3px);
+//     width: 100%;
+//     padding: 10px 20px;
+//     cursor: pointer;
+// `
 
 const ButtonApprove = styled(Button)`
     border-radius: 2px;
