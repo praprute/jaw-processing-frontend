@@ -1001,11 +1001,17 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const handleSelectOrdersGetIN = async (id_selected: number) => {
         const result = getNoticeTargetPending.data.find((data) => id_selected === data.idtarget_puddle)
-        if (result.type === TypeProcess.CLEARING) {
-            setTypeProcessImport(TypeProcess.GETFISHRESIDUE)
+
+        if (result?.type_process === 14) {
+            setTypeProcessImport(TypeProcess.MIXEDPAUSE)
         } else {
-            setTypeProcessImport(TypeProcess.IMPORT)
+            if (result.type === TypeProcess.CLEARING) {
+                setTypeProcessImport(TypeProcess.GETFISHRESIDUE)
+            } else {
+                setTypeProcessImport(TypeProcess.IMPORT)
+            }
         }
+
         let amount_item_cal =
             getPuddleDetailById.data?.status !== TypeOrderPuddle.FERMENT
                 ? getOrdersDetailFromId.data.length === 1
@@ -1395,6 +1401,18 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setVisibleModalChangeVoume(false)
         }
     }
+
+    const [selectedOptionProcess, setSelectedOptionProcess] = useState(null)
+
+    const onChangeOptionProcess = (value: any) => {
+        console.log('onChangeOptionProcess : ', value)
+        setSelectedOptionProcess(value)
+    }
+
+    const optionProcess = [
+        { value: 12, label: 'ดูดไปผสม' },
+        { value: 14, label: 'ดูดไปพัก' },
+    ]
     const handleSubMitMixed = async () => {
         try {
             // listSelectdItemsComponent.map()
@@ -1406,7 +1424,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 )
                 let payload = {
                     order_id: result.tx[0].idOrders,
-                    type_process: TypeProcess.MIXING,
+                    type_process: selectedOptionProcess,
                     amount_items: (result.volumnInput * 1.2 * result.tx[0].remaining_items) / result.tx[0].remaining_volume,
                     amount_unit_per_price: !!first ? result.tx[0].amount_unit_per_price : result.tx[0].remaining_unit_per_price,
                     amount_price: !!first
@@ -1432,40 +1450,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     round: 0,
                     // round: Number(form.getFieldValue('round')),
                 }
-
-                // {
-                //     "idsub_orders": 724,
-                //     "idOrders": 341,
-                //     "type": 0,
-                //     "fish": 32520,
-                //     "salt": 1,
-                //     "laber": 1,
-                //     "other": 0,
-                //     "fish_sauce": 0,
-                //     "fish_price": 661456.8,
-                //     "salt_price": 0,
-                //     "laber_price": 0,
-                //     "amount_items": 100,
-                //     "amount_unit_per_price": 20.34,
-                //     "amount_price": 661456.8,
-                //     "remaining_items": 100,
-                //     "remaining_unit_per_price": 0,
-                //     "remaining_price": 0,
-                //     "description": "",
-                //     "user_create_sub": 9,
-                //     "date_create": "2023-11-20 13:56:17",
-                //     "approved": 1,
-                //     "volume": 40000,
-                //     "remaining_volume": 40000,
-                //     "action_puddle": null,
-                //     "action_serial_puddle": null,
-                //     "type_process": null,
-                //     "date_action": "2023-04-24 07:00:00",
-                //     "tn": null,
-                //     "nacl": null,
-                //     "ph": null,
-                //     "round": null
-                // }
 
                 let rr = await submitTransfer.onRequest(payload)
                 if (rr === 'success') {
@@ -3135,9 +3119,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setModeMulti(false)
                 }}
-                onOk={() => {
-                    handleSubMitMixed()
-                }}
+                // onOk={() => {
+                //     handleSubMitMixed()
+                // }}
                 open={modeMulti}
                 title='ปล่อยแบบหลายบ่อ'
                 width={990}
@@ -3390,6 +3374,19 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             >
                 <ModalContent>
                     <>
+                        <StyledFormItems
+                            label='เลือก Process'
+                            name='type_process'
+                            rules={[{ required: false, message: 'กรุณาเลือก Process' }]}
+                            style={{ width: '100%' }}
+                        >
+                            <Select
+                                onChange={onChangeOptionProcess}
+                                options={optionProcess}
+                                placeholder='เลือก Process'
+                                style={{ width: '100%' }}
+                            />
+                        </StyledFormItems>
                         {listSelectdItemsComponent.map((data, indexList) => (
                             <div
                                 key={indexList}

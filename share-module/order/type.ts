@@ -55,6 +55,7 @@ export interface INoticeTargetPendingDto {
     source_puddle?: number
     source_serial_puddle?: number
     item_transfer?: number
+    type_process?: number
 }
 
 export interface IPayloadTransferFishSauce {

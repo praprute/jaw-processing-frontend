@@ -102,6 +102,8 @@ const PuddlePage: NextPageWithLayout = () => {
                 return <span>บ่อตีกาก</span>
             case TypeOrderPuddle.MIXED:
                 return <span>ดูดไปผสม</span>
+            case TypeOrderPuddle.MIXEDPAUSE:
+                return <span>ดูดมาพัก</span>
             default:
                 break
         }
@@ -137,6 +139,8 @@ const PuddlePage: NextPageWithLayout = () => {
                 return 'ดูดไปผสม'
             case TypeProcess.EMPTY:
                 return 'บ่อว่าง'
+            case TypeOrderPuddle.MIXEDPAUSE:
+                return 'ดูดมาพัก'
             default:
                 return ' '
                 break

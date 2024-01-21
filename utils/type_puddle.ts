@@ -13,6 +13,7 @@ export enum TypeOrderPuddle {
     FAIL = 10,
     IMPORTWATERFISH = 11,
     MIXED = 12,
+    MIXEDPAUSE = 14,
 }
 
 export enum TypeProcess {
@@ -42,6 +43,6 @@ export enum TypeProcess {
     IMPORTWATERFISH = 11,
     // เติมน้ำคาว 6 month สีม่วงอ่อน
     MIXING = 12,
-
+    MIXEDPAUSE = 14,
     EMPTY = 13,
 }
