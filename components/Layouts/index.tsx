@@ -5,6 +5,7 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { useRouter } from 'next/router'
 import Cookies from 'js-cookie'
+import NextImage from 'next/image'
 
 import { IUserInfo } from '../../share-module/auth/type'
 import { useNavigation } from '../../utils/use-navigation'
@@ -130,25 +131,6 @@ const AppLayout = (props: ILayout) => {
         // })
     }
 
-    //TODO : PERMISSION FEATURE
-    // useEffect(() => {
-    //   if (myInfo && router.pathname) {
-    //     if (myInfo?.role === 1) {
-    //       itemsMenuSeller.map((element, index) => {
-    //         if (router.pathname === element.key) {
-    //           return setDefaultKey(element.key)
-    //         }
-    //       })
-    //     } else {
-    //       itemsMenu.map((element, index) => {
-    //         if (router.pathname === element.key) {
-    //           setDefaultKey(element.key)
-    //         }
-    //       })
-    //     }
-    //   }
-    // }, [myInfo, router.pathname])
-
     const CardInfo = () => {
         return (
             <WrapCardInfo>
@@ -167,11 +149,12 @@ const AppLayout = (props: ILayout) => {
         )
     }
 
+    const FLAGHIDDENINFO = false
     const MenuPath = (props: { hideUserInfo?: boolean }) => {
         const { hideUserInfo = false } = props
         return (
             <>
-                {!hideUserInfo && (
+                {FLAGHIDDENINFO && !hideUserInfo && (
                     <WrapMenuCardInfo>
                         <CardInfo />
                     </WrapMenuCardInfo>
@@ -256,10 +239,19 @@ const AppLayout = (props: ILayout) => {
                         navigation.navigateTo.home()
                     }}
                 >
-                    <DeploymentUnitOutlined
+                    {/* <DeploymentUnitOutlined
                         style={{ fontWeight: '700', fontSize: '18px', color: '#f0b90b', marginRight: '8px' }}
                     />
-                    <div className='logo'>{process.env.NEXT_PUBLIC_NAME_PLATFORM}</div>
+                     */}
+                    <NextImage alt='RUNGROJ' height={60} src='https://jaw.sgp1.digitaloceanspaces.com/Logo-RFS.jpg' width={100} />
+                    {/* <div className='logo'>{process.env.NEXT_PUBLIC_NAME_PLATFORM}</div> */}
+                    <HeadingContainer>
+                        <Heading>
+                            <PageHeading>
+                                RUNGROJ <NEXTHighlight>ERP</NEXTHighlight>
+                            </PageHeading>
+                        </Heading>
+                    </HeadingContainer>
                 </HeaderLogo>
                 {/* <StyledSearch placeholder='ค้นหาเอกสารที่ต้องการ' suffix={<SearchOutlined />} /> */}
                 {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
@@ -304,9 +296,11 @@ const AppLayout = (props: ILayout) => {
                         <MenuPath />
 
                         <br />
-                        <StyledLogOut onClick={handleSignOut} size='large'>
-                            SIGNOUT
-                        </StyledLogOut>
+                        <div style={{ padding: '20px' }}>
+                            <StyledButtonGradient onClick={handleSignOut} size='large'>
+                                SIGNOUT
+                            </StyledButtonGradient>
+                        </div>
                     </WrapSider>
                 )}
 
@@ -326,6 +320,44 @@ const AppLayout = (props: ILayout) => {
 }
 
 export default AppLayout
+
+const StyledButtonGradient = styled(Button)`
+    width: 100%;
+    background: linear-gradient(107.85deg, #df2222 0%, #00b2ff 139.5%);
+    color: #fff;
+    border: none;
+    transition: background-color 0.3s;
+    &&:hover {
+        background: linear-gradient(107.85deg, #ff0000 0%, #00b2ff 139.5%);
+        color: #fff !important;
+        border: none;
+    }
+`
+
+const NEXTHighlight = styled.span`
+    background: linear-gradient(107.85deg, #51459e 0%, #00b2ff 139.5%);
+    font-size: 24px !important;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+`
+
+const Heading = styled.div`
+    padding-left: 32px;
+`
+
+const PageHeading = styled.div`
+    font-weight: 550;
+    font-size: 24px;
+    line-height: 0.75;
+    line-height: 55px;
+`
+
+const HeadingContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+`
 
 const StyledAvatar = styled(Avatar)`
     width: 50px;
@@ -353,19 +385,19 @@ const StyledAvatar = styled(Avatar)`
 //         `}
 // `
 
-const StyledLogOut = styled(Button)`
-    width: 100%;
-    border-radius: 8px;
-    color: white;
-    background: #f5222d;
-    border-color: transparent;
-    &:hover {
-        color: white;
-        border-color: #f53841;
-        background: #f53841;
-        box-shadow: 0 1px 10px #f5222d;
-    }
-`
+// const StyledLogOut = styled(Button)`
+//     width: 100%;
+//     border-radius: 8px;
+//     color: white;
+//     background: #f5222d;
+//     border-color: transparent;
+//     &:hover {
+//         color: white;
+//         border-color: #f53841;
+//         background: #f53841;
+//         box-shadow: 0 1px 10px #f5222d;
+//     }
+// `
 const StyledMenuIcon = styled(MenuOutlined)`
     cursor: pointer;
     @media only screen and (min-width: 769px) {
@@ -388,10 +420,6 @@ const WrapperDrawer = styled(Drawer)`
         // background: rgb(26, 28, 33);
         padding: 10px 20px;
     }
-
-    // &&.ant-layout-sider .ant-layout-sider-dark{
-    //     background: red !important;
-    // }
 `
 
 const HeaderLogo = styled.span`
@@ -400,12 +428,14 @@ const HeaderLogo = styled.span`
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    padding-top: 12px;
+    padding-bottom: 12px;
 `
 const StyledTitleMenu = styled.p`
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     margin-bottom: 0;
-
+    padding-left: 16px;
     color: #000000;
 `
 const StyledMenu = styled(Menu)`
@@ -416,7 +446,12 @@ const StyledMenu = styled(Menu)`
     // }
 
     &&.ant-menu-dark.ant-menu-inline .ant-menu-item {
-        border-radius: 10px !important;
+        border-radius: 0px 20px 20px 0px !important;
+        margin-left: 0;
+    }
+
+    &&.ant-menu-dark.ant-menu-inline .ant-menu-item span {
+        padding-left: 16px;
     }
 
     &&.ant-menu-dark.ant-menu-inline .ant-menu-item {
@@ -424,6 +459,7 @@ const StyledMenu = styled(Menu)`
     }
     &&.ant-menu-dark.ant-menu-inline .ant-menu-item.ant-menu-item-selected {
         color: white !important;
+        background: linear-gradient(107.85deg, #51459e 0%, #00b2ff 139.5%);
     }
 `
 const StyledLayOut = styled(Layout)`
@@ -432,6 +468,7 @@ const StyledLayOut = styled(Layout)`
     &&.ant-layout .ant-layout-sider {
         height: 100%;
         background: white !important;
+        /* background: linear-gradient(180deg, #57696a 0%, #252a2f 119.79%) !important; */
     }
 `
 const StyledContent = styled(Content)<{ isFullscreen?: boolean }>`
@@ -461,6 +498,7 @@ const WrapHeader = styled(Header)`
     font-weight: 700;
     height: 75px;
     padding: 0 30px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2) !important;
     span {
         font-size: 16px;
     }
@@ -503,6 +541,7 @@ const WrapCardInfo = styled.div`
 `
 
 const WrapSider = styled(Sider)`
+    padding: 24px 0px 0px 0px !important;
     height: 100%;
     width: 260px;
     min-height: 100vh;
@@ -510,6 +549,8 @@ const WrapSider = styled(Sider)`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* color: white; */
+    /* background: linear-gradient(180deg, #57696a 0%, #252a2f 119.79%) !important; */
     @media only screen and (max-width: 769px) {
         display: none;
     }

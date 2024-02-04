@@ -70,7 +70,7 @@ const ContentFillter = styled.div`
 `
 const HeaderFillterBox = styled.div`
     width: 100%;
-    background: rgb(26, 28, 33);
+    background: linear-gradient(107.85deg, #51459e 0%, #00b2ff 160.5%);
     padding: 12px;
     color: white;
     border-radius: 8px 8px 0px 0px;

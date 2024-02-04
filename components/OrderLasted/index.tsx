@@ -54,8 +54,6 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 }
             }
         })()
-
-        console.log('data : ', data)
     }, [data])
 
     const handleTypeOrder = (type: number) => {
@@ -75,7 +73,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
             case TypeProcess.ADDONWATERSALT:
                 return 'เติมน้ำเกลือ'
             case TypeProcess.ADDONFISHSAUCE:
-                return 'เติมน้ำปลาพรพิมล'
+                return 'เติมน้ำปลาข้างนอก'
             case TypeProcess.TRANSFERSALTWATER:
                 return 'ปล่อยน้ำเกลือ'
             case TypeProcess.IMPORTSALTWATER:
@@ -284,8 +282,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -356,8 +354,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -429,8 +427,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -501,8 +499,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -574,8 +572,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -647,8 +645,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -720,8 +718,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -792,8 +790,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -864,8 +862,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -937,8 +935,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1010,8 +1008,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1051,7 +1049,7 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td> {numberWithCommas(data.amount_price)}</td>
                                         <td>
                                             {numberWithCommas(data.volume)} KG |{' '}
-                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                            {numberWithCommas(Number((data.volume / 1).toFixed(2)))} L
                                         </td>
                                         <td></td>
                                         <td></td>
@@ -1083,8 +1081,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1155,8 +1153,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.process_name ? (
-                                                data?.process_name
+                                            {data?.description ? (
+                                                data?.description
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}

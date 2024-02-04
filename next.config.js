@@ -15,6 +15,16 @@ module.exports = withAntdLess({
         //     getLocalIdent: [Function: getCssModuleLocalIdent]
         //   }
     },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: '**',
+                port: '',
+                pathname: '**',
+            },
+        ],
+    },
     // Other Config Here...
 
     webpack(config) {

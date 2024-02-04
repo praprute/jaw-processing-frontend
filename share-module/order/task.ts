@@ -202,17 +202,17 @@ export const deleteTransactionGetInTask = createReduxAsyncTask({
         },
 })
 
-export const updateProcessDescritionSubOrderTask = createReduxAsyncTask({
+export const updateDescritionSubOrderTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
-    name: 'updateProcessDescritionSubOrder',
+    name: 'updateDescritionSubOrderTask',
     defaultData: {} as { success: string; message?: any },
-    defaultPayload: {} as { process: number; subOrderId: number },
+    defaultPayload: {} as { process: number; subOrderId: number; puddle_id: number },
     saga: ({ actions }) =>
         function* (action) {
             try {
                 const config = yield configAPI()
                 const { data } = yield axios.put(
-                    `${process.env.NEXT_PUBLIC_HOST}/updateProcessDescritionSubOrder/`,
+                    `${process.env.NEXT_PUBLIC_HOST}/updateDescritionSubOrderTask/`,
                     action.payload,
                     config,
                 )

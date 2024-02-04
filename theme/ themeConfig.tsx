@@ -28,6 +28,7 @@ const theme: ThemeConfig = {
             borderRadius: 8,
             paddingBlock: 0,
             paddingInline: 8,
+            // colorPrimaryHover: '#51459e',
         },
         // Input: {
         //   algorithm: true,

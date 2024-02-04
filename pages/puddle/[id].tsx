@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Breadcrumb, Button, Col, Drawer, Form, Row, Space, Spin } from 'antd'
+import { Breadcrumb, Button, Col, Drawer, Form, Modal, Row, Space, Spin } from 'antd'
 import Head from 'next/head'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
@@ -21,6 +21,9 @@ const PuddlePage: NextPageWithLayout = () => {
     const [open, setOpen] = useState(false)
     const [tigger, setTigger] = useState(false)
     const [columnGrid, setColumnGrid] = useState(6)
+    const [visable, setVisable] = useState(false)
+    const [selectedPuddle, setSelectedPuddle] = useState(null)
+    const [selectedSerialPuddle, setSelectedSerialPuddle] = useState(null)
 
     const getPuddleByIdBuilding = getPuddleByIdBuildingTask.useTask()
     const createPuddleRequest = createPuddleTask.useTask()
@@ -126,7 +129,7 @@ const PuddlePage: NextPageWithLayout = () => {
             case TypeProcess.ADDONWATERSALT:
                 return 'เติมน้ำเกลือ'
             case TypeProcess.ADDONFISHSAUCE:
-                return 'เติมน้ำปลาพรพิมล'
+                return 'เติมน้ำปลาที่อื่น'
             case TypeProcess.TRANSFERSALTWATER:
                 return 'ปล่อยน้ำเกลือ'
             case TypeProcess.IMPORTSALTWATER:
@@ -190,8 +193,11 @@ const PuddlePage: NextPageWithLayout = () => {
                                                 diff={Number(dayjs().diff(dayjs(data?.action_time), 'day'))}
                                                 isStatus={data.type_process}
                                                 onClick={() => {
-                                                    data.status !== 999 &&
-                                                        navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
+                                                    if (data.status !== 999) {
+                                                        setSelectedPuddle(data.idpuddle.toString())
+                                                        setSelectedSerialPuddle(data.serial)
+                                                        setVisable(true)
+                                                    }
                                                 }}
                                                 style={{ backgroundColor: data.color }}
                                             >
@@ -226,6 +232,11 @@ const PuddlePage: NextPageWithLayout = () => {
                                                         <span>ยังไม่กลบเกลือ</span>
                                                     )}
                                                 </StyledTitleBetween>
+                                                {!!data?.description ? (
+                                                    <StyledTitleBetween>des: {data?.description}</StyledTitleBetween>
+                                                ) : (
+                                                    <StyledTitleBetween>des: - </StyledTitleBetween>
+                                                )}
                                             </StyledGlassBox>
                                         </Col>
                                     ))}
@@ -239,8 +250,13 @@ const PuddlePage: NextPageWithLayout = () => {
                                             isStatus={data.type_process}
                                             key={index}
                                             onClick={() => {
-                                                data.status !== 999 &&
-                                                    navigation.navigateTo.detailPuddle(id as string, data.idpuddle.toString())
+                                                // data.status !== 999 &&
+                                                //     setSelectedPuddle(data.idpuddle.toString() && setVisable(true))
+                                                if (data.status !== 999) {
+                                                    setSelectedPuddle(data.idpuddle.toString())
+                                                    setSelectedSerialPuddle(data.serial)
+                                                    setVisable(true)
+                                                }
                                             }}
                                             style={{ backgroundColor: data.color }}
                                         >
@@ -268,6 +284,11 @@ const PuddlePage: NextPageWithLayout = () => {
                                                     : '0  วัน'}
                                                 {data?.topSalt === 1 ? <span>กลบเกลือแล้ว</span> : <span>ยังไม่กลบเกลือ</span>}
                                             </StyledTitleBetween>
+                                            {!!data?.description ? (
+                                                <StyledTitleBetween>des: {data?.description}</StyledTitleBetween>
+                                            ) : (
+                                                <StyledTitleBetween>des: - </StyledTitleBetween>
+                                            )}
                                         </StyledGlassBox>
                                     ))}
                             </WrapGridCustom>
@@ -297,6 +318,19 @@ const PuddlePage: NextPageWithLayout = () => {
                     <FormInsertPuddle />
                 </Form>
             </StyledDrawe>
+            <Modal
+                centered
+                onCancel={() => {
+                    setVisable(false)
+                }}
+                onOk={() => {
+                    navigation.navigateTo.detailPuddle(id as string, selectedPuddle.toString())
+                }}
+                open={visable}
+                title='กรุณาตรวจสอบ'
+            >
+                <p>คุณต้องการเข้าไปที่บ่อ {selectedSerialPuddle} ใช่หรือไม่</p>
+            </Modal>
         </>
     )
 }

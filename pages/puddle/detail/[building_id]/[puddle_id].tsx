@@ -53,7 +53,6 @@ import {
     getNoticeTargetPendingTask,
     submitGetInFishSaurceTask,
     deleteTransactionGetInTask,
-    updateProcessDescritionSubOrderTask,
     submitCloseProcessTask,
     submitAddOnSaltWaterTask,
     submitAddOnFishSauceTask,
@@ -65,6 +64,7 @@ import {
     submitAddOnFishyTask,
     updateVolumeTask,
     getOrdersHistoryDetailFromIdTask,
+    updateDescritionSubOrderTask,
 } from '../../../../share-module/order/task'
 import TableHistoryOrders from '../../../../components/Table/TableHistoryOrders'
 import OrderLastedSection from '../../../../components/OrderLasted'
@@ -205,7 +205,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalProcess, setVisibleModalProcess] = useState(false)
     const [visibleModalDescProcess, setVisibleModalDescProcess] = useState(false)
     const [idSubOrdersTarget, setIdSubOrdersTarget] = useState(null)
-    const [selectedIdProcess, setSelectedIdProcess] = useState(null)
+    // const [selectedIdProcess, setSelectedIdProcess] = useState(null)
     const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
     const [visibleModalAddOnFishSauce, setVisibleModalAddOnFishSauce] = useState(false)
     const [saltWaterKG, setSaltWaterKG] = useState(0)
@@ -309,6 +309,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleHistoryOrder, setVisibleHistoryOrder] = useState(false)
     const [idHistory, setIdHistory] = useState(null)
     const [modeMulti, setModeMulti] = useState(false)
+    const [descSuborder, setDescSuborder] = useState(null)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -321,7 +322,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const getAllBuildings = getAllBuildingTask.useTask()
     const getTypeProcess = getTypeProcessTask.useTask()
     const submitTypeProcess = submitTypeProcessTask.useTask()
-    const updateProcessDescritionSubOrder = updateProcessDescritionSubOrderTask.useTask()
+    const updateProcessDescritionSubOrder = updateDescritionSubOrderTask.useTask()
     const submitCloseProcess = submitCloseProcessTask.useTask()
     const submitAddOnSaltWater = submitAddOnSaltWaterTask.useTask()
     const getReceiveWeightFishByOrderId = getReceiveWeightFishByOrderIdTask.useTask()
@@ -915,34 +916,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 remainingItems - parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
             remaining_volume: remainingVolumnExport - Number(e.target.value) * 1.2,
         })
-
-        // if (Number(e.target.value) * 1.2 > orderDetailLasted.remaining_volume) {
-        //     setAmountItemsKG(orderDetailLasted.remaining_volume * 1.2)
-        //     setAmountItemsPercent(parseFloat2Decimals(((orderDetailLasted.remaining_volume * remainingItems * 1.2 ) / volumn).toFixed(2)))
-
-        //     form.setFieldsValue({
-        //         volume: orderDetailLasted.remaining_volume,
-        //         amount_items: parseFloat2Decimals(
-        //             ((orderDetailLasted.remaining_volume* remainingItems ) / orderDetailLasted.remaining_volume).toFixed(2),
-        //         ),
-        //         remaining_items:
-        //             remainingItems -
-        //             parseFloat2Decimals(
-        //                 ((orderDetailLasted.remaining_volume * remainingItems ) / orderDetailLasted.remaining_volume).toFixed(2),
-        //             ),
-        //         remaining_volume: remainingVolumnExport - orderDetailLasted.remaining_volume,
-        //     })
-        // } else {
-        //     setAmountItemsKG(Number(e.target.value) * 1.2)
-        //     setAmountItemsPercent(parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)))
-
-        //     form.setFieldsValue({
-        //         amount_items: parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
-        //         remaining_items:
-        //             remainingItems - parseFloat2Decimals(((Number(e.target.value) * remainingItems * 1.2) / volumn).toFixed(2)),
-        //         remaining_volume: remainingVolumnExport - Number(e.target.value) * 1.2,
-        //     })
-        // }
     }
 
     const handleChangeLitToKGSaltWater = (e: number) => {
@@ -953,11 +926,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         // setSaltWaterKG(Number(e.target.value) * 1.2)
         setAmpanKG(Number(e) * 1.2)
     }
-    //  React.ChangeEvent<HTMLInputElement>
-    // const handleChangeLitToKGFishSauceWater = (e: number) => {
-    //     // setFishSauceWaterKG(Number(e.target.value) * 1.2)
-    //     setFishSauceWaterKG(Number(e))
-    // }
 
     const handleChangeLitToKGFishSauceWaterAddon = (e: number) => {
         // setFishSauceWaterKG(Number(e.target.value) * 1.2)
@@ -1236,29 +1204,32 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setModalLoadingVisivble(true)
             let amount_item_cal =
                 getOrdersDetailFromId.data.length === 1
-                    ? (ampanKG * 100) / volumnPuddle
-                    : (ampanKG * remainingItems) / remainingVolumnGetIn
+                    ? ((ampanKG / 1.2) * 100) / volumnPuddle
+                    : ((ampanKG / 1.2) * remainingItems) / remainingVolumnGetIn
             let price_net = Number(values.volume) * preDataAmpanBill.price_per_weigh
 
             const payload = {
                 order_id: getPuddleDetailById?.data?.lasted_order,
                 type_process: TypeProcess.IMPORTHITWATER,
                 amount_items: amount_item_cal,
-                amount_unit_per_price: price_net / ampanKG,
+                amount_unit_per_price: price_net / (ampanKG / 1.2),
                 amount_price: price_net,
                 remaining_items: remainingItems + amount_item_cal,
                 remaining_unit_per_price:
                     (lastedPrice + price_net) /
-                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG),
+                    (getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG / 1.2),
                 remaining_price: lastedPrice + price_net,
-                volume: ampanKG,
-                remaining_volume: getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG,
+                volume: ampanKG / 1.2,
+                remaining_volume:
+                    getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume + ampanKG / 1.2,
                 process: 10,
-                new_stock: Number(values.volume) * 1.2,
+                new_stock: Number(values.volume),
                 idreceipt: preDataAmpanBill.idampan_receipt,
                 id_puddle: Number(puddle_id),
                 date_action: dateTransfer,
             }
+
+            //  new_stock: Number(values.volume) * 1.2,
 
             const res = await submitAddOnAmpan.onRequest(payload)
             if (res.success === 'success') {
@@ -1405,7 +1376,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [selectedOptionProcess, setSelectedOptionProcess] = useState(null)
 
     const onChangeOptionProcess = (value: any) => {
-        console.log('onChangeOptionProcess : ', value)
         setSelectedOptionProcess(value)
     }
 
@@ -1488,16 +1458,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         console.log('search:', value)
     }
 
-    // const handleDeletePuddleWithMultiListPuddle = async(index:number) => {
-    //     console.log('index : ', index)
-    //     let aa = listBuildingTransfser
-    //     aa.splice(index, 1)
-    //     console.log('aa : ', aa)
-    //     setListBuildingTransfser(aa)
-    // }
-
-    // console.log('listBuildingTransfser : ', listBuildingTransfser)
-
     const handleMultiTransfer = async () => {
         try {
             setModalLoadingVisivble(true)
@@ -1510,25 +1470,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             }
 
             for (const [index, data] of listBuildingTransfser.entries()) {
-                // console.log('data ', data)
-
-                // let buffer = listBuildingTransfser
-
-                // if(index === 0){
-                //     buffer = {
-                //         remaining_items: form.getFieldValue('remaining_items') - 0,
-                //         remaining_unit_per_price:form.getFieldValue('remaining_unit_per_price') - 0,
-                //         remaining_volume:Number(form.getFieldValue('remaining_volume')) - 0,
-                //         remaining_price: form.getFieldValue('remaining_price') - 0,
-                //     }
-                // }else{
-
-                // }
-
-                // console.log('length : ', listBuildingTransfser.length, buffer.remaining_volume, (amountItemsKG / listBuildingTransfser.length))
-                // console.log('getOrdersDetailFromId.data : ', getOrdersDetailFromId.data)
-                // console.log('check vv : ', getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume , (amountItemsKG / listBuildingTransfser.length), getOrdersDetailFromId.data[getOrdersDetailFromId.data?.length - 1]?.remaining_volume - (amountItemsKG / listBuildingTransfser.length))
-                // console.log('buffer v : ', buffer.remaining_volume , (amountItemsKG / listBuildingTransfser.length) , buffer.remaining_volume - (amountItemsKG / listBuildingTransfser.length))
                 let payload = {
                     order_id: getPuddleDetailById?.data?.lasted_order,
                     type_process: TypeProcess.TRANSFER,
@@ -1733,10 +1674,10 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     }
     const handleUpdateDescProcess = async () => {
         try {
-            if (selectedIdProcess === null || idSubOrdersTarget === null) {
+            if (descSuborder === null || idSubOrdersTarget === null) {
                 return
             }
-            const payload = { process: selectedIdProcess, subOrderId: idSubOrdersTarget }
+            const payload = { process: descSuborder, subOrderId: idSubOrdersTarget, puddle_id: Number(puddle_id) }
             const res = await updateProcessDescritionSubOrder.onRequest(payload)
             if (res.success === 'success') {
                 NoticeSuccess('ทำรายการสำเร็จ')
@@ -1864,7 +1805,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const onChangeDateTransfer: DatePickerProps['onChange'] = (date, dateString) => {
         setDateTransfer(dateString)
-        // console.log('date : ', date, dateString)
     }
 
     // const handleChangeChem = async () => {
@@ -2073,8 +2013,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <Row gutter={[16, 0]} style={{ width: '100%' }}>
                         <Col xs={24}>
                             <>
-                                Stock ที่มีอยู่ : {Number(preDataAmpanBill?.stock)} KG. ~ {Number(preDataAmpanBill?.stock / 1.2)}{' '}
-                                L
+                                Stock ที่มีอยู่ : {Number(preDataAmpanBill?.stock)} KG. ~ {Number(preDataAmpanBill?.stock / 1)} L
                             </>
                             <StyledFormItems
                                 label='ปริมาตรน้ำรถน้าอำพันที่เติมเพิ่ม (L.)'
@@ -2084,9 +2023,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
                                     {
                                         validator: async (_, value) => {
-                                            if (value > Number(preDataAmpanBill?.stock / 1.2)) {
+                                            if (value > Number(preDataAmpanBill?.stock / 1)) {
                                                 return Promise.reject(
-                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataAmpanBill?.stock / 1.2)}`),
+                                                    new Error(`ค่าต้องไม่เกิน ${Number(preDataAmpanBill?.stock / 1)}`),
                                                 )
                                             }
                                         },
@@ -2475,42 +2414,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             </StyleBoxSetting>
 
             <Divider />
-            {/* <StyledBoxHeader>
-                <span>อาคารทั้งหมด</span>
-            </StyledBoxHeader> */}
-            {/* <br />
-            <Row gutter={[16, 16]}>
-                {Boolean(building?.length) &&
-                    building.map((data, index) => (
-                        <Col key={index} md={12} sm={24} xs={24}>
-                            <StyledGlassBox>
-                                <StyledTitleBetween>
-                                    <span style={{ fontSize: '16px' }}>{data.name}</span>
-                                    <span>จำนวนบ่อทั้งหมด : {data.allPuddle} บ่อ</span>
-                                </StyledTitleBetween>
-                                <StyledTitleBetween>
-                                    <span style={{ fontSize: '16px' }}></span>
-                                    <span>ลิมิต : {data.limit_pool} บ่อ</span>
-                                </StyledTitleBetween>
-                                <br />
-                                <StyledTitleBetween>
-                                    <span style={{ fontSize: '16px' }}></span>
 
-                                    <StyledButton
-                                        key={index}
-                                        onClick={() => {
-                                            navigation.navigateTo.allPuddle(data.idbuilding.toString())
-                                        }}
-                                        size='middle'
-                                        type='dashed'
-                                    >
-                                        รายละเอียด
-                                    </StyledButton>
-                                </StyledTitleBetween>
-                            </StyledGlassBox>
-                        </Col>
-                    ))}
-            </Row> */}
             <Divider />
             <StyledBoxContent>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
@@ -2668,21 +2572,32 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setVisibleModalDescProcess(false)
                     setIdSubOrdersTarget(null)
-                    setSelectedIdProcess(null)
+                    // setSelectedIdProcess(null)
                 }}
                 onOk={handleUpdateDescProcess}
                 open={visibleModalDescProcess}
                 title={`suborder id : ${idSubOrdersTarget}`}
             >
                 <div>
-                    <StyledContentModal>
+                    {/* <StyledContentModal>
                         <ul>
                             {getTypeProcess?.data?.map((data, index) => (
                                 <li key={index}>{data.process_name}</li>
                             ))}
                         </ul>
-                    </StyledContentModal>
-                    {idSubOrdersTarget && (
+                    </StyledContentModal> */}
+
+                    <Input
+                        onChange={(e) => {
+                            setDescSuborder(e.target.value)
+                        }}
+                        placeholder='รายละเอียดเพิ่มเติม'
+                        size='large'
+                        style={{ color: 'black' }}
+                    />
+
+                    {/* setDescSuborder */}
+                    {/* {idSubOrdersTarget && (
                         <Select
                             onChange={(e) => {
                                 setSelectedIdProcess(e)
@@ -2698,7 +2613,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                     </Option>
                                 ))}
                         </Select>
-                    )}
+                    )} */}
                 </div>
             </Modal>
             <Modal
@@ -2707,7 +2622,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setVisibleModalAddOn(false)
                     setIdSubOrdersTarget(null)
-                    setSelectedIdProcess(null)
+                    // setSelectedIdProcess(null)
                 }}
                 open={visibleModalAddOn}
                 title={`เติมน้ำเกลือที่ออเดอร์ : ${getPuddleDetailById?.data?.lasted_order}`}
@@ -2913,7 +2828,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setVisibleModalWaterFish(false)
                     setIdSubOrdersTarget(null)
-                    setSelectedIdProcess(null)
+                    // setSelectedIdProcess(null)
                 }}
                 open={visibleModalWaterFish}
                 title={`เติมน้ำคาว : ${getPuddleDetailById?.data?.lasted_order}`}
@@ -2951,7 +2866,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setVisibleModalHitWaterFish(false)
                     setIdSubOrdersTarget(null)
-                    setSelectedIdProcess(null)
+                    // setSelectedIdProcess(null)
                 }}
                 open={visibleModalHitWaterFish}
                 title={`เติมน้ำรถน้าอำพัน : ${getPuddleDetailById?.data?.lasted_order}`}
@@ -2989,7 +2904,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 onCancel={() => {
                     setVisibleModalAddOnFishSauce(false)
                     setIdSubOrdersTarget(null)
-                    setSelectedIdProcess(null)
+                    // setSelectedIdProcess(null)
                 }}
                 open={visibleModalAddOnFishSauce}
                 title={`เติมน้ำปลาที่ออเดอร์ : ${getPuddleDetailById?.data?.lasted_order}`}
@@ -3466,7 +3381,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         Calculate :
                         <StyledContentMixing>
                             <table id='customers' style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 1em' }}>
-                                <tr style={{ marginBottom: '16px' }}>
+                                <tr style={{ marginBottom: '16px', textAlign: 'right' }}>
                                     <th>บ่อ</th>
                                     <th>TN</th>
                                     <th>ปริมาตร</th>
@@ -3474,7 +3389,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                     <th>action</th>
                                 </tr>
                                 {listSelectdItemsComponent.map((data, index) => (
-                                    <tr key={index} style={{ marginBottom: '16px' }}>
+                                    <tr key={index} style={{ marginBottom: '16px', textAlign: 'right' }}>
                                         <td>{data.serialPuddle}</td>
                                         <td>{data?.tx[0]?.tn}</td>
                                         <td>
@@ -3499,7 +3414,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                         </td>
                                     </tr>
                                 ))}
-                                <tr style={{ marginBottom: '16px' }}>
+                                <tr style={{ marginBottom: '16px', textAlign: 'right' }}>
                                     <td></td>
                                     <td>{sumCalculatedTxVolumn}</td>
 

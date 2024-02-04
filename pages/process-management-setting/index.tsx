@@ -211,7 +211,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                             placeholder='เพิ่มรายการการทำงาน'
                             value={valueTypeProcess}
                         />
-                        <StyledButton block onClick={handleSubmitTypeProcessTask} type='primary'>
+                        <StyledButton block onClick={handleSubmitTypeProcessTask} size='large' type='primary'>
                             ตกลง
                         </StyledButton>
                     </Content>
@@ -227,7 +227,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                             placeholder='ค่าแรงดองปลา'
                             value={valueCostLaborFerment}
                         />
-                        <StyledButton block onClick={handleSubmitUpdateCostLaborFerment} type='primary'>
+                        <StyledButton block onClick={handleSubmitUpdateCostLaborFerment} size='large' type='primary'>
                             อัพเดทค่าแรงดองปลา
                         </StyledButton>
                     </Content>
@@ -251,6 +251,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                                                 onClick={() => {
                                                     openModalUpdateCost(data)
                                                 }}
+                                                size='large'
                                                 type='primary'
                                             >
                                                 อัพเดท
@@ -287,6 +288,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                                                 onClick={() => {
                                                     handleDeleteFishType(data.idfish_type)
                                                 }}
+                                                size='large'
                                                 type='primary'
                                             >
                                                 ลบ
@@ -309,7 +311,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                             placeholder='เพิ่มชนิดของปลา'
                             value={valueFishType}
                         />
-                        <StyledButton block onClick={handleSubmitCreateFishType} type='primary'>
+                        <StyledButton block onClick={handleSubmitCreateFishType} size='large' type='primary'>
                             ตกลง
                         </StyledButton>
                     </Content>
@@ -343,6 +345,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                                                 onClick={() => {
                                                     handleDeleteWorkingStatus(data.idworking_status)
                                                 }}
+                                                size='large'
                                                 type='primary'
                                             >
                                                 ลบ
@@ -376,7 +379,7 @@ const ProcessManagementSetting: NextPageWithLayout = () => {
                             </Form.Item>
                         </Form>
 
-                        <StyledButton block onClick={handleSubmitCreateWorkingStatus} type='primary'>
+                        <StyledButton block onClick={handleSubmitCreateWorkingStatus} size='large' type='primary'>
                             ตกลง
                         </StyledButton>
                     </Content>
@@ -516,7 +519,7 @@ const BoxContent = styled.div`
 
 const HeaderBoxContent = styled.div`
     width: 100%;
-    background: rgb(26, 28, 33);
+    background: linear-gradient(107.85deg, #51459e 0%, #00b2ff 160.5%);
     padding: 12px;
     color: white;
     border-radius: 8px 8px 0px 0px;
