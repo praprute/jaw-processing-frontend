@@ -412,9 +412,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -465,9 +465,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -745,7 +745,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         ;(async () => {
             await handleGetListAmpanReceive()
         })()
-    }, [setCurrentPageAmpan])
+    }, [currentPageAmpan])
 
     useEffect(() => {
         ;(async () => {
@@ -755,7 +755,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const handleGetListAmpanReceive = async () => {
         try {
-            const res = await getReceiveAmpanPaginationWithOutEmpty.onRequest({ page: currentPageSalt - 1, offset: OFFSET_PAGE })
+            const res = await getReceiveAmpanPaginationWithOutEmpty.onRequest({ page: currentPageAmpan - 1, offset: OFFSET_PAGE })
             setSourceDataAmpan(res.data)
             setTotalListAmpna(res.total)
         } catch (e: any) {
@@ -1420,6 +1420,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     round: 0,
                     // round: Number(form.getFieldValue('round')),
                 }
+
+                console.log('payload : ', payload)
 
                 let rr = await submitTransfer.onRequest(payload)
                 if (rr === 'success') {
