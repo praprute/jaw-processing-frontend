@@ -214,7 +214,6 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                             <StyledButton
                                                 disabled={hideAction}
                                                 onClick={() => {
-                                                    console.log('data: ', data)
                                                     onOpenModalChangeVolums(true)
                                                     setSubIdRef(data.idsub_orders)
                                                 }}

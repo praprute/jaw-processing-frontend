@@ -27,7 +27,7 @@ import { LabeledValue } from 'antd/lib/select'
 import axios from 'axios'
 import Table, { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
-import { BranchesOutlined, CheckOutlined } from '@ant-design/icons'
+import { BranchesOutlined, CheckOutlined, DownCircleFilled, UpCircleFilled, VerticalAlignMiddleOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import type { DatePickerProps } from 'antd'
 import type { CheckboxValueType } from 'antd/es/checkbox/Group'
@@ -593,6 +593,19 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             })
 
         setSumCalculatedTxVolumn(volumnTx / volumn)
+    }
+
+    const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        // first prevent the default behavior
+        e.preventDefault()
+        // get the href and remove everything before the hash (#)
+        const href = e.currentTarget.href
+        const targetId = href.replace(/.*\#/, '')
+        // get the element by id and use scrollIntoView
+        const elem = document.getElementById(targetId)
+        elem?.scrollIntoView({
+            behavior: 'smooth',
+        })
     }
 
     const handleChangeVolumnMixing = (value: any, index: any) => {
@@ -1326,6 +1339,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 serial_puddle: Number(form.getFieldValue('action_puddle')),
                 process: form.getFieldValue('process') as number,
                 date_action: dateTransfer,
+                round: Number(form.getFieldValue('round')) || 0,
             }
 
             const result = await submitTransfer.onRequest(payload)
@@ -1342,6 +1356,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             setDateTransfer(null)
         }
     }
+
+    console.log('dateTransfer : ', dateTransfer)
 
     const handleCheckFirstTransaction = async (amount_items: any, remaining_unit_per_price: any, remaining_price: any) => {
         if (amount_items === 100 && remaining_unit_per_price === 0 && remaining_price === 0) {
@@ -2149,7 +2165,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                 </StyledBreadcrumbItem>
                 <StyledBreadcrumbItem>รหัสบ่อ {getPuddleDetailById?.data?.serial}</StyledBreadcrumbItem>
             </Breadcrumb>
-            <StyledBoxHeader>
+            <StyledBoxHeader id='section-0'>
                 <StyledTitleBoxHeader>
                     <span>
                         บ่อหมายเลข {getPuddleDetailById?.data?.serial} : {getPuddleDetailById.data?.uuid_puddle}
@@ -2177,7 +2193,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             {Boolean(getNoticeTargetPending.data?.length) &&
                 getNoticeTargetPending.data.map((data, index) => (
                     <React.Fragment key={index}>
-                        {/* <>{JSON.stringify(data)}</> */}
                         <StyledAlert
                             action={
                                 <>
@@ -2418,7 +2433,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             <Divider />
 
             <Divider />
-            <StyledBoxContent>
+            <StyledBoxContent id='section-1'>
                 <span>การทำรายการทั้งหมดทั้งหมด</span>
                 <br />
                 <TableHistoryOrders
@@ -3492,6 +3507,26 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             }}
                         />
                     ))}
+            </FloatButton.Group>
+            <FloatButton.Group icon={<VerticalAlignMiddleOutlined />} style={{ left: 24 }} trigger='click' type='primary'>
+                <FloatButton
+                    href='#section-0'
+                    icon={<UpCircleFilled />}
+                    key={1}
+                    onClick={handleScroll}
+                    // onClick={() => {
+                    //     navigation.navigateTo.allPuddle(data.idbuilding.toString())
+                    // }}
+                />
+                <FloatButton
+                    href='#section-1'
+                    icon={<DownCircleFilled />}
+                    key={2}
+                    onClick={handleScroll}
+                    // onClick={() => {
+                    //     navigation.navigateTo.allPuddle(data.idbuilding.toString())
+                    // }}
+                />
             </FloatButton.Group>
         </>
     )

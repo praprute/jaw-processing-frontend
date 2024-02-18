@@ -109,7 +109,6 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                             >
                                 <Select
                                     onChange={(e) => {
-                                        console.log('onChangeMultiBuilding : ', e, indexList)
                                         onChangeMultiBuilding(e, indexList)
                                     }}
                                     placeholder='เลือกอาคาร'

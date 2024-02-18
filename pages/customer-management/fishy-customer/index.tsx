@@ -99,7 +99,6 @@ const CustomerFishyBill: NextPageWithLayout = () => {
                 idcustomer_bill: id,
             }
             const res = await deleteCustomer.onRequest(payload)
-            console.log('res : ', res)
             if (res.success === 'success') {
                 NoticeSuccess('ทำรายการสำเร็จ')
             }
