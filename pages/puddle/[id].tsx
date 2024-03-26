@@ -324,8 +324,8 @@ const PuddlePage: NextPageWithLayout = () => {
                     setVisable(false)
                 }}
                 onOk={() => {
-                    console.log('selectedPuddle.toString()  :', selectedPuddle)
-                    if (selectedPuddle.toString() === '829') {
+                    console.log('selectedPuddle.toString()  :', process.env.NEXT_PUBLIC_CANTAINER_SELLING_id)
+                    if (selectedPuddle.toString() === process.env.NEXT_PUBLIC_CANTAINER_SELLING_id) {
                         navigation.navigateTo.sellingPage()
                         setVisable(false)
                     } else {
