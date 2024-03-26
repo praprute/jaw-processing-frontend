@@ -14,7 +14,7 @@ import { NextPageWithLayout } from '../../_app'
 import { NoticeError, NoticeSuccess } from '../../../utils/noticeStatus'
 import { ICustomerList } from '../../../share-module/FishWeightBill/type'
 
-const CustomerAmpanBill: NextPageWithLayout = () => {
+const CustomerSelling: NextPageWithLayout = () => {
     const [form] = Form.useForm()
 
     const [currentPage, setCurrentPage] = useState(1)
@@ -22,7 +22,7 @@ const CustomerAmpanBill: NextPageWithLayout = () => {
     const [totalList, setTotalList] = useState(0)
     const [trigger, setTrigger] = useState(false)
 
-    const TYPE_BILL = 5
+    const TYPE_BILL = 7
     const OFFSET_PAGE = 10
 
     const getCustomerByBillTaskPagination = getCustomerByBillTaskPaginationTask.useTask()
@@ -119,7 +119,7 @@ const CustomerAmpanBill: NextPageWithLayout = () => {
         <div>
             <StyledGlassBox>
                 <WrapContent>
-                    <Title>เพิ่มผู้จำหน่ายน้ำรถน้าอำพัน</Title>
+                    <Title>เพิ่มชื่อลูกค้า</Title>
                     <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
                         <Row gutter={[16, 8]} style={{ width: '100%' }}>
                             <Col md={20} sm={24} xs={24}>
@@ -140,7 +140,7 @@ const CustomerAmpanBill: NextPageWithLayout = () => {
             <br />
             <StyledGlassBox>
                 <WrapContent>
-                    <Title>ผู้จำหน่ายน้ำรถน้าอำพัน</Title>
+                    <Title>รายชื่อลูกค้า</Title>
 
                     <StyledTable
                         columns={columns}
@@ -159,7 +159,7 @@ const CustomerAmpanBill: NextPageWithLayout = () => {
     )
 }
 
-CustomerAmpanBill.getLayout = function getLayout(page: ReactElement) {
+CustomerSelling.getLayout = function getLayout(page: ReactElement) {
     return (
         <AppLayout>
             <>{page}</>
@@ -167,7 +167,7 @@ CustomerAmpanBill.getLayout = function getLayout(page: ReactElement) {
     )
 }
 
-export default CustomerAmpanBill
+export default CustomerSelling
 
 const StyldeButtonSubmit = styled(Button)`
     height: 40px;

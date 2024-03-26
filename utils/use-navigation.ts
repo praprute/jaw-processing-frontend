@@ -53,6 +53,12 @@ export const useNavigation = () => {
             createFishyBillReceive: async () => {
                 await history.push(`fishy-bill/create`)
             },
+            stockSalt: async () => {
+                await history.push(`stock/salt`)
+            },
+            sellingPage: async () => {
+                await history.push(`/selling`)
+            },
         },
     }
 }

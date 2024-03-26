@@ -37,10 +37,8 @@ const AppLayout = (props: ILayout) => {
         { key: '/fishsauce-bill', name: 'ระบบบิลน้ำปลา' },
         { key: '/ampan-bill', name: 'ระบบบิลน้ำรถน้าอำพัน' },
         { key: '/fishy-bill', name: 'ระบบบิลน้ำคาว' },
+        { key: '/selling', name: 'ตู้' },
         { key: '/process-management-setting', name: 'ตั้งค่า' },
-
-        // { key: '/c', name: 'Accounting Doc' },
-        // { key: '/d', name: 'Setting' },
     ]
     const menuItems_CUSTOMER = [
         { key: '/customer-management/fish-customer', name: 'ผู้จำหน่ายปลา' },
@@ -49,11 +47,14 @@ const AppLayout = (props: ILayout) => {
         { key: '/customer-management/salt-water-customer', name: 'ผู้จำหน่ายน้ำเกลือ' },
         { key: '/customer-management/ampan-customer', name: 'ผู้จำหน่ายน้ำรถน้าอำพัน' },
         { key: '/customer-management/fishy-customer', name: 'ผู้จำหน่ายน้ำคาว' },
+        { key: '/customer-management/selling-customer', name: 'ลูกค้าเตรียมขาย' },
     ]
+
+    const menuItems_STOCK = [{ key: '/stock/salt', name: 'Stock เกลือ' }]
+    const menuItems_SPECIFIC = [{ key: '/specific', name: 'จัดการสูตรน้ำปลา' }]
 
     const menuItems_ACCOUNT = [{ key: '/menuItems_ACCOUNT', name: 'Coming soon' }]
     const menuItems_PRODUCT = [{ key: '/menuItems_PRODUCT', name: 'Coming soon' }]
-    const menuItems_STOCK = [{ key: '/menuItems_STOCK', name: 'Coming soon' }]
     const menuItems_USER = [{ key: '/menuItems_USER', name: 'Coming soon' }]
 
     const itemsMenu: MenuProps['items'] = menuItems.map((text) => {
@@ -83,6 +84,12 @@ const AppLayout = (props: ILayout) => {
         }
     })
     const itemsMenu_STOCK: MenuProps['items'] = menuItems_STOCK.map((text) => {
+        return {
+            key: `${text.key}`,
+            label: `${text.name}`,
+        }
+    })
+    const itemsMenu_SPECIFIC: MenuProps['items'] = menuItems_SPECIFIC.map((text) => {
         return {
             key: `${text.key}`,
             label: `${text.name}`,
@@ -183,6 +190,30 @@ const AppLayout = (props: ILayout) => {
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
                 />
+                <StyledTitleMenu>STOCK INGREDIENT MENAGEMENT</StyledTitleMenu>
+                <StyledMenu
+                    defaultSelectedKeys={[defaultKey]}
+                    items={itemsMenu_STOCK}
+                    mode='inline'
+                    onSelect={(values) => {
+                        router.push(values.key)
+                    }}
+                    style={{ height: '100%', borderRight: 0 }}
+                    theme='dark'
+                />
+                <StyledTitleMenu>SPECIFIC MENAGEMENT</StyledTitleMenu>
+                <StyledMenu
+                    defaultSelectedKeys={[defaultKey]}
+                    items={itemsMenu_SPECIFIC}
+                    mode='inline'
+                    onSelect={(values) => {
+                        router.push(values.key)
+                    }}
+                    style={{ height: '100%', borderRight: 0 }}
+                    theme='dark'
+                />
+                {/* menuItems_SPECIFIC */}
+                {/* menuItems_SPECIFIC */}
                 <StyledTitleMenu>ACCOUNT MENAGEMENT</StyledTitleMenu>
                 <StyledMenu
                     defaultSelectedKeys={[defaultKey]}
@@ -205,17 +236,7 @@ const AppLayout = (props: ILayout) => {
                     style={{ height: '100%', borderRight: 0 }}
                     theme='dark'
                 />
-                <StyledTitleMenu>STOCK MENAGEMENT</StyledTitleMenu>
-                <StyledMenu
-                    defaultSelectedKeys={[defaultKey]}
-                    items={itemsMenu_STOCK}
-                    mode='inline'
-                    onSelect={(values) => {
-                        router.push(values.key)
-                    }}
-                    style={{ height: '100%', borderRight: 0 }}
-                    theme='dark'
-                />
+
                 <StyledTitleMenu>USER MENAGEMENT</StyledTitleMenu>
                 <StyledMenu
                     defaultSelectedKeys={[defaultKey]}

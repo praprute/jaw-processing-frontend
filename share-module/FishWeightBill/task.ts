@@ -75,6 +75,52 @@ export const getReceiveFishWeightPaginationWithOutEmptyTask = createReduxAsyncTa
         },
 })
 
+export const searchReceiveFishWeightPaginationWithOutEmptyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'searchReceiveFishWeightPaginationWithOutEmpty',
+    defaultData: {} as IListFishWeight,
+    defaultPayload: {} as { page: number; offset: number; search: string },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset, search } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveFishWeightPaginationWithOutEmptyTask/${page}/${offset}/${search}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+// searchReceiveSolidSaltPaginationWithOutEmptyTask
+export const searchReceiveSolidSaltPaginationWithOutEmptyTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'searchReceiveSolidSaltPaginationWithOutEmpty',
+    defaultData: {} as IListFishWeight,
+    defaultPayload: {} as { page: number; offset: number; search: string },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset, search } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(
+                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveSolidSaltPaginationWithOutEmptyTask/${page}/${offset}/${search}`,
+                    config,
+                )
+
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
 export const fillterReceiveWeightFishTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'fillterReceiveWeightFish',

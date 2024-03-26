@@ -759,3 +759,37 @@ export const updateVolumeTask = createReduxAsyncTask({
             }
         },
 })
+
+export const getAllOrdersSellingTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getAllOrdersSelling',
+    defaultData: {} as {
+        data: {
+            idorder_selling: number
+            volume: number
+            price_per_unit: number
+            total_price: number
+            description?: string
+            customer_name?: string
+            puddle_id: number
+            lot?: string
+            date_action?: string
+            date_create: string
+            idpuddle?: number
+            serial?: number
+        }[]
+        total: number
+    },
+    defaultPayload: {} as { page: number; offset: number },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const { page, offset } = action.payload
+                const config = yield configAPI()
+                const { data } = yield axios.get(`${process.env.NEXT_PUBLIC_HOST}/getSellingOrdersTask/${page}/${offset}`, config)
+                yield put(actions.success(data))
+            } catch (error: any) {
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})

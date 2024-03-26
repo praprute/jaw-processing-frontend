@@ -78,6 +78,7 @@ import ModalConfirm from '../../../../components/Modal/ModalConfirm'
 import { configAPI } from '../../../../share-module/configApi'
 import { getTypeProcessTask, submitTypeProcessTask } from '../../../../share-module/puddle/task'
 import {
+    getCustomerByBillTaskPaginationTask,
     getLogReceiveSaltByOrdersIdTask,
     getReceiveAmpanPaginationWithOutEmptyTask,
     // getReceiveFishSaucePaginationTask,
@@ -185,6 +186,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [formHitWater] = Form.useForm()
     const [formWaterFish] = Form.useForm()
     const [formFishy] = Form.useForm()
+    const [formSelling] = Form.useForm()
 
     const [building, setBuilding] = useState<IAllBuildingAndPuddleDto[]>([])
     const [open, setOpen] = useState(false)
@@ -205,11 +207,9 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [visibleModalProcess, setVisibleModalProcess] = useState(false)
     const [visibleModalDescProcess, setVisibleModalDescProcess] = useState(false)
     const [idSubOrdersTarget, setIdSubOrdersTarget] = useState(null)
-    // const [selectedIdProcess, setSelectedIdProcess] = useState(null)
     const [visibleModalAddOn, setVisibleModalAddOn] = useState(false)
     const [visibleModalAddOnFishSauce, setVisibleModalAddOnFishSauce] = useState(false)
     const [saltWaterKG, setSaltWaterKG] = useState(0)
-    // const [fishSauceWaterKG, setFishSauceWaterKG] = useState(0)
     const [fishSauceWaterKGAddon, setFishSauceWaterKGAddon] = useState(0)
     const [ampanKG, setAmpanKG] = useState(0)
     const [visibleModalBillFerment, setVisibleModalBillFerment] = useState(false)
@@ -219,10 +219,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [preDataAmpanBill, setPreDataAmpanBill] = useState<ISelectAmpanBillDto>(null)
     const [preDataFishyBill, setPreDataFishyBill] = useState<ISelectFishyBillDto>(null)
     const [visibleModalViewSaltBill, setVisibleModalViewSaltBill] = useState(false)
-    // const [visibleModalViewFishSauceBill, setVisibleModalViewFishSauceBill] = useState(false)
     const [idOrdersOpenSaltBill, setIdOrdersOpenSaltBill] = useState(null)
-    // const [idOrdersOpenFishSauceBill, setIdOrdersOpenFishSauceBill] = useState(null)
-
     const [titleDrawerTransfer, setTitleDrawerTransfer] = useState('ปล่อยน้ำปลา')
 
     //  0 = น้ำปลา , 1 = น้ำเกลือ
@@ -247,7 +244,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     })
     const [typeProcessImport, setTypeProcessImport] = useState(TypeProcess.IMPORT)
     const [valueTypeProcess, setValueTypeProcess] = useState(null)
-    // const [valueChem, setValueChem] = useState(null)
     const [currentStepSalt, setCurrentStepSalt] = useState(0)
     const [currentStepFishSauce, setCurrentStepFishSauce] = useState(0)
     const [currentStepAmpan, setCurrentStepAmpan] = useState(0)
@@ -267,8 +263,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [dateStart, setDateStart] = useState(null)
     const [visibleModalDateStart, setVisibleModalDateStart] = useState(false)
     const [dateTransfer, setDateTransfer] = useState(null)
-    // const [lastedOrderId, setLastedOrderId] = useState(null)
-
+    const [visibleModalSelling, setVisibleModalSelling] = useState(false)
+    const [sellingStatus, setSellingStatus] = useState(false)
     const [visibleModalSendToLabs, setVisibleModalSendToLabs] = useState(false)
     const [chemCheck, setChemCheck] = useState([])
     const [microCheck, setMicroCheck] = useState({ Micro: false })
@@ -310,6 +306,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const [idHistory, setIdHistory] = useState(null)
     const [modeMulti, setModeMulti] = useState(false)
     const [descSuborder, setDescSuborder] = useState(null)
+    const [typeTransfer, setTypeTransfer] = useState(TypeProcess.TRANSFER)
 
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const getAllOrdersFromPuddleId = getAllOrdersFromPuddleIdTask.useTask()
@@ -331,23 +328,20 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const getLogReceiveSaltByOrdersId = getLogReceiveSaltByOrdersIdTask.useTask()
     const getReceiveAmpanPaginationWithOutEmpty = getReceiveAmpanPaginationWithOutEmptyTask.useTask()
     const getReceiveFishyPaginationWithOutEmpty = getReceiveFishyPaginationWithOutEmptyTask.useTask()
-    // const getLogReceiveFishSauceByOrdersId = getLogReceiveFishSauceByOrdersIdTask.useTask()
     const submitAddOnFishSauce = submitAddOnFishSauceTask.useTask()
     const submitTransferSaltWater = submitTransferSaltWaterTask.useTask()
     const getListWorkingStatus = getWorkingStatusTypeTask.useTask()
     const changeWorkingStatusPuddle = changeWorkingStatusPuddleTask.useTask()
     const updateStatusTopSalt = updateStatusTopSaltTask.useTask()
     const updateDateStartFermant = updateDateStartFermantTask.useTask()
-    // const updateChemOrder = updateChemOrderTask.useTask()
     const getSpecific = getSpecificChemTask.useTask()
     const addOrderSpecific = addOrderSpecificTask.useTask()
-    // const addOnNonePrice = addOnNonePriceTask.useTask()
     const submitAddOnAmpan = submitAddOnAmpanTask.useTask()
     const submitAddOnFishy = submitAddOnFishyTask.useTask()
     const getLastedSubOrderById = getLastedSubOrderByIdTask.useTask()
-    // const specificChem = getSpecificChemTask2.useTask()
     const updateVolume = updateVolumeTask.useTask()
     const getOrdersHistoryDetailFromId = getOrdersHistoryDetailFromIdTask.useTask()
+    const getCustomerByBillTaskPagination = getCustomerByBillTaskPaginationTask.useTask()
 
     const OFFSET_PAGE = 10
 
@@ -566,6 +560,11 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     useEffect(() => {
         ;(async () => {
             await getSpecific.onRequest()
+            await getCustomerByBillTaskPagination.onRequest({
+                page: 0,
+                offset: 100000,
+                type_bill: 7,
+            })
             const result = await getAllBuildings.onRequest()
             setBuilding(result)
         })()
@@ -970,6 +969,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
 
     const onClose = () => {
         setOpen(false)
+        setSellingStatus(false)
     }
 
     const showDrawerGetIn = () => {
@@ -1536,40 +1536,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     remaining_price: payloads.remaining_price,
                 }
             }
-
-            // {
-            //     "building": 1,
-            //     "puddle_id": [
-
-            //     ],
-            //     "selectedPuddle": 147,
-            //     "serialPuddle": 1014
-            // }
-            // const payload = {
-            //     order_id: getPuddleDetailById?.data?.lasted_order,
-            //     type_process: TypeProcess.TRANSFER,
-            //     amount_items: form.getFieldValue('amount_items'),
-            //     amount_unit_per_price: form.getFieldValue('amount_unit_per_price'),
-            //     amount_price: form.getFieldValue('amount_price'),
-            //     remaining_items: form.getFieldValue('remaining_items'),
-            //     remaining_unit_per_price: form.getFieldValue('remaining_unit_per_price'),
-            //     remaining_price: form.getFieldValue('remaining_price'),
-            //     approved: 0,
-            //     volume: amountItemsKG, //Number(form.getFieldValue('volume')),
-            //     id_puddle: Number(puddle_id),
-            //     remaining_volume: Number(form.getFieldValue('remaining_volume')),
-            //     action_puddle: await getSerial(Number(puddle_id)),
-            //     target_puddle: Number(form.getFieldValue('id_puddle')),
-            //     serial_puddle: Number(form.getFieldValue('action_puddle')),
-            //     date_action: dateTransfer,
-            //     round: Number(form.getFieldValue('round')),
-            // }
-
-            // const payloads = form.getFieldValue('process')
-            //     ? { ...payload, process: form.getFieldValue('process') as number }
-            //     : { ...payload }
-
-            // console.log('payloads : ', payloads)
         } catch (e: any) {
             NoticeError('ทำรายการไม่สำเร็จ')
         } finally {
@@ -1590,7 +1556,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             if (itemsTransfer === 0) {
                 const payload = {
                     order_id: getPuddleDetailById?.data?.lasted_order,
-                    type_process: TypeProcess.TRANSFER,
+                    type_process: typeTransfer,
                     amount_items: form.getFieldValue('amount_items'),
                     amount_unit_per_price: form.getFieldValue('amount_unit_per_price'),
                     amount_price: form.getFieldValue('amount_price'),
@@ -1606,7 +1572,11 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     serial_puddle: Number(form.getFieldValue('action_puddle')),
                     date_action: dateTransfer,
                     round: Number(form.getFieldValue('round')),
+                    customer_name: form.getFieldValue('customer_name'),
+                    lot: form.getFieldValue('lot'),
+                    description: form.getFieldValue('description') || null,
                 }
+                // console.log('customer_name : ', form.getFieldValue('customer_name'))
 
                 const payloads = form.getFieldValue('process')
                     ? { ...payload, process: form.getFieldValue('process') as number }
@@ -2298,6 +2268,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             setTitleDrawerTransfer('ปล่อยน้ำปลา')
                             setModeMulti(false)
                             showDrawer()
+                            setTypeTransfer(TypeProcess.TRANSFER)
+                            setSellingStatus(false)
                         }}
                         type='primary'
                     >
@@ -2309,7 +2281,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                                 { building: null, puddle_id: [], selectedPuddle: null, serialPuddle: null },
                             ])
                             setItemsTransfer(0)
-                            // setTitleDrawerTransfer('ปล่อยน้ำปลา')
                             setModeMulti(true)
                             // showDrawer()
                         }}
@@ -2354,7 +2325,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onClick={() => {
                             setVisibleModalHitWaterFish(true)
                             // setItemsTransfer(1)
-                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
                             // showDrawer()
                         }}
                         type='primary'
@@ -2365,7 +2335,6 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onClick={() => {
                             setVisibleModalWaterFish(true)
                             // setItemsTransfer(1)
-                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
                             // showDrawer()
                         }}
                         type='primary'
@@ -2377,6 +2346,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             setItemsTransfer(1)
                             setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
                             showDrawer()
+                            setSellingStatus(false)
                         }}
                         type='primary'
                     >
@@ -2395,12 +2365,26 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onClick={() => {
                             setModalMixing(true)
                             // setItemsTransfer(1)
-                            // setTitleDrawerTransfer('ปล่อยน้ำเกลือ')
                             // showDrawer()
                         }}
                         type='primary'
                     >
                         ผสม
+                    </StyledButtonAction>
+                    <StyledButtonAction
+                        onClick={() => {
+                            setItemsTransfer(0)
+                            setTitleDrawerTransfer('ขึ้นตู้')
+                            setSellingStatus(true)
+                            setModeMulti(false)
+                            showDrawer()
+                            setTypeTransfer(TypeProcess.SELLING)
+                            // setVisibleModalSelling(true)
+                        }}
+                        type='primary'
+                    >
+                        ขึ้นตู้
+                        {/* setTypeTransfer */}
                     </StyledButtonAction>
                 </StyledSectionAction>
 
@@ -2462,6 +2446,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     <TransferFishsauce
                         amountItemsKG={amountItemsKG}
                         buildingOption={getAllBuildings.data}
+                        customer={getCustomerByBillTaskPagination.data?.data}
                         lastedOrder={orderDetailLasted}
                         listBuilding={listBuildingTransfser}
                         multi={modeMulti}
@@ -2474,6 +2459,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onSearchBuff={onSearch}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
+                        selling={sellingStatus}
                         setMultiBuildingTransfser={setListBuildingTransfser}
                         typeProcess={getTypeProcess?.data}
                     />
@@ -2511,6 +2497,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                         onChangeDate={onChangeDateTransfer}
                         onSelectAction={handleSelectPuddle}
                         puddleOption={tragetPuddle}
+                        selling={sellingStatus}
                         throwOutProcess
                         typeProcess={getTypeProcess?.data}
                     />
@@ -3467,6 +3454,39 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                             {/* {JSON.stringify(listSelectdItemsComponent[0]?.vloumnTx)} */}
                         </StyledContentMixing>
                     </>
+                </ModalContent>
+            </Modal>
+            <Modal
+                centered
+                destroyOnClose
+                onCancel={() => {
+                    setVisibleModalSelling(false)
+                }}
+                open={visibleModalSelling}
+                title={'นำออกไปขึ้นตู้'}
+            >
+                <ModalContent>
+                    <Form autoComplete='off' form={formSelling} layout='vertical' onFinish={handleSubmitTransfer}>
+                        <StyledFormItems
+                            extra={`~ ${amountItemsKG} kg.`}
+                            label='จำนวนที่ปล่อยออก L.'
+                            name='volume'
+                            rules={[
+                                {
+                                    pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/),
+                                    required: true,
+                                    message: 'กรุณากรอกจำนวนให้ครบถ้วน',
+                                },
+                            ]}
+                        >
+                            <Input
+                                onChange={handleChangeAmountItems}
+                                placeholder='จำนวนที่ปล่อยออก'
+                                size='large'
+                                style={{ color: 'black' }}
+                            />
+                        </StyledFormItems>
+                    </Form>
                 </ModalContent>
             </Modal>
 

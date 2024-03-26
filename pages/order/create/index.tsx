@@ -1,5 +1,5 @@
 import { LeftOutlined } from '@ant-design/icons'
-import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox, Tabs, DatePicker } from 'antd'
+import { Layout, Row, Col, Form, Input, Select, Button, Table, Modal, InputNumber, Checkbox, Tabs, DatePicker, Space } from 'antd'
 import { useRouter } from 'next/router'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -17,6 +17,8 @@ import {
     getReceiveSolidSaltPaginationWithOutEmptyTask,
     insertLogBillOpenOrderTask,
     insertLogSolidSaltBillOpenOrderTask,
+    searchReceiveFishWeightPaginationWithOutEmptyTask,
+    searchReceiveSolidSaltPaginationWithOutEmptyTask,
 } from '../../../share-module/FishWeightBill/task'
 import {
     createOrderTask,
@@ -106,8 +108,9 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const getAllFeeLaborFerment = getAllFeeLaborFermentTask.useTask()
     const getReceiveSolidSaltPagination = getReceiveSolidSaltPaginationWithOutEmptyTask.useTask()
     const insertLogSolidSaltBillOpenOrder = insertLogSolidSaltBillOpenOrderTask.useTask()
-
-    const OFFSET_PAGE = 10
+    const searchReceiveFishWeightPaginationWithOutEmpty = searchReceiveFishWeightPaginationWithOutEmptyTask.useTask()
+    const searchReceiveSolidSaltPaginationWithOutEmpty = searchReceiveSolidSaltPaginationWithOutEmptyTask.useTask()
+    const OFFSET_PAGE = 30
     const MAX_ITEMS_PERCENTAGE = 100
 
     const columns: ColumnsType<any> = [
@@ -546,6 +549,41 @@ const CreateOrderPage: NextPageWithLayout = () => {
         setDateStart(dateString)
     }
 
+    const handleChangeSearchFish = async (e: any) => {
+        try {
+            if (!!e.target.value.toString()) {
+                const res = await searchReceiveFishWeightPaginationWithOutEmpty.onRequest({
+                    page: 0,
+                    offset: OFFSET_PAGE,
+                    search: e.target.value.toString(),
+                })
+                setSourceData(res.data)
+                setTotalList(res.total)
+            } else {
+                await handleGetListReceive()
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+    const handleChangeSearchSalt = async (e: any) => {
+        try {
+            if (!!e.target.value.toString()) {
+                const res = await searchReceiveSolidSaltPaginationWithOutEmpty.onRequest({
+                    page: 0,
+                    offset: OFFSET_PAGE,
+                    search: e.target.value.toString(),
+                })
+                setSourceDataSolidSalt(res.data)
+                setTotalListSolidSalt(res.total)
+            } else {
+                await handleGetListReceiveSolidSalt()
+            }
+        } catch (e: any) {
+            NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
+        }
+    }
+
     return (
         <MainLayout>
             <StyledBackPage
@@ -760,34 +798,46 @@ const CreateOrderPage: NextPageWithLayout = () => {
                         label: 'รายการใบชั่งปลา',
                         key: '1',
                         children: (
-                            <StyledTable
-                                columns={columns}
-                                dataSource={sourceData}
-                                loading={getReceiveFishWeight.loading}
-                                onChange={handleChangePagination}
-                                pagination={{
-                                    total: totalList,
-                                    current: currentPage,
-                                    showSizeChanger: false,
-                                }}
-                            />
+                            <>
+                                <Space.Compact style={{ width: '100%' }}>
+                                    <Input onChange={handleChangeSearchFish} />
+                                    <Button type='primary'>Submit</Button>
+                                </Space.Compact>{' '}
+                                <StyledTable
+                                    columns={columns}
+                                    dataSource={sourceData}
+                                    loading={getReceiveFishWeight.loading}
+                                    onChange={handleChangePagination}
+                                    pagination={{
+                                        total: totalList,
+                                        current: currentPage,
+                                        showSizeChanger: false,
+                                    }}
+                                />
+                            </>
                         ),
                     },
                     {
                         label: 'รายการบิลเกลือ',
                         key: '2',
                         children: (
-                            <StyledTable
-                                columns={columnsSolidSalt}
-                                dataSource={sourceDataSolidSalt}
-                                loading={getReceiveSolidSaltPagination.loading}
-                                onChange={handleChangePaginationSolidSalt}
-                                pagination={{
-                                    total: totalListSolidSalt,
-                                    current: currentPageSolidSalt,
-                                    showSizeChanger: false,
-                                }}
-                            />
+                            <>
+                                <Space.Compact style={{ width: '100%' }}>
+                                    <Input onChange={handleChangeSearchSalt} />
+                                    <Button type='primary'>Submit</Button>
+                                </Space.Compact>{' '}
+                                <StyledTable
+                                    columns={columnsSolidSalt}
+                                    dataSource={sourceDataSolidSalt}
+                                    loading={getReceiveSolidSaltPagination.loading}
+                                    onChange={handleChangePaginationSolidSalt}
+                                    pagination={{
+                                        total: totalListSolidSalt,
+                                        current: currentPageSolidSalt,
+                                        showSizeChanger: false,
+                                    }}
+                                />
+                            </>
                         ),
                     },
                 ]}

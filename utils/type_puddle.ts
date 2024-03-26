@@ -45,4 +45,5 @@ export enum TypeProcess {
     MIXING = 12,
     MIXEDPAUSE = 14,
     EMPTY = 13,
+    SELLING = 15,
 }

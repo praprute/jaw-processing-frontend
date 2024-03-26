@@ -324,7 +324,14 @@ const PuddlePage: NextPageWithLayout = () => {
                     setVisable(false)
                 }}
                 onOk={() => {
-                    navigation.navigateTo.detailPuddle(id as string, selectedPuddle.toString())
+                    console.log('selectedPuddle.toString()  :', selectedPuddle)
+                    if (selectedPuddle.toString() === '829') {
+                        navigation.navigateTo.sellingPage()
+                        setVisable(false)
+                    } else {
+                        navigation.navigateTo.detailPuddle(id as string, selectedPuddle.toString())
+                        setVisable(false)
+                    }
                 }}
                 open={visable}
                 title='กรุณาตรวจสอบ'

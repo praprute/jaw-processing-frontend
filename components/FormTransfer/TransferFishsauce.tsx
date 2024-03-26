@@ -7,6 +7,7 @@ import { Dayjs } from 'dayjs'
 import { IAllBuildingAndPuddleDto, IAllPuddleDto } from '../../share-module/building/type'
 import { IOrderDetailDto } from '../../share-module/order/type'
 import { ITypeProcess } from '../../share-module/puddle/type'
+import { ICustomerList } from '../../share-module/FishWeightBill/type'
 
 const { Option } = Select
 
@@ -28,6 +29,8 @@ interface ITransferFishsauce {
     setMultiBuildingTransfser?: (e: any) => void
     onChangewwwwBuff?: (value: string) => void
     onSearchBuff?: (value: string) => void
+    selling: boolean
+    customer?: ICustomerList[]
 }
 
 const TransferFishsauce = (props: ITransferFishsauce) => {
@@ -47,6 +50,8 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
         setMultiBuildingTransfser,
         onChangewwwwBuff,
         onSearchBuff,
+        selling,
+        customer,
     } = props
 
     const [puddleList, setPuddleList] = useState([])
@@ -243,15 +248,49 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                         ))}
                 </Select>
             </StyledFormItems>
-            <StyledFormItems
-                label='รอบ'
-                name='round'
-                rules={[
-                    { pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: false, message: 'กรุณากรอกจำนวนให้ครบถ้วน' },
-                ]}
-            >
-                <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
-            </StyledFormItems>
+            {!!!selling && (
+                <StyledFormItems
+                    label='รอบ'
+                    name='round'
+                    rules={[
+                        { pattern: new RegExp(/[+-]?([0-9]*[.])?[0-9]+$/), required: false, message: 'กรุณากรอกจำนวนให้ครบถ้วน' },
+                    ]}
+                >
+                    <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
+                </StyledFormItems>
+            )}
+
+            {!!selling && (
+                <StyledFormItems
+                    label='ชื่อลูกค้า'
+                    name='customer_name'
+                    rules={[{ required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
+                >
+                    <Select placeholder='เลือกรายการการทำงาน' style={{ width: '100%' }}>
+                        {!!customer &&
+                            customer.map((data, index) => (
+                                <Option key={index} value={data.name}>
+                                    <span>{data?.name}</span>
+                                </Option>
+                            ))}
+                    </Select>
+                </StyledFormItems>
+            )}
+
+            {!!selling && (
+                <StyledFormItems label='เลข Lot' name='lot' rules={[{ required: true, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}>
+                    <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
+                </StyledFormItems>
+            )}
+            {!!selling && (
+                <StyledFormItems
+                    label='รายละเอียดเพิ่มเติม'
+                    name='description'
+                    rules={[{ required: false, message: 'กรุณากรอกจำนวนให้ครบถ้วน' }]}
+                >
+                    <Input placeholder='จำนวนรอบ' size='large' style={{ color: 'black' }} />
+                </StyledFormItems>
+            )}
             <StyledFormItems
                 label='วันที่ทำรายการ'
                 name='date_action'

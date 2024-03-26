@@ -86,6 +86,8 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                 return 'ดูดไปผสม'
             case TypeProcess.MIXEDPAUSE:
                 return 'ดูดมาพัก'
+            case TypeProcess.SELLING:
+                return 'ขึ้นตู้'
             default:
                 break
         }
@@ -396,6 +398,79 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                             {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
                                         </td>
                                         <td>บ่อปลายทาง {data?.action_serial_puddle}</td>
+
+                                        <td></td>
+                                        <td>
+                                            Tn:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Tn,
+                                            )}
+                                            , Salt:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.Salt,
+                                            )}
+                                            , PH:
+                                            {JSON.stringify(
+                                                resultTest.find((element: any) => element?.ref === data.idsub_orders)?.PH,
+                                            )}
+                                        </td>
+                                    </StyledRowTransaction>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td></td>
+                                        <td>{!!data.round ? `รอบ ${data.round}` : ''}</td>
+                                        <td>คงเหลือ</td>
+                                        <td>{numberWithCommas(data.remaining_items)}</td>
+                                        <td>{numberWithCommas(data.remaining_unit_per_price)}</td>
+                                        <td>{numberWithCommas(data.remaining_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.remaining_volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.remaining_volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
+                                        <td>
+                                            {data?.description ? (
+                                                data?.description
+                                            ) : (
+                                                <StyledButton
+                                                    disabled={hideAction}
+                                                    onClick={() => {
+                                                        onSelected(data.idsub_orders)
+                                                    }}
+                                                    type='primary'
+                                                >
+                                                    เพิ่มรายละเอียด
+                                                </StyledButton>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <StyledButton
+                                                disabled={hideAction}
+                                                onClick={() => {
+                                                    openModalLabs(true)
+                                                    setIdRef(data.idsub_orders)
+                                                }}
+                                                type='primary'
+                                            >
+                                                ส่งตัวอย่างไปที่ Labs
+                                            </StyledButton>
+                                        </td>
+                                    </StyledRowTransaction>
+                                </>
+                            )}
+                            {data.type === TypeProcess.SELLING && (
+                                <>
+                                    <StyledRowTransaction isStatus={data.type}>
+                                        <td>{!!data.date_action ? dayjs(data.date_action).format('DD/MM/YYYY') : '-'}</td>
+                                        <td>{handleTypeOrder(data.type)}</td>
+                                        <td></td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_items)}</td>
+                                        <td>{data.amount_unit_per_price}</td>
+                                        <td style={{ color: 'red' }}>- {numberWithCommas(data.amount_price)}</td>
+                                        <td>
+                                            {numberWithCommas(data.volume)} kg. |{' '}
+                                            {numberWithCommas(Number((data.volume / 1.2).toFixed(2)))} L
+                                        </td>
+                                        <td>{data?.action_serial_puddle === null && 'ขึ้นตู้'}</td>
 
                                         <td></td>
                                         <td>
