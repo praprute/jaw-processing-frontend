@@ -1026,8 +1026,8 @@ const DetailPuddlePage: NextPageWithLayout = () => {
         try {
             const config = await configAPI()
             const { data } = await axios.get(`${process.env.NEXT_PUBLIC_HOST}/getSerialPuddle/${id}`, config)
-
-            return Number(data.message[0].serial)
+            // console.log('data : ', data.message[0].serial)
+            return data.message[0].serial
         } catch (e: any) {
             return 0
         }
@@ -1036,6 +1036,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const handleSelectPuddle = async (labelValue: LabeledValue) => {
         try {
             const res = await getSerial(Number(labelValue))
+            console.log('res : ', res)
             form.setFieldsValue({ action_puddle: res })
         } catch (e: any) {
             return '0'
