@@ -12,7 +12,7 @@ import AppLayout from '../../../components/Layouts'
 import ModalLoading from '../../../components/Modal/ModalLoading'
 import {
     // getReceiveFishWeightPaginationTask,
-    getReceiveFishWeightPaginationWithOutEmptyTask,
+    // getReceiveFishWeightPaginationWithOutEmptyTask,
     // getReceiveSolidSaltPaginationTask,
     getReceiveSolidSaltPaginationWithOutEmptyTask,
     insertLogBillOpenOrderTask,
@@ -53,6 +53,9 @@ interface IFishWeightBill {
 }
 
 interface IDataLogStock {
+    no?: string
+    price_per_weigh?: string
+    stock?: string
     new_stock: number
     idreceipt: number
 }
@@ -77,6 +80,8 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [preDataAddFish, setPreDataAddFish] = useState<IFishWeightBill>(null)
     const [dataAddFish, setDataAddFish] = useState<IDataLogStock[]>([])
 
+    console.log('dataAddFish : ', dataAddFish)
+
     const [visibleModalAddOnSolidSalt, setVisibleModalAddOnSolidSalt] = useState(false)
     const [preDataAddFishSolidSalt, setPreDataAddFishSolidSalt] = useState<ISolidSaltBillDto>(null)
     const [dataAddSolidSalt, setDataAddSolidSalt] = useState<IDataLogStock[]>([])
@@ -98,10 +103,12 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const [currentPageSolidSalt, setCurrentPageSolidSalt] = useState(1)
     const [sourceDataSolidSalt, setSourceDataSolidSalt] = useState([])
     const [totalListSolidSalt, setTotalListSolidSalt] = useState(0)
+    const [searchFishBill, setSearchFishBill] = useState(null)
+    const [searchSaltBill, setSearchSaltBill] = useState(null)
 
     // const [solidSaltStockOld, setSolidSaltStockOld] = useState(0)
 
-    const getReceiveFishWeight = getReceiveFishWeightPaginationWithOutEmptyTask.useTask()
+    // const getReceiveFishWeight = getReceiveFishWeightPaginationWithOutEmptyTask.useTask()
     const getPuddleDetailById = getPuddleDetailByIdTask.useTask()
     const insertLogBillOpenOrder = insertLogBillOpenOrderTask.useTask()
     const getFeeLaborPerBuildingByBuilding = getFeeLaborPerBuildingByBuildingTask.useTask()
@@ -110,9 +117,10 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const insertLogSolidSaltBillOpenOrder = insertLogSolidSaltBillOpenOrderTask.useTask()
     const searchReceiveFishWeightPaginationWithOutEmpty = searchReceiveFishWeightPaginationWithOutEmptyTask.useTask()
     const searchReceiveSolidSaltPaginationWithOutEmpty = searchReceiveSolidSaltPaginationWithOutEmptyTask.useTask()
-    const OFFSET_PAGE = 30
+    const OFFSET_PAGE = 10
     const MAX_ITEMS_PERCENTAGE = 100
 
+    console.log('searchReceiveFishWeightPaginationWithOutEmpty : ', searchReceiveFishWeightPaginationWithOutEmpty.data)
     const columns: ColumnsType<any> = [
         {
             title: 'ลำดับที่',
@@ -120,10 +128,10 @@ const CreateOrderPage: NextPageWithLayout = () => {
             key: 'no',
         },
         {
-            title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            title: 'วันที่ตามบิล',
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -171,6 +179,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                         formAddOn.setFieldsValue({
                             stock_old: numberWithCommas(data.stock),
                             price_per_kg: data.price_per_weigh,
+                            no: data.no,
                         })
                         // setSolidSaltStockOld(data.stock)
                     }}
@@ -190,9 +199,9 @@ const CreateOrderPage: NextPageWithLayout = () => {
         },
         {
             title: 'วันที่',
-            dataIndex: 'date_create',
-            key: 'date_create',
-            render: (date_create: string) => <span>{moment(date_create).format('DD/MM/YYYY')}</span>,
+            dataIndex: 'date_action',
+            key: 'date_action',
+            render: (date_action: string) => <span>{moment(date_action).format('DD/MM/YYYY')}</span>,
         },
 
         {
@@ -240,6 +249,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                         formAddOnSolidSalt.setFieldsValue({
                             stock_old: numberWithCommas(data.stock),
                             price_per_kg: data.price_per_weigh,
+                            no: data.no,
                         })
                     }}
                     type='primary'
@@ -351,7 +361,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
 
     const handleGetListReceive = async () => {
         try {
-            const res = await getReceiveFishWeight.onRequest({ page: currentPage - 1, offset: OFFSET_PAGE })
+            const res = await searchReceiveFishWeightPaginationWithOutEmpty.onRequest({
+                page: currentPage - 1,
+                offset: OFFSET_PAGE,
+                search: searchFishBill,
+            })
             setSourceData(res.data)
             setTotalList(res.total)
         } catch (e: any) {
@@ -361,7 +375,11 @@ const CreateOrderPage: NextPageWithLayout = () => {
 
     const handleGetListReceiveSolidSalt = async () => {
         try {
-            const res = await getReceiveSolidSaltPagination.onRequest({ page: currentPageSolidSalt - 1, offset: OFFSET_PAGE })
+            const res = await searchReceiveSolidSaltPaginationWithOutEmpty.onRequest({
+                page: currentPageSolidSalt - 1,
+                offset: OFFSET_PAGE,
+                search: searchSaltBill,
+            })
             setSourceDataSolidSalt(res.data)
             setTotalListSolidSalt(res.total)
         } catch (e: any) {
@@ -462,9 +480,49 @@ const CreateOrderPage: NextPageWithLayout = () => {
         })
     }
 
+    const handleDeleteFishBill = (index?: string) => {
+        setDataAddFish((prev) => prev.filter((word) => word.no !== index))
+    }
+    const handleDeleteSaltBill = (index?: string) => {
+        setDataAddSolidSalt((prev) => prev.filter((word) => word.no !== index))
+    }
+
+    useEffect(() => {
+        if (!!dataAddFish) {
+            let f = 0
+            let fp = 0
+            dataAddFish.map((data) => {
+                f = f + data.new_stock
+                fp = fp + data.new_stock * Number(data?.price_per_weigh)
+            })
+            form.setFieldsValue({
+                fish: f,
+                fish_price: fp,
+            })
+        }
+    }, [dataAddFish])
+
+    useEffect(() => {
+        if (!!dataAddSolidSalt) {
+            let f = 0
+            let fp = 0
+            dataAddSolidSalt.map((data) => {
+                f = f + data.new_stock
+                fp = fp + data.new_stock * Number(data?.price_per_weigh)
+            })
+            form.setFieldsValue({
+                salt: f,
+                salt_price: fp,
+            })
+        }
+    }, [dataAddSolidSalt])
+
     const handleSubmitPreStock = (value: any) => {
         let payload = [
             {
+                no: formAddOn.getFieldValue('no'),
+                price_per_weigh: value?.price_per_kg,
+                stock: value?.stock_old,
                 new_stock: parseFloat2Decimals(value?.new_stock),
                 idreceipt: Number(preDataAddFish?.idreceipt),
             },
@@ -487,6 +545,9 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const handleSubmitPreStockSolidSalt = (value: any) => {
         let payload = [
             {
+                no: formAddOnSolidSalt.getFieldValue('no'),
+                price_per_weigh: value?.price_per_kg,
+                stock: value?.stock_old,
                 new_stock: parseFloat2Decimals(value?.new_stock),
                 idreceipt: Number(preDataAddFishSolidSalt?.idsolid_salt_receipt),
             },
@@ -552,14 +613,16 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const handleChangeSearchFish = async (e: any) => {
         try {
             if (!!e.target.value.toString()) {
+                setSearchFishBill(e.target.value.toString())
                 const res = await searchReceiveFishWeightPaginationWithOutEmpty.onRequest({
-                    page: 0,
+                    page: currentPage - 1,
                     offset: OFFSET_PAGE,
                     search: e.target.value.toString(),
                 })
                 setSourceData(res.data)
                 setTotalList(res.total)
             } else {
+                setSearchFishBill(null)
                 await handleGetListReceive()
             }
         } catch (e: any) {
@@ -569,6 +632,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
     const handleChangeSearchSalt = async (e: any) => {
         try {
             if (!!e.target.value.toString()) {
+                setSearchSaltBill(e.target.value.toString())
                 const res = await searchReceiveSolidSaltPaginationWithOutEmpty.onRequest({
                     page: 0,
                     offset: OFFSET_PAGE,
@@ -577,6 +641,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                 setSourceDataSolidSalt(res.data)
                 setTotalListSolidSalt(res.total)
             } else {
+                setSearchSaltBill(null)
                 await handleGetListReceiveSolidSalt()
             }
         } catch (e: any) {
@@ -692,6 +757,74 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                 </StyledFormItems>
                             </Col>
                         </Row>
+
+                        <Row gutter={16}>
+                            <Col md={24} span={24} xs={24}>
+                                <h3>บิลปลาที่ใช้</h3>
+                                {dataAddFish.map((data, index) => (
+                                    <React.Fragment key={index}>
+                                        <table
+                                            style={{
+                                                width: '100%',
+                                            }}
+                                        >
+                                            <tr>
+                                                <td style={{ width: '24px' }}>{index + 1}</td>
+                                                <td style={{ textAlign: 'left' }}> เลขบิล : {data?.no} </td>
+                                                <td style={{ textAlign: 'left' }}>ราคาต่อหน่วย : {data?.price_per_weigh}</td>
+                                                <td style={{ textAlign: 'left' }}>stock เดิม : {data?.stock}</td>
+                                                <td style={{ textAlign: 'left' }}>ใช้ไป : {data?.new_stock}</td>
+                                                <td style={{ textAlign: 'left' }}>
+                                                    <p
+                                                        onClick={() => {
+                                                            handleDeleteFishBill(data?.no)
+                                                        }}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        ลบ
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </React.Fragment>
+                                ))}
+                            </Col>
+                        </Row>
+                        <br />
+                        <Row gutter={16}>
+                            <Col md={24} span={24} xs={24}>
+                                <h3>บิลเกลือที่ใช้</h3>
+                                {dataAddSolidSalt.map((data, index) => (
+                                    <React.Fragment key={index}>
+                                        <table
+                                            style={{
+                                                width: '100%',
+                                            }}
+                                        >
+                                            <tr>
+                                                <td style={{ width: '24px' }}>{index + 1}</td>
+                                                <td style={{ textAlign: 'left' }}> เลขบิล : {data?.no} </td>
+                                                <td style={{ textAlign: 'left' }}>ราคาต่อหน่วย : {data?.price_per_weigh}</td>
+                                                <td style={{ textAlign: 'left' }}>stock เดิม : {data?.stock}</td>
+                                                <td style={{ textAlign: 'left' }}>ใช้ไป : {data?.new_stock}</td>
+                                                <td style={{ textAlign: 'left' }}>
+                                                    <p
+                                                        onClick={() => {
+                                                            handleDeleteSaltBill(data?.no)
+                                                        }}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        ลบ
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </React.Fragment>
+                                ))}
+                            </Col>
+                        </Row>
+                        <br />
+                        {/* dataAddFish */}
                         <Row gutter={16}>
                             <Col md={8} span={8} xs={24}>
                                 <StyledFormItems>
@@ -806,7 +939,7 @@ const CreateOrderPage: NextPageWithLayout = () => {
                                 <StyledTable
                                     columns={columns}
                                     dataSource={sourceData}
-                                    loading={getReceiveFishWeight.loading}
+                                    loading={searchReceiveFishWeightPaginationWithOutEmpty.loading}
                                     onChange={handleChangePagination}
                                     pagination={{
                                         total: totalList,
@@ -868,6 +1001,12 @@ const CreateOrderPage: NextPageWithLayout = () => {
                     onFinish={handleSubmitPreStock}
                 >
                     <Row gutter={[16, 0]}>
+                        {/* <Col xs={24}>
+                            <StyledFormItems label='เลขบิล' name='no'>
+                                <Input disabled placeholder='stock ทีมีอยู่' size='large' style={{ color: 'black' }} />
+                            </StyledFormItems>
+                        </Col> */}
+
                         <Col xs={24}>
                             <StyledFormItems label='stock ทีมีอยู่' name='stock_old'>
                                 <Input disabled placeholder='stock ทีมีอยู่' size='large' style={{ color: 'black' }} />

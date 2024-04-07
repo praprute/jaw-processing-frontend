@@ -83,10 +83,11 @@ export const searchReceiveFishWeightPaginationWithOutEmptyTask = createReduxAsyn
     saga: ({ actions }) =>
         function* (action) {
             try {
-                const { page, offset, search } = action.payload
+                // const { page, offset, search } = action.payload
                 const config = yield configAPI()
-                const { data } = yield axios.get(
-                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveFishWeightPaginationWithOutEmptyTask/${page}/${offset}/${search}`,
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveFishWeightPaginationWithOutEmptyTask/`,
+                    action.payload,
                     config,
                 )
 
@@ -106,10 +107,10 @@ export const searchReceiveSolidSaltPaginationWithOutEmptyTask = createReduxAsync
     saga: ({ actions }) =>
         function* (action) {
             try {
-                const { page, offset, search } = action.payload
                 const config = yield configAPI()
-                const { data } = yield axios.get(
-                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveSolidSaltPaginationWithOutEmptyTask/${page}/${offset}/${search}`,
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/searchReceiveSolidSaltPaginationWithOutEmptyTask/`,
+                    action.payload,
                     config,
                 )
 
