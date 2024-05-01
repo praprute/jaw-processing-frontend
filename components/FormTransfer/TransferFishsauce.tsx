@@ -70,7 +70,7 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
 
     return (
         <>
-            {!!!multi && (
+            {!!!multi && !!!selling && (
                 <StyledFormItems
                     label='เลือกอาคาร'
                     name='id_building'
@@ -86,7 +86,7 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                     </Select>
                 </StyledFormItems>
             )}
-            {!!!multi && (
+            {!!!multi && !!!selling && (
                 <StyledFormItems
                     label='เลือกบ่อปลายทาง'
                     name='id_puddle'
@@ -171,9 +171,12 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
                 </Button>
             )}
             {!!multi && <Divider />}
-            <StyledFormItems label='confirmation action puddle serial' name='action_puddle'>
-                <Input disabled placeholder='confirmation action puddle serial' size='large' style={{ color: 'black' }} />
-            </StyledFormItems>
+            {!!!selling && (
+                <StyledFormItems label='confirmation action puddle serial' name='action_puddle'>
+                    <Input disabled placeholder='confirmation action puddle serial' size='large' style={{ color: 'black' }} />
+                </StyledFormItems>
+            )}
+
             <StyledFormItems
                 extra={`~ ${amountItemsKG} kg.`}
                 label='จำนวนที่ปล่อยออก L.'

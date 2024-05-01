@@ -3,6 +3,7 @@ import { ReactElement, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
+import dayjs from 'dayjs'
 
 import AppLayout from '../../components/Layouts'
 import FillterBox from '../../components/ReceiveFishWeightBill/FillterBox'
@@ -99,7 +100,7 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
     const handleSubmit = async (values: any) => {
         try {
             setFillterValues(values)
-            const res = await getReceiveFishWeight.onRequest({
+            const payload = {
                 page: currentPage - 1,
                 offset: OFFSET_PAGE,
                 no: values.no,
@@ -113,12 +114,12 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
                 product_name: values.product_name,
                 store_name: values.store_name,
                 dateStart: !!form.getFieldValue('date_start')
-                    ? moment(form.getFieldValue('date_start'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD')
+                    ? dayjs(form.getFieldValue('date_start')).format('YYYY-MM-DD')
                     : null,
-                dateEnd: !!form.getFieldValue('date_end')
-                    ? moment(form.getFieldValue('date_end'), 'YYYY-MM-DD').utc().format('YYYY-MM-DD')
-                    : null,
-            })
+                dateEnd: !!form.getFieldValue('date_end') ? dayjs(form.getFieldValue('date_end')).format('YYYY-MM-DD') : null,
+            }
+
+            const res = await getReceiveFishWeight.onRequest(payload)
 
             setSourceData(res.data)
             setTotalList(res.total)
@@ -159,7 +160,7 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
 
             <SectionTable>
                 <Container>
-                    <h3>รายการใบชั่งปลา</h3>
+                    <h3>รายการใบชั่งปลา {totalList} รายการ</h3>
                     <StyledTable
                         columns={columns}
                         dataSource={sourceData}

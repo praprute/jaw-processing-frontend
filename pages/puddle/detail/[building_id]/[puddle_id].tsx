@@ -1570,7 +1570,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     remaining_volume: Number(form.getFieldValue('remaining_volume')),
                     action_puddle: await getSerial(Number(puddle_id)),
                     target_puddle: Number(form.getFieldValue('id_puddle')),
-                    serial_puddle: Number(form.getFieldValue('action_puddle')),
+                    serial_puddle: form.getFieldValue('action_puddle'),
                     date_action: dateTransfer,
                     round: Number(form.getFieldValue('round')),
                     customer_name: form.getFieldValue('customer_name'),
@@ -1606,7 +1606,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
                     remaining_volume: Number(form.getFieldValue('remaining_volume')),
                     action_puddle: await getSerial(Number(puddle_id)),
                     target_puddle: Number(form.getFieldValue('id_puddle')),
-                    serial_puddle: Number(form.getFieldValue('action_puddle')),
+                    serial_puddle: form.getFieldValue('action_puddle'),
                     item_transfer: itemsTransfer,
                     date_action: dateTransfer,
                 }
