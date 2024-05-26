@@ -5,9 +5,10 @@ import { Dayjs } from 'dayjs'
 interface IFillterBox {
     onChangeDate?: (value: Dayjs, dateString: string) => void
     onChangeDateEnd?: (value: Dayjs, dateString: string) => void
+    onExport?: () => void
 }
 const FillterBox = (props: IFillterBox) => {
-    const { onChangeDate, onChangeDateEnd } = props
+    const { onChangeDate, onChangeDateEnd, onExport } = props
 
     return (
         <BoxFillter>
@@ -68,9 +69,18 @@ const FillterBox = (props: IFillterBox) => {
                         </StyledFormItems>
                     </Col>
                     <Col md={24} sm={24} xs={24}>
-                        <StyldeButtonSubmit htmlType='submit' type='primary'>
-                            ค้นหา
-                        </StyldeButtonSubmit>
+                        <Row gutter={[16, 16]}>
+                            <Col md={20} sm={24} xs={24}>
+                                {' '}
+                                <StyldeButtonSubmit htmlType='submit' type='primary'>
+                                    ค้นหา
+                                </StyldeButtonSubmit>
+                            </Col>
+                            <Col md={4} sm={24} xs={24}>
+                                {' '}
+                                <StyldeButtonSubmit onClick={onExport}>EXPORT</StyldeButtonSubmit>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
             </ContentFillter>

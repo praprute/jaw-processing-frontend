@@ -4,10 +4,12 @@ import styled from 'styled-components'
 import { ColumnsType } from 'antd/lib/table'
 import moment from 'moment'
 import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 import AppLayout from '../../components/Layouts'
 import FillterBox from '../../components/ReceiveFishWeightBill/FillterBox'
-import { getReceiveFishWeightPaginationTask } from '../../share-module/FishWeightBill/task'
+import { getReceiveFishWeightPaginationTask, getReceiveFishWeightReportTask } from '../../share-module/FishWeightBill/task'
 import { NextPageWithLayout } from '../_app'
 import { numberWithCommas } from '../../utils/format-number'
 import { useNavigation } from '../../utils/use-navigation'
@@ -19,8 +21,10 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
 
     const [currentPage, setCurrentPage] = useState(1)
     const [sourceData, setSourceData] = useState([])
+    const [sourceDataReport, setSourceDataReport] = useState([])
     const [totalList, setTotalList] = useState(0)
     const getReceiveFishWeight = getReceiveFishWeightPaginationTask.useTask()
+    const getReceiveFishWeightReport = getReceiveFishWeightReportTask.useTask()
     const [fillterValues, setFillterValues] = useState({
         no: null,
         weigh_in: null,
@@ -120,12 +124,66 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
             }
 
             const res = await getReceiveFishWeight.onRequest(payload)
+            const dataReport = await getReceiveFishWeightReport.onRequest(payload)
 
             setSourceData(res.data)
             setTotalList(res.total)
+
+            if (dataReport.data) {
+                let buffer = []
+                console.log('dataReport.data : ', dataReport.data)
+                dataReport.data.map((da) => {
+                    buffer.push({
+                        idreceipt: da.idreceipt,
+                        no: da.no,
+                        น้ำหนักสุทธิ: da.weigh_net,
+                        ราคาต่อหน่วย: da.price_per_weigh,
+                        ราคาสุทธิ: da.amount_price,
+                        ทะเบียนรถ: da.vehicle_register,
+                        ลูกค้า: da.customer_name,
+                        ปลา: da.product_name,
+                        store_name: da.product_name,
+                        รายละเอียดเพิ่มเติม: da.description,
+                        วันที่ลงบิล: da.date_action,
+                        stock: da.stock,
+                        วันที่คีข้อมูล: da.date_create,
+                    })
+                })
+                setSourceDataReport(buffer)
+            }
         } catch (e: any) {
             NoticeError(`ทำรายการไม่สำเร็จ : ${e}`)
         }
+    }
+
+    const handleExport = () => {
+        // var wb = XLSX.utils.book_new(),
+        //     ws = XLSX.utils.json_to_sheet(data)
+        // XLSX.utils.book_append_sheet(wb, ws, 'Report')
+
+        // XLSX.writeFile(wb, 'Report.xlsx')
+
+        // var elt = document.getElementById('tbl_exporttable_to_xls')
+        // var wb = XLSX.utils.table_to_book(elt, { sheet: 'sheet1' })
+
+        // var ws = XLSX.utils.json_to_sheet(sourceDataReport)
+        // var wb = { Sheets: { data: ws }, SheetNames: ['data'] }
+        // return dl
+        //     ? XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' })
+        //     : XLSX.writeFile(wb, fn || 'บิลปลา.' + (type || 'xlsx'))
+
+        const worksheet = XLSX.utils.json_to_sheet(sourceDataReport)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+
+        saveAs(
+            blob,
+            `${'บิลปลา'}-${dayjs(form.getFieldValue('date_start')).format('YYYY-MM-DD')}-${dayjs(
+                form.getFieldValue('date_end'),
+            ).format('YYYY-MM-DD')}.xlsx`,
+        )
     }
 
     const handleChangePagination = (pagination: any) => {
@@ -148,7 +206,7 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
             </StyledNavMenu>
             <SectionFillter>
                 <StyledForm autoComplete='off' form={form} hideRequiredMark layout='vertical' onFinish={handleSubmit}>
-                    <FillterBox />
+                    <FillterBox onExport={handleExport} />
                 </StyledForm>
             </SectionFillter>
 

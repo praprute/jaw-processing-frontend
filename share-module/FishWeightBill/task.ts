@@ -13,6 +13,41 @@ import {
     MODULE_NAME,
 } from './type'
 
+export const getReceiveFishWeightReportTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReceiveFishWeightReport',
+    defaultData: {} as IListFishWeight,
+    defaultPayload: {} as {
+        no?: string
+        weigh_in?: string
+        weigh_out?: string
+        weigh_net?: string
+        time_in?: string
+        time_out?: string
+        vehicle_register?: string
+        customer_name?: string
+        product_name?: string
+        store_name?: string
+        dateStart?: string
+        dateEnd?: string
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(
+                    `${process.env.NEXT_PUBLIC_HOST}/getReceiveFishWeightReportTask`,
+                    action.payload,
+                    config,
+                )
+                yield put(actions.success(data))
+            } catch (error: any) {
+                const errorResponse = yield error.json()
+                yield put(actions.failure(errorResponse))
+            }
+        },
+})
+
 export const getReceiveFishWeightPaginationTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'getReceiveFishWeightPagination',

@@ -23,6 +23,8 @@ export interface IDtoFishWeight {
     description: string
     date_create: string
     order_connect: any
+    date_action?: string
+    stock?: number
 }
 export interface IListFishWeight {
     data: IDtoFishWeight[]
