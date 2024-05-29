@@ -993,11 +993,17 @@ const DetailPuddlePage: NextPageWithLayout = () => {
             }
         }
 
+        console.log('volumnPuddle : ', result.volume)
+        console.log('remainingItems : ', remainingItems)
+        console.log('remainingVolumnGetIn : ', remainingVolumnGetIn)
+
         let amount_item_cal =
             getPuddleDetailById.data?.status !== TypeOrderPuddle.FERMENT
                 ? getOrdersDetailFromId.data.length === 1
                     ? (result.volume * 100) / volumnPuddle
                     : (result.volume * 100) / volumnPuddle //(result.volume * 100) / remainingVolumnGetIn
+                : remainingItems === 0
+                ? (result.volume * 100) / volumnPuddle
                 : (result.volume * remainingItems) / remainingVolumnGetIn ///result.amount_price / result.amount_unit_per_price
 
         setDefaultDateActionGetIn(result?.date_action)
@@ -2110,6 +2116,7 @@ const DetailPuddlePage: NextPageWithLayout = () => {
     const itemsStepsAmpan = stepsAmpan.map((item) => ({ key: item.title, title: item.title }))
     const itemsStepsFishy = stepFishy.map((item) => ({ key: item.title, title: item.title }))
 
+    console.log('orderDetailLasted : ', getOrdersDetailFromId.data)
     return (
         <>
             <Head>
