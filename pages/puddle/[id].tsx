@@ -1,9 +1,11 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Breadcrumb, Button, Col, Drawer, Form, Modal, Row, Space, Spin } from 'antd'
+import { Breadcrumb, Button, Col, DatePicker, Drawer, Form, Modal, Row, Space, Spin } from 'antd'
 import Head from 'next/head'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 import { NextPageWithLayout } from '../_app'
 import AppLayout from '../../components/Layouts'
@@ -12,11 +14,13 @@ import FormInsertPuddle from '../../components/FormInsertPuddle'
 import { NoticeError, NoticeSuccess } from '../../utils/noticeStatus'
 import { useNavigation } from '../../utils/use-navigation'
 import { TypeOrderPuddle, TypeProcess } from '../../utils/type_puddle'
+import { getReportByBuildingTask } from '../../share-module/order/task'
 
 const PuddlePage: NextPageWithLayout = () => {
     const router = useRouter()
     const navigation = useNavigation()
     const [form] = Form.useForm()
+    const [formExport] = Form.useForm()
     const { id } = router.query
     const [open, setOpen] = useState(false)
     const [tigger, setTigger] = useState(false)
@@ -27,7 +31,13 @@ const PuddlePage: NextPageWithLayout = () => {
 
     const getPuddleByIdBuilding = getPuddleByIdBuildingTask.useTask()
     const createPuddleRequest = createPuddleTask.useTask()
+    const getReportByBuilding = getReportByBuildingTask.useTask()
 
+    useEffect(() => {
+        ;(async () => {
+            await getPuddleByIdBuilding.onRequest({ building_id: Number(id) })
+        })()
+    }, [])
     useEffect(() => {
         ;(async () => {
             await getPuddleByIdBuilding.onRequest({ building_id: Number(id) })
@@ -150,6 +160,59 @@ const PuddlePage: NextPageWithLayout = () => {
         }
     }
 
+    const handleSubmit = async () => {
+        try {
+            const allPuddle = getPuddleByIdBuilding.data.map((element) => {
+                return { idpuddle: element.idpuddle, idOrders: element.lasted_order, serial: element.serial }
+            })
+
+            const payload = {
+                puddle: allPuddle,
+                dateStart: dayjs(formExport.getFieldValue('dateStart')).format('YYYY-MM-DD'),
+                dateEnd: dayjs(formExport.getFieldValue('dateEnd')).format('YYYY-MM-DD'),
+            }
+
+            // ต้นงวด ซื้อเข้า เพิ่ม ใช้ไป
+            // console.log('payload : ', payload)
+            const rr = await getReportByBuilding.onRequest(payload)
+            let buffer = []
+            // console.log('rr : ', rr)
+            if (rr.length > 0) {
+                rr.map((da) => {
+                    buffer.push({
+                        บ่อ: da.serial,
+                        วันที่ต้นงวด: da.allTransaction.dateAction_First,
+                        จำนวนต้นงวด: da.allTransaction.amountUnit_first,
+                        มูลค่าต้นงวด: da.allTransaction.remaining_price_first,
+                        เพิ่มจำนวน: da.allTransaction.amount_add,
+                        เพิ่มมูลค่า: da.allTransaction.price_add,
+                        จำนวนใช้ไป: da.allTransaction.amount_use,
+                        มูลค่าใช้ไป: da.allTransaction.price_use,
+                        จำนวนคงเหลือ: da.allTransaction.amountUnit,
+                        มูลค่าคงเหลือ: da.allTransaction.remaining_price,
+                    })
+                })
+            }
+
+            await handleExport(buffer)
+        } catch (e) {}
+    }
+
+    const handleExport = async (data: any) => {
+        // console.log('data : ', data)
+        const worksheet = XLSX.utils.json_to_sheet(data)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+
+        saveAs(
+            blob,
+            `${'รายงานต้นทุน'}-${dayjs(formExport.getFieldValue('dateStart')).format('YYYY-MM-DD')}-${dayjs(
+                formExport.getFieldValue('dateEnd'),
+            ).format('YYYY-MM-DD')}.xlsx`,
+        )
+    }
     //
     return (
         <>
@@ -176,6 +239,28 @@ const PuddlePage: NextPageWithLayout = () => {
                     ลงทะเบียนบ่อ
                 </StyledButton>
             </StyledBoxHeader>
+            <br />
+            <StyledBoxHeaderExport>
+                <StyledForm autoComplete='off' form={formExport} hideRequiredMark layout='horizontal' onFinish={handleSubmit}>
+                    <StyledFormItems
+                        label='วันที่ทำรายการตั้งต้น'
+                        name='dateStart'
+                        rules={[{ required: false, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                    >
+                        <DatePicker style={{ width: '100%' }} />
+                    </StyledFormItems>
+                    <StyledFormItems
+                        label='วันที่ทำรายการสิ้นสุด'
+                        name='dateEnd'
+                        rules={[{ required: false, message: 'กรุณาระบุวันที่ทำรายการ' }]}
+                    >
+                        <DatePicker style={{ width: '100%' }} />
+                    </StyledFormItems>
+                    <StyldeButtonSubmit disabled={getReportByBuilding.loading || getPuddleByIdBuilding.loading} htmlType='submit'>
+                        EXPORT
+                    </StyldeButtonSubmit>
+                </StyledForm>
+            </StyledBoxHeaderExport>
             <br />
             <SectionBoxAllPuddled>
                 {getPuddleByIdBuilding.loading ? (
@@ -351,6 +436,35 @@ PuddlePage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export default PuddlePage
+
+const StyldeButtonSubmit = styled(Button)`
+    /* width: 100%; */
+    height: 48px;
+    font-size: 18px;
+    font-weight: 500;
+`
+
+const StyledFormItems = styled(Form.Item)`
+    .ant-form-item-label > label {
+        font-size: 18px;
+        font-weight: normal;
+    }
+    margin: 0;
+`
+
+const StyledForm = styled(Form)`
+    width: 100%;
+    /* background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5.3px);
+    -webkit-backdrop-filter: blur(5.3px);
+    width: 100%;
+    padding: 10px 20px; */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+`
 
 const SectionBoxAllPuddled = styled.div`
     width: 100%;
@@ -543,4 +657,16 @@ const StyledBoxHeader = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+`
+const StyledBoxHeaderExport = styled.div`
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5.3px);
+    -webkit-backdrop-filter: blur(5.3px);
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `

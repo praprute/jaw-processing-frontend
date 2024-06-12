@@ -131,7 +131,7 @@ const FishWeightReceivePage: NextPageWithLayout = () => {
 
             if (dataReport.data) {
                 let buffer = []
-                console.log('dataReport.data : ', dataReport.data)
+                // console.log('dataReport.data : ', dataReport.data)
                 dataReport.data.map((da) => {
                     buffer.push({
                         idreceipt: da.idreceipt,

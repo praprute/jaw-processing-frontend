@@ -14,6 +14,46 @@ import {
     MODULE_NAME,
 } from './type'
 
+export const getReportByBuildingTask = createReduxAsyncTask({
+    moduleName: MODULE_NAME,
+    name: 'getReportByBuilding',
+    defaultData: {} as {
+        idpuddle: number
+        idOrders: number
+        serial: string
+        allTransaction: {
+            dateAction_First: string
+            amountUnit_first: number
+            remaining_price_first: number
+            amountUnit: number
+            remaining_price: number
+            amount_add: number
+            price_add: number
+            amount_use: number
+            price_use: number
+        }
+    }[],
+    defaultPayload: {} as {
+        dateStart: string
+        dateEnd: string
+        puddle: {
+            idpuddle: number
+            idOrders: number
+            serial: string
+        }[]
+    },
+    saga: ({ actions }) =>
+        function* (action) {
+            try {
+                const config = yield configAPI()
+                const { data } = yield axios.post(`${process.env.NEXT_PUBLIC_HOST}/getReportByPuddleTask`, action.payload, config)
+                yield put(actions.success(data))
+            } catch (error: any) {
+                // const errorResponse = yield error.response.data.json()
+                yield put(actions.failure(error.response.data))
+            }
+        },
+})
 export const createOrderTask = createReduxAsyncTask({
     moduleName: MODULE_NAME,
     name: 'createOrder',
