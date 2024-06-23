@@ -186,6 +186,8 @@ const PuddlePage: NextPageWithLayout = () => {
                         มูลค่าต้นงวด: da.allTransaction.remaining_price_first,
                         เพิ่มจำนวน: da.allTransaction.amount_add,
                         เพิ่มมูลค่า: da.allTransaction.price_add,
+                        จำนวนเติมเข้าจากข้างนอก: da.allTransaction.addOnFishSauce,
+                        มูลค่าเติมเข้าจากข้างนอก: da.allTransaction.addOnFishSaucePrice,
                         จำนวนใช้ไป: da.allTransaction.amount_use,
                         มูลค่าใช้ไป: da.allTransaction.price_use,
                         จำนวนคงเหลือ: da.allTransaction.amountUnit,

@@ -31,6 +31,8 @@ export const getReportByBuildingTask = createReduxAsyncTask({
             price_add: number
             amount_use: number
             price_use: number
+            addOnFishSauce: number
+            addOnFishSaucePrice: number
         }
     }[],
     defaultPayload: {} as {
