@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx'
-import { DownloadOutlined } from '@ant-design/icons'
+import { DownloadOutlined, EditOutlined } from '@ant-design/icons'
 
 import { IOrderDetailDto } from '../../share-module/order/type'
 import { numberWithCommas } from '../../utils/format-number'
@@ -283,8 +283,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -355,8 +364,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -428,8 +446,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -501,8 +528,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -573,8 +609,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -646,8 +691,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -719,8 +773,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -792,8 +855,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {' '}
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -864,8 +936,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -936,8 +1017,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1009,8 +1099,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1082,8 +1181,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1155,8 +1263,17 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         </td>
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
-                                            {data?.description ? (
-                                                data?.description
+                                           {data?.description ? (
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}
@@ -1228,7 +1345,16 @@ const OrderLastedSection = (props: IOrderLastedSection) => {
                                         <td>{data.approved === 0 ? 'non approve' : 'approve'}</td>
                                         <td>
                                             {data?.description ? (
-                                                data?.description
+                                                <>
+                                                    {' '}
+                                                    {data?.description}{' '}
+                                                    <EditOutlined
+                                                        onClick={() => {
+                                                            onSelected(data.idsub_orders)
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                    />
+                                                </>
                                             ) : (
                                                 <StyledButton
                                                     disabled={hideAction}

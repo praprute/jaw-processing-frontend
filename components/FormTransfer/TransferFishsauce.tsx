@@ -56,6 +56,7 @@ const TransferFishsauce = (props: ITransferFishsauce) => {
 
     const [puddleList, setPuddleList] = useState([])
 
+
     useEffect(() => {
         if (!!puddleOption) {
             let puddle = puddleOption.map((data) => {
